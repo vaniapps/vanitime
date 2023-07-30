@@ -85,8 +85,8 @@ function Tab1(){
 
     function getContent() {
         if (contentMode == "random_audio") {
-            setCurrentContent(findRandomLecture(lecturesMap));
-            console.log(findRandomLecture(lecturesMap));
+            setCurrentContent(findRandomLecture(lecturesMap,vaniTime));
+            console.log(findRandomLecture(lecturesMap,vaniTime));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["audio"] = true
