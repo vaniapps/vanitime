@@ -8,6 +8,7 @@ import Tab3 from './Tab3';
 
 import booksMapData from "../data/booksMap.json";
 import lecturesMapData from "../data/lecturesMap.json";
+import findRandomLecture from './scripts/findRandomLecture';
 
 function Tab1(){
 	
@@ -70,9 +71,9 @@ function Tab1(){
     const [currentContent, setCurrentContent] = useState([])
     let history = useHistory();
 
-    function findRandomLecture() {
-      return ["761017_-_Lecture_and_Conversation_at_Rotary_Club_-_Chandigarh", "Let Krishna Speak for Himself", 58]
-    }
+    // function findRandomLecture(test) {
+    //   return ["761017_-_Lecture_and_Conversation_at_Rotary_Club_-_Chandigarh", "Let Krishna Speak for Himself", 58]
+    // }
 
     function findRandomPurports() {
 			return [["BG_9.27", "Bhagavad Gita 9.27", 10], ["BG_9.28", "Bhagavad Gita 9.28", 5], ["BG_9.28", "Bhagavad Gita 9.29", 15]]
@@ -84,8 +85,8 @@ function Tab1(){
 
     function getContent() {
         if (contentMode == "random_audio") {
-            setCurrentContent(findRandomLecture());
-            console.log(findRandomLecture());
+            setCurrentContent(findRandomLecture(lecturesMap));
+            console.log(findRandomLecture(lecturesMap));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["audio"] = true
