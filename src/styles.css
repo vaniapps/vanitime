@@ -13,6 +13,10 @@ ion-modal#example-modal {
     overflow-y: auto;
   }
 
+  .mw-headline {
+    text-align: center;
+  }
+
   /* ion-datetime {
     --background: rgb(245, 235, 247);
     --background-rgb: 245, 235, 247;

@@ -92923,12 +92923,15 @@ function Tab1(){
                 return dum
             })
         } else if (contentMode == "book_text") {
+            if(currentBook["verse"] === "") setToast("select_book")
+            else{
             setCurrentContent(findNextPurports);
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
                 return dum
             })
+        }
         }
     }
 

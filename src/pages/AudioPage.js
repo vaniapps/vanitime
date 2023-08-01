@@ -14,7 +14,10 @@ function Audio(){
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
        
-        const textContent = xmlDoc.querySelector('text').textContent;
+        let textContent = xmlDoc.querySelector('text').textContent;
+        textContent = textContent.slice(textContent.indexOf("<div class=\"code\">"))
+        textContent = textContent.slice(0, textContent.indexOf("<!--"))
+        textContent = textContent.replace("/wiki", "/tab1/purports")
         const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
         console.log(htmlData);
         return htmlData;

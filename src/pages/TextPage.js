@@ -2,6 +2,7 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/rea
 import { useEffect, useState } from 'react';
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import axios from 'axios';
+import '../styles.css';
 
 function Text(){
   let { path, url } = useRouteMatch();
@@ -13,7 +14,11 @@ function Text(){
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
      
-      const textContent = xmlDoc.querySelector('text').textContent;
+      let textContent = xmlDoc.querySelector('text').textContent;
+      textContent = textContent.slice(textContent.indexOf("<h4><span class"))
+      textContent = textContent.slice(0, textContent.indexOf("<div style=\"float:right"))
+      textContent = textContent.replace("/wiki", "/tab1/purports")
+      textContent = textContent.replace(/<p><br \/>\n<\/p>/g, "")
       const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
       console.log(htmlData);
       return htmlData;
@@ -30,6 +35,7 @@ function Text(){
         const xmlData = response.data;
         return parseXmlToHtml(xmlData);
       });
+
 
       setHtmlContent(parsedHtmlContents);
     } catch (error) {
