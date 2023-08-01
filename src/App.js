@@ -11,9 +11,8 @@ import {
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { ellipse, square, triangle, settingsSharp } from 'ionicons/icons';
+import YouTube from 'react-youtube';
 import Tab1 from './pages/HomePage';
-import Tab2 from './pages/ContentPage';
-import Tab3 from './pages/Tab3';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -39,19 +38,24 @@ setupIonicReact({
 
 function App() {
   let history = useHistory();
+  const opts = {
+    height: '390',
+    width: '640',
+    playerVars: {
+      // https://developers.google.com/youtube/player_parameters
+      autoplay: 1,
+    },
+  };
   return (
     <IonApp>
    
       <IonTabs>
         <IonRouterOutlet>
-          <Route exact path="/tab1">
+          <Route path="/tab1">
             <Tab1 />
           </Route>
-          <Route exact path="/tab2">
-            <Tab2 />
-          </Route>
-          <Route exact path="/tab3">
-            <Tab3 />
+          <Route path="/tab2">
+          <YouTube videoId="2g811Eo7K8U" opts={opts} />
           </Route>
           <Route exact path="/">
             <Redirect to="/tab1" />
@@ -62,7 +66,7 @@ function App() {
             <IonIcon aria-hidden="true" icon={triangle} />
             <IonLabel>VaniTime</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/tab1">
+          <IonTabButton tab="tab2" href="/tab2">
             <IonIcon aria-hidden="true" icon={ellipse} />
             <IonLabel>History</IonLabel>
           </IonTabButton>
