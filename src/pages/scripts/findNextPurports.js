@@ -1,4 +1,4 @@
-import durationToMinutes from "./durationToMinutes";
+import {hoursToMinutes} from "./durationToMinutes";
 
 function purportsList(booksData, bookName) {
   const purports = [];
@@ -44,7 +44,7 @@ function purportsList(booksData, bookName) {
 
 function findNextPurports(booksMap, startingPurport, vaniTime, wordsPerMin = 50) {
   const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
-  let totalWords = wordsPerMin * durationToMinutes(vaniTime);
+  let totalWords = wordsPerMin * hoursToMinutes(vaniTime);
   let wordsSumSoFar = 0;
   const startingIndex = purportList.findIndex(purport => purport[0] === startingPurport);
 	console.log(startingIndex,purportList[startingIndex]);

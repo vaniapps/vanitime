@@ -1,16 +1,20 @@
-import durationToMinutes from "./durationToMinutes.js";
+import {minutesToMinutes} from "./durationToMinutes.js";
 
 function generateLectures(lectureMap,vaniTime){
 	let lectures = [];
-	let vaniTimeMinutes = durationToMinutes(vaniTime);
+	let vaniTimeMinutes = minutesToMinutes(vaniTime); 
 	for(const topic in lectureMap){
 		if(lectureMap[topic]["checked"] != "false")
 		{
 			for(const lecture in lectureMap[topic]["parts"]){
 				{
-					let currTime = durationToMinutes(lectureMap[topic]["parts"][lecture]["duration"]);
-					if(Math.abs(currTime-vaniTimeMinutes)<3)// 3 minutes tolerance
-						lectures.push([lecture,lectureMap[topic]["parts"][lecture]["name"],currTime]);
+					if(!lecture["read"]){
+						let currTime = minutesToMinutes(lectureMap[topic]["parts"][lecture]["duration"]);
+						if (Math.abs(currTime-vaniTimeMinutes)<5) {
+							console.log(currTime, vaniTime, Math.abs(currTime-vaniTimeMinutes)) 
+							lectures.push([lecture,lectureMap[topic]["parts"][lecture]["name"],currTime])
+						}
+					}
 				}
 			}
 		}
@@ -21,14 +25,6 @@ function generateLectures(lectureMap,vaniTime){
 
 const findRandomLecture = (lectureMap,vaniTime) => {
 	let lectures = generateLectures(lectureMap,vaniTime);
-	// console.log(lectures[0]);
-	// for(var x of lectures)
-	// {
-	// 	if(isNaN(x[2]))
-	// 	{
-	// 		console.log(x);
-	// 	}
-	// }
 	if(lectures.length==0)
 	{
 		throw new Error("No lectures found");
@@ -36,7 +32,6 @@ const findRandomLecture = (lectureMap,vaniTime) => {
 	}
 	const randomLecture = lectures[Math.floor(Math.random() * lectures.length)];
 	return randomLecture;
-	// return ["761017_-_Lecture_and_Conversation_at_Rotary_Club_-_Chandigarh", "Let Krishna Speak for Himself", 58];
 };
 
 

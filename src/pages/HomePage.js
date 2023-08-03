@@ -101,7 +101,7 @@ function Tab1(){
                 return dum
             })
         } else if (contentMode == "book_text") {
-            setCurrentContent(findNextPurports(booksMap,"SB_9.2.7",vaniTime));
+            setCurrentContent(findNextPurports(booksMap,"BG_14.1",vaniTime));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true

@@ -1,4 +1,4 @@
-import durationToMinutes from "./durationToMinutes";
+import {hoursToMinutes} from "./durationToMinutes"; 
 
 function purportsList(booksData) {
   let books = [];
@@ -61,8 +61,9 @@ function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
   const purportList = purportsList(booksMap);
 	// console.log(purportList);
 	console.log(vaniTime,wordsPerMin);
-	vaniTime = durationToMinutes(vaniTime);
+	vaniTime = hoursToMinutes(vaniTime);
   let totalWords = wordsPerMin * vaniTime;
+  console.log(wordsPerMin, vaniTime, totalWords)
   while (true) {
     let start = Math.floor(Math.random() * purportList.length);
     if (counter == 20) {
