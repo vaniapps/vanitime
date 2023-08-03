@@ -1,10 +1,12 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonDatetime, IonButton,
-IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion, IonAccordionGroup } from '@ionic/react';
-import { useEffect, useState } from 'react';
-import { useHistory, Switch, Route } from 'react-router-dom';
+IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion, 
+IonAccordionGroup, IonRouterOutlet, IonModal, IonToast } from '@ionic/react';
+import { useState, useRef } from 'react';
+import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import {Accordion, AccordionBody, AccordionHeader, AccordionItem} from "react-headless-accordion";
-import Tab2 from './ContentPage';
-import Tab3 from './Tab3';
+import Text from './TextPage';
+import Audio from './AudioPage';
+import '../styles.css';
 
 import booksMapData from "../data/booksMap.json";
 import lecturesMapData from "../data/lecturesMap.json";
@@ -31,24 +33,6 @@ function Tab1(){
 		
 		const [booksMap, setBooksMap] = useState(booksMapData);
 		const [lecturesMap, setLecturesMap] = useState(lecturesMapData);
-		
-		// useEffect(() => {
-		// 	const fetchData = async () => {
-		// 		try {
-		// 			const booksResponse = await fetch(booksMapPath);
-		// 			const lecturesResponse = await fetch(lecturesMapPath);
-		// 			const booksData = await booksResponse.json();
-		// 			const lecturesData = await lecturesResponse.json();
-		// 			console.log("booksData", booksData);
-		// 			setBooksMap(booksData);
-		// 			setLecturesMap(lecturesData);
-		// 		} catch (err) {
-		// 			console.log('Error fetching json', err);
-		// 		}
-		// 	};
-		// 	fetchData();
-		// }, []);
-		// console.log("here", booksMap, lecturesMap);
 	
     const [alertsMap, setAlertsMap] = useState({
         "books": false,
@@ -57,20 +41,31 @@ function Tab1(){
         "audio": false,
         "text": false
     })
-    const [bookSelectAlert, setBookSelectAlert] = useState(false)
-    const [chapterSelectAlert, setChapterSelectAlert] = useState(false)
-    const [currentBook, setCurrentBook] = useState({
-
+    const [toast, setToast] = useState("false")
+    const [toastMessageMap, setToastMessageMap] = useState({
+        "select_book": "Please select a book"
+    })
+    const [tempCurrentBook, setTempCurrentBook] = useState({
         "name": "",
         "part": "",
         "sub_part": "",
         "verse": ""
-        
     })
-
+        let [currentBook, setCurrentBook] = useState({
+            "name": "",
+            "part": "",
+            "sub_part": "",
+            "verse": ""
+        })
     const [vaniTime, setVaniTime] = useState("00:05")
     const [currentContent, setCurrentContent] = useState([])
     let history = useHistory();
+    let { path, url } = useRouteMatch();
+    let location = useLocation();
+    const modal = useRef(null);
+    function modalDismiss() {
+        modal.current?.dismiss();
+    }
 
     // function findRandomLecture(test) {
     //   return ["761017_-_Lecture_and_Conversation_at_Rotary_Club_-_Chandigarh", "Let Krishna Speak for Himself", 58]
@@ -85,6 +80,7 @@ function Tab1(){
     // }
 
     function getContent() {
+        console.log(contentMode)
         if (contentMode == "random_audio") {
             setCurrentContent(findRandomLecture(lecturesMap,vaniTime));
             console.log(findRandomLecture(lecturesMap,vaniTime));
@@ -102,28 +98,41 @@ function Tab1(){
             })
         } else if (contentMode == "book_text") {
             setCurrentContent(findNextPurports(booksMap,"BG_14.1",vaniTime));
+            if(currentBook["verse"] === "") setToast("select_book")
+            else{
+            setCurrentContent(findNextPurports);
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
                 return dum
             })
         }
+        }
     }
 
+    console.log(alertsMap)
+
   return (
-    <IonPage>
+    <>
+   
+
+
+     <IonRouterOutlet>
+     <Route exact path={path}>
+     <IonPage>
       <IonHeader>
         <IonToolbar>
           <IonTitle>Vani Time</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent >
+       
         <h1 textAlign="center">Select Vani Time</h1>
-    <div style={{textAlign: "center"}}>
-      <IonDatetime value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
+    
+      <IonDatetime style={{display:"flex", justifyContent: "center"}} size='cover' value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
        setVaniTime(e.detail.value);
       }}></IonDatetime>
-    </div>
+   
       <IonRadioGroup
     value={contentMode}
     onIonChange={(e) => {
@@ -146,12 +155,12 @@ function Tab1(){
    {contentMode == "random_audio" ? <>      
     {Object.entries(lecturesMap).map(([parentKey, parentValue]) => {
         return(
-            <IonItem color="light">
+            <IonItem>
             <IonLabel>{parentValue.name}</IonLabel>
             <IonCheckbox checked={parentValue.checked} onIonChange={(e) => {
                 setLecturesMap(prev => {
                     let dum = {...prev}
-                    dum[parentKey]["checked"] = e.detail.checked
+                    dum[parentKey]["checked"] = e.detail.checked ? "true" : "false"
                     return dum
                 })
             }} />
@@ -171,15 +180,15 @@ function Tab1(){
             <AccordionHeader as={"div"}>
               <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
                 <IonLabel style={{"marginLeft": "20px"}}>{bookValue.name}</IonLabel>
-                <IonCheckbox style={{"marginRight": "20px"}} checked={bookValue.checked} onIonChange={(e) => {
+                <IonCheckbox indeterminate={bookValue.checked === "partial"} style={{"marginRight": "20px"}} checked={bookValue.checked === "true"} onIonChange={(e) => {
                     setBooksMap(prev=>{
                         let dum = {...prev}
-                        dum[bookKey]["checked"] = e.detail.checked
+                        dum[bookKey]["checked"] = e.detail.checked ? "true" : "false"
                         for (let part of Object.entries(dum[bookKey]["parts"])) {
-                            part[1]["checked"] = e.detail.checked
+                            part[1]["checked"] = e.detail.checked ? "true" : "false"
                             if (part[1]["parts"]){
                                 for (let sub_part of Object.entries(part[1]["parts"])) {
-                                    sub_part[1]["checked"] = e.detail.checked
+                                    sub_part[1]["checked"] = e.detail.checked ? "true" : "false"
                                 }
                             }
                         }
@@ -200,13 +209,20 @@ function Tab1(){
                      <AccordionHeader as={"div"}>
                      <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
                     <IonLabel style={{"marginLeft": "40px"}}>{partsValue.name}</IonLabel>
-                    <IonCheckbox style={{"marginRight": "40px"}} checked={partsValue.checked} onIonChange={(e) => {
+                    <IonCheckbox indeterminate={partsValue.checked === "partial"} style={{"marginRight": "40px"}} checked={partsValue.checked === "true"} onIonChange={(e) => {
                         setBooksMap(prev=>{
                             let dum = {...prev}
-                            dum[bookKey]["parts"][partsKey]["checked"] = e.detail.checked
+                            dum[bookKey]["parts"][partsKey]["checked"] = e.detail.checked ? "true" : "false"
                             for (let part of Object.entries(dum[bookKey]["parts"][partsKey]["parts"])) {
-                                part[1]["checked"] = e.detail.checked
+                                part[1]["checked"] = e.detail.checked ? "true" : "false"
                             }
+                            let count = 0;
+                            for (let part of Object.entries(dum[bookKey]["parts"])){
+                                if (part[1]["checked"] === "true") count++
+                            }
+                            if(count === Object.entries(dum[bookKey]["parts"]).length) dum[bookKey]["checked"] = "true"
+                            else if (count === 0) dum[bookKey]["checked"] = "false"
+                            else dum[bookKey]["checked"] = "partial"
                             return dum   
                         })
                     }} />
@@ -217,10 +233,25 @@ function Tab1(){
                         return (
                             <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
                                 <IonLabel style={{"marginLeft": "60px"}}>{subPartsValue.name}</IonLabel>
-                                <IonCheckbox style={{"marginRight": "60px"}} checked={subPartsValue.checked} onIonChange={(e) => {
+                                <IonCheckbox style={{"marginRight": "60px"}} checked={subPartsValue.checked === "true"} onIonChange={(e) => {
                                     setBooksMap(prev=>{
                                         let dum = {...prev}
-                                        dum[bookKey]["parts"][partsKey]["parts"][subPartsKey]["checked"] = e.detail.checked
+                                        dum[bookKey]["parts"][partsKey]["parts"][subPartsKey]["checked"] = e.detail.checked ? "true" : "false"
+                                        let count = 0;
+                                        for (let part of Object.entries(dum[bookKey]["parts"][partsKey]["parts"])){
+                                            if (part[1]["checked"] === "true") count++
+                                        }
+                                        console.log(count, Object.entries(dum[bookKey]["parts"][partsKey]["parts"]).length)
+                                        if(count === Object.entries(dum[bookKey]["parts"][partsKey]["parts"]).length) dum[bookKey]["parts"][partsKey]["checked"] = "true"
+                                        else if (count === 0) dum[bookKey]["parts"][partsKey]["checked"] = "false"
+                                        else dum[bookKey]["parts"][partsKey]["checked"] = "partial"
+                                        count = 0;
+                                        for (let part of Object.entries(dum[bookKey]["parts"])){
+                                            if (part[1]["checked"] === "true") count++
+                                        }
+                                        if(count === Object.entries(dum[bookKey]["parts"]).length) dum[bookKey]["checked"] = "true"
+                                        else if (count === 0) dum[bookKey]["checked"] = "false"
+                                        else dum[bookKey]["checked"] = "partial"
                                         return dum   
                                     })
                                 }} />
@@ -231,10 +262,17 @@ function Tab1(){
                 </AccordionItem>
                     : <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
                     <IonLabel style={{"marginLeft": "40px"}}>{partsValue.name}</IonLabel>
-                    <IonCheckbox style={{"marginRight": "40px"}} checked={partsValue.checked} onIonChange={(e) => {
+                    <IonCheckbox style={{"marginRight": "40px"}} checked={partsValue.checked === "true"} onIonChange={(e) => {
                         setBooksMap(prev=>{
                             let dum = {...prev}
-                            dum[bookKey]["parts"][partsKey]["checked"] = e.detail.checked
+                            dum[bookKey]["parts"][partsKey]["checked"] = e.detail.checked ? "true" : "false"
+                            let count = 0;
+                            for (let part of Object.entries(dum[bookKey]["parts"])){
+                                if (part[1]["checked"] === "true") count++
+                            }
+                            if(count === Object.entries(dum[bookKey]["parts"]).length) dum[bookKey]["checked"] = "true"
+                            else if (count === 0) dum[bookKey]["checked"] = "false"
+                            else dum[bookKey]["checked"] = "partial"
                             return dum   
                         })
                     }} />
@@ -261,244 +299,282 @@ function Tab1(){
     </> : null}
 
 
-    <IonAlert
-    isOpen={alertsMap["sub_parts"]}
-    onDidDismiss={() => {
-        setAlertsMap(prev => {
-            let dum = {...prev}
-            dum["sub_parts"] = false
-            return dum
-        })
-    }}
-    cssClass="my-custom-class"
-    header={"Select a Chapter"}
-    inputs={booksMap[currentBook["name"]] && booksMap[currentBook["name"]]['parts'][currentBook["part"]] && Object.entries(booksMap[currentBook["name"]]['parts'][currentBook["part"]]["parts"])[0][1]["parts"] ? Object.entries(booksMap[currentBook["name"]]["parts"][currentBook["part"]]["parts"]).map(([partsKey, partsValue])=> {
-        return {
-            name: partsValue.name,
-            type: "radio",
-            label: partsValue.name,
-            value: partsKey,
-           }
-    }): []}
-    buttons={[
-        {
-         text: "Cancel",
-         role: "cancel",
-         cssClass: "warning",
-         handler: () => {},
-        },
-        {
-         text: "Select",
-         handler: (res) => {
-          setCurrentBook(prev => {
-            let dum = {...prev}
-            dum["sub_part"] = res
-            dum["verse"] = "1"
-            return dum
-        });
-
-         },
-        },
-       ]}
-   />
 
 
-    <IonAlert
-    isOpen={alertsMap["parts"]}
-    onDidDismiss={() => {
-        setAlertsMap(prevAlerts => {
-            let dumAlerts = {...prevAlerts}
-            dumAlerts["parts"] = false
-            return dumAlerts
-        })
-    }}
-    cssClass="my-custom-class"
-    header={currentBook["name"]}
-    inputs={booksMap[currentBook["name"]] ? Object.entries(booksMap[currentBook["name"]]["parts"]).map(([partsKey, partsValue])=> {
-        return {
-            name: partsValue.name,
-            type: "radio",
-            label: partsValue.name,
-            value: partsKey,
-           }
-    }): []}
-    buttons={[
-        {
-         text: "Cancel",
-         role: "cancel",
-         cssClass: "warning",
-         handler: () => {},
-        },
-        {
-         text: "Next/Select",
-         handler: (res) => {
-         console.log(currentBook)
+<IonModal id="example-modal" ref={modal} isOpen={alertsMap["books"] || alertsMap["parts"] || alertsMap["sub_parts"]} onDidDismiss={()=>{
+                    setTempCurrentBook({
+                        "name": "",
+                        "part": "",
+                        "sub_part": "",
+                        "verse": ""
+                    })
+                    setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["sub_parts"] = false
+                        dum["parts"] = false
+                        dum["books"] = false
+                        return dum
+                    })
+        }}>
+             <p style={{textAlign:"center"}}>Selct the Book</p>
+        <div className="wrapper">
+           
 
-        if(Object.entries(booksMap[currentBook["name"]]["parts"][res]["parts"])[0][1]["parts"]){
-            setCurrentBook(prev => {
-                let dum = {...prev}
-                dum["part"] = res
-                console.log(res)
-                return dum
-            });
-            setAlertsMap(prev => {
-            let dum = {...prev}
-            dum["sub_parts"] = true
-            return dum
-        })
-        }
-        else setCurrentBook(prev => {
-            let dum = {...prev}
-            dum["part"] = res
-            dum["sub_part"] = ""
-            dum["verse"] = "1"
-            return dum
-        });
-         },
-        },
-       ]}
-   />
+            {(alertsMap["sub_parts"] && booksMap[tempCurrentBook["name"]] && booksMap[tempCurrentBook["name"]]['parts'][tempCurrentBook["part"]] && Object.entries(booksMap[tempCurrentBook["name"]]['parts'][tempCurrentBook["part"]]["parts"])[0][1]["parts"]) ? <IonRadioGroup
+                value={tempCurrentBook["sub_part"]}
+                onIonChange={(e) => {
+                    setTempCurrentBook(prev => {
+                        let dum = {...prev}
+                        dum["sub_part"] = e.detail.value
+                        return dum
+                    });
+                }}
+            >
+                {Object.entries(booksMap[tempCurrentBook["name"]]["parts"][tempCurrentBook["part"]]["parts"]).map(([subPartKey, subPartValue])=> {
+                    return(
+                        <IonItem>
+                        <IonLabel>{subPartValue.name}</IonLabel>
+                        <IonRadio slot="end" value={subPartKey} />
+                    </IonItem>
+                    );
+                })} </IonRadioGroup> : <>{(alertsMap["parts"] && tempCurrentBook["name"]) ? <IonRadioGroup
+                value={tempCurrentBook["part"]}
+                onIonChange={(e) => {
+                    setTempCurrentBook(prev => {
+                        let dum = {...prev}
+                        dum["part"] = e.detail.value
+                        return dum
+                    });
+                }}
+            >
+                {Object.entries(booksMap[tempCurrentBook["name"]]["parts"]).map(([partKey, partValue])=> {
+                    return(
+                        <IonItem>
+                        <IonLabel>{partValue.name}</IonLabel>
+                        <IonRadio slot="end" value={partKey} />
+                    </IonItem>
+                    );
+                })}
+            </IonRadioGroup> : <>{alertsMap["books"] ? <IonRadioGroup
+                value={tempCurrentBook["name"]}
+                onIonChange={(e) => {
+                    setTempCurrentBook(prev => {
+                        let dum = {...prev}
+                        dum["name"] = e.detail.value
+                        return dum
+                    });
+                }}
+            >
+                {Object.entries(booksMap).map(([bookKey, bookValue])=> {
+                    return(
+                        <IonItem>
+                        <IonLabel>{bookValue.name}</IonLabel>
+                        <IonRadio slot="end" value={bookKey} />
+                    </IonItem>
+                    );
+                })}
+            </IonRadioGroup>: null}</>}</>}
+            </div>
+            <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
+            <IonButton onClick={()=>{
+                if(alertsMap["sub_parts"]) {
+                    setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["sub_parts"] = false
+                        return dum
+                    })
+                }
+                else if(alertsMap["parts"]) {
+                    setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["parts"] = false
+                        return dum
+                    })
+                }
+                else if(alertsMap["books"]) {
+                    setTempCurrentBook({
+                        "name": "",
+                        "part": "",
+                        "sub_part": "",
+                        "verse": ""
+                    })
+                    setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["books"] = false
+                        return dum
+                    })
+                }
+            }}>Back</IonButton>
+            <IonButton onClick={()=>{
+                if(alertsMap['sub_parts']) {
+                    if(tempCurrentBook["sub_part"] === "") {
+                        setToast("select_book")
+                    }else {
+                        setCurrentBook(prev => {
+                            let dum = {...tempCurrentBook}
+                            dum["verse"] = "1"
+                            return dum
+                        });
+                        setTempCurrentBook(prev => {
+                            let dum = {...prev}
+                            dum["verse"] = "1"
+                            return dum
+                        });
+                        setAlertsMap(prev => {
+                            let dum = {...prev}
+                            dum["sub_parts"] = false
+                            dum["parts"] = false
+                            dum["books"] = false
+                            return dum
+                        })
+                    }
+                } else if(alertsMap['parts']){
+                    if(tempCurrentBook["part"] === ""){
+                        setToast("select_book")
+                    } else {
+                        if(Object.entries(booksMap[tempCurrentBook["name"]]["parts"][tempCurrentBook["part"]]["parts"])[0][1]["parts"]){
+                            setAlertsMap(prev => {
+                                let dum = {...prev}
+                                dum["sub_parts"] = true
+                                return dum
+                            })
+                        }else{
+                            setCurrentBook(prev => {
+                                let dum = {...tempCurrentBook}
+                                dum["sub_part"] = ""
+                                dum["verse"] = "1"
+                                return dum
+                            });
 
-<IonAlert
-    isOpen={alertsMap["books"]}
-    onDidDismiss={() => setAlertsMap(prev => {
-        let dum = {...prev}
-        dum["books"] = false
-        return dum
-    })}
-    cssClass="my-custom-class"
-    header={"Select Book"}
-    inputs={Object.entries(booksMap).map(([bookKey, bookValue])=> {
-        return {
-            name: bookValue.name,
-            type: "radio",
-            label: bookValue.name,
-            value: bookKey,
-           }
-    })}
-    buttons={[
-     {
-      text: "Cancel",
-      role: "cancel",
-      cssClass: "warning",
-      handler: () => {},
-     },
-     {
-      text: "Next",
-      handler: (res) => {
-        console.log(res)
-        setCurrentBook(prev => {
-            let dum = {...prev}
-            dum["name"] = res
-            return dum
-        });
-        setAlertsMap(prev => {
-            let dum = {...prev}
-            dum["parts"] = true
-            return dum
-        })
-      },
-     },
-    ]}
-   />
+                            setTempCurrentBook(prev => {
+                                let dum = {...prev}
+                                dum["sub_part"] = ""
+                                dum["verse"] = "1"
+                                return dum
+                            });
+                            
+                            setAlertsMap(prev => {
+                                let dum = {...prev}
+                                dum["parts"] = false
+                                dum["books"] = false
+                                return dum
+                            })
+                        }
+                    }
+                }
+                else if(alertsMap['books']){
+                    if(tempCurrentBook["name"] === ""){
+                        setToast("select_book")
+                    } else {
+                        setAlertsMap(prev => {
+                            let dum = {...prev}
+                            dum["parts"] = true
+                            return dum
+                        })
+                    }
+                }
+                
+            }}>Next</IonButton>
+            </div>
+        </IonModal>
 
-<IonAlert
-    isOpen={alertsMap["books"]}
-    onDidDismiss={() => setAlertsMap(prev => {
-        let dum = {...prev}
-        dum["books"] = false
-        return dum
-    })}
-    cssClass="my-custom-class"
-    header={"Select Book"}
-    inputs={Object.entries(booksMap).map(([bookKey, bookValue])=> {
-        return {
-            name: bookValue.name,
-            type: "radio",
-            label: bookValue.name,
-            value: bookKey,
-           }
-    })}
-    buttons={[
-     {
-      text: "Cancel",
-      role: "cancel",
-      cssClass: "warning",
-      handler: () => {},
-     },
-     {
-      text: "Next",
-      handler: (res) => {
-        console.log(res)
-        setCurrentBook(prev => {
-            let dum = {...prev}
-            dum["name"] = res
-            return dum
-        });
-        setAlertsMap(prev => {
-            let dum = {...prev}
-            dum["parts"] = true
-            return dum
-        })
-      },
-     },
-    ]}
-   />
 
-<IonAlert
-    isOpen={alertsMap["audio"]}
-    onDidDismiss={() => setAlertsMap(prev => {
-        let dum = {...prev}
-        dum["audio"] = false
-        return dum
-    })}
-    cssClass="my-custom-class"
-    header={"Proceed with the below lecture?"}
-    message={currentContent[1]}
-    buttons={[
-     {
-      text: "Find a differnt one",
-      cssClass: "warning",
-      handler: getContent,
-     },
-     {
-      text: "Proceed",
-      handler: () => {
-        history.push("/lecture/"+ currentContent[0])
-      },
-     },
-    ]}
-   />
 
-<IonAlert
-    isOpen={alertsMap["text"]}
-    onDidDismiss={() => setAlertsMap(prev => {
-        let dum = {...prev}
-        dum["text"] = false
-        return dum
-    })}
-    cssClass="my-custom-class"
-    header={"Proceed with the below purports?"}
-    message={currentContent.map(purport => {
-        return purport[0]+" "
-    })}
-    buttons={[
-     {
-      text: "Find a differnt one",
-      cssClass: "warning",
-      handler: getContent,
-     },
-     {
-      text: "Proceed",
-      handler: (res) => {
-        history.push("/purports/"+ currentContent[0])
-      },
-     },
-    ]}
-   />
+    <IonModal id="example-modal" ref={modal} isOpen={alertsMap["audio"]} onDidDismiss={()=>{
+                    setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["audio"] = false
+                        return dum
+                    })
+        }}>
+        
+            <p style={{marginLeft:"10px"}}>Proceed with the below lecture?</p>
+            <div className="wrapper">
+            <div style={{marginBottom:"10px"}}>
+                <IonLabel>Title: {currentContent[1]}</IonLabel>
+              </div>
+              <div style={{marginBottom:"10px"}}>
+                <IonLabel>Duration: {currentContent[2]} Minutes</IonLabel>
+              </div>
+              <div style={{marginBottom:"10px"}}>
+                <IonLabel>Details: {currentContent[0]}</IonLabel>
+              </div>
+              </div>
+            <div style={{display:"flex", justifyContent:"space-evenly"}}>
+            <IonButton onClick={()=>{
+                setCurrentContent(findRandomLecture)
+            }}>Try again</IonButton>
+            <IonButton onClick={()=>{
+                 setAlertsMap(prev => {
+                    let dum = {...prev}
+                    dum["audio"] = false
+                    return dum
+                })
+                history.push(path+"/lecture/"+ currentContent[0])
+            }}>Proceed</IonButton>
+            </div>
+         
+        </IonModal>
+
+        <IonModal id="example-modal" ref={modal} isOpen={alertsMap["text"]} onDidDismiss={()=>{
+                    setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["text"] = false
+                        return dum
+                    })
+        }}>
+        
+            <p style={{marginLeft:"10px"}}>Proceed with the below verses?</p>
+            <div className="wrapper">
+              {currentContent.map(verse => {
+                return (
+                    <div style={{textAlign:"center"}}>
+                        <IonLabel>{verse[0]} ({verse[2]} Minutes)</IonLabel>
+                    </div>
+                )
+              })}
+              <div style={{textAlign:"center"}}>
+                    <IonLabel>Total time: ({(()=>{
+                        let totalTime = 0
+                        for (let verse of currentContent) {
+                            totalTime += verse[2]
+                        }
+                        return totalTime
+                    })()} Minutes)</IonLabel>
+                </div>
+                </div>
+            <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
+            {contentMode === "random_text" ? <IonButton onClick={()=>{
+                setCurrentContent(findRandomPurports)
+            }}>Try again</IonButton> : null}
+            <IonButton onClick={()=>{
+                 setAlertsMap(prev => {
+                    let dum = {...prev}
+                    dum["text"] = false
+                    return dum
+                })
+                let verses=currentContent[0][0]
+                for (let i=1; i<currentContent.length; i++) {
+                    verses+=","+currentContent[i][0]
+                }
+                history.push(path+"/purports/"+ verses)
+            }}>Proceed</IonButton>
+            </div>
+         
+        </IonModal>
+        <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={5000}></IonToast>
 
       </IonContent>
     </IonPage>
+     </Route>
+     <Route path={`${path}/lecture/:key`}>
+      <Audio />
+     </Route>
+     <Route path={`${path}/purports/:key`}>
+      <Text />
+     </Route>
+     </IonRouterOutlet>
+    </>
 
 
   );
