@@ -17,7 +17,8 @@ function Audio(){
         let textContent = xmlDoc.querySelector('text').textContent;
         textContent = textContent.slice(textContent.indexOf("<div class=\"code\">"))
         textContent = textContent.slice(0, textContent.indexOf("<!--"))
-        textContent = textContent.replace("/wiki", "/tab1/purports")
+        textContent = textContent.replace(/\/wiki/g, "/tab1/purports")
+        console.log(textContent.indexOf("/wiki"))
         const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
         console.log(htmlData);
         return htmlData;

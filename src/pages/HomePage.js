@@ -93393,7 +93393,7 @@ function Tab1(){
     </IonPage>
      </Route>
      <Route path={`${path}/lecture/:key`}>
-      <Audio />
+      <Audio booksMap={[lecturesMap, setLecturesMap]} />
      </Route>
      <Route path={`${path}/purports/:key`}>
       <Text />
