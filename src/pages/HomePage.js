@@ -10,7 +10,7 @@ import booksMapData from "../data/booksMap.json";
 import lecturesMapData from "../data/lecturesMap.json";
 import findRandomLecture from './scripts/findRandomLecture';
 import findRandomPurports from './scripts/findRandomPurports';
-
+import findNextPurports from './scripts/findNextPurports';
 function Tab1(){
 	
 		const [contentMode, setContentMode] = useState("random_audio");
@@ -80,9 +80,9 @@ function Tab1(){
 		// 	return [["BG_9.27", "Bhagavad Gita 9.27", 10], ["BG_9.28", "Bhagavad Gita 9.28", 5], ["BG_9.28", "Bhagavad Gita 9.29", 15]]
     // }
 
-    function findNextPurports() {
-			return [["BG_9.27", "Bhagavad Gita 9.27", 10], ["BG_9.28", "Bhagavad Gita 9.28", 5], ["BG_9.28", "Bhagavad Gita 9.29", 15]]
-    }
+    // function findNextPurports() {
+		// 	return [["BG_9.27", "Bhagavad Gita 9.27", 10], ["BG_9.28", "Bhagavad Gita 9.28", 5], ["BG_9.28", "Bhagavad Gita 9.29", 15]]
+    // }
 
     function getContent() {
         if (contentMode == "random_audio") {
@@ -101,7 +101,7 @@ function Tab1(){
                 return dum
             })
         } else if (contentMode == "book_text") {
-            setCurrentContent(findNextPurports);
+            setCurrentContent(findNextPurports(booksMap,"SB_9.2.7",vaniTime));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
