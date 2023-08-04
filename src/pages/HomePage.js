@@ -15,24 +15,24 @@ import findRandomPurports from './scripts/findRandomPurports';
 import findNextPurports from './scripts/findNextPurports';
 function Tab1(){
 	
-		const [contentMode, setContentMode] = useState("random_audio");
-		const [contentModesMap, setContentModesMap] = useState({
-			"random_audio": {
-				"name": "Lecture",
-				"button": "Get a Lecture"
-			},
-			"random_text": {
-				"name": "Purports",
-				"button": "Get Random Purports"
-			},
-			"book_text": {
-				"name": "Book",
-				"button": "Get Purports"
-			}
-		});
-		
-		const [booksMap, setBooksMap] = useState(booksMapData);
-		const [lecturesMap, setLecturesMap] = useState(lecturesMapData);
+    const [contentMode, setContentMode] = useState("random_audio");
+    const [contentModesMap, setContentModesMap] = useState({
+        "random_audio": {
+            "name": "Lecture",
+            "button": "Get a Lecture"
+        },
+        "random_text": {
+            "name": "Purports",
+            "button": "Get Random Purports"
+        },
+        "book_text": {
+            "name": "Book",
+            "button": "Get Purports"
+        }
+    });
+    
+    const [booksMap, setBooksMap] = useState(booksMapData);
+    const [lecturesMap, setLecturesMap] = useState(lecturesMapData);
 	
     const [alertsMap, setAlertsMap] = useState({
         "books": false,
@@ -66,6 +66,7 @@ function Tab1(){
     function modalDismiss() {
         modal.current?.dismiss();
     }
+    const [wordsPerMin, setWordsPerMin] = useState(50)
 
     // function findRandomLecture(test) {
     //   return ["761017_-_Lecture_and_Conversation_at_Rotary_Club_-_Chandigarh", "Let Krishna Speak for Himself", 58]
@@ -90,17 +91,16 @@ function Tab1(){
                 return dum
             })
         } else if (contentMode == "random_text") {
-            setCurrentContent(findRandomPurports(booksMap,vaniTime));
+            setCurrentContent(findRandomPurports(booksMap,vaniTime,wordsPerMin));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
                 return dum
             })
         } else if (contentMode == "book_text") {
-            setCurrentContent(findNextPurports(booksMap,"BG_14.1",vaniTime));
             if(currentBook["verse"] === "") setToast("select_book")
             else{
-            setCurrentContent(findNextPurports);
+            setCurrentContent(findNextPurports(booksMap,currentBook,vaniTime,wordsPerMin));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
@@ -502,7 +502,7 @@ function Tab1(){
               </div>
             <div style={{display:"flex", justifyContent:"space-evenly"}}>
             <IonButton onClick={()=>{
-                setCurrentContent(findRandomLecture)
+                setCurrentContent(findRandomLecture(lecturesMap,vaniTime))
             }}>Try again</IonButton>
             <IonButton onClick={()=>{
                  setAlertsMap(prev => {
@@ -529,7 +529,7 @@ function Tab1(){
               {currentContent.map(verse => {
                 return (
                     <div style={{textAlign:"center"}}>
-                        <IonLabel>{verse[0]} ({verse[2]} Minutes)</IonLabel>
+                        <IonLabel>{verse[0]} ({verse[2]/wordsPerMin} Minutes)</IonLabel>
                     </div>
                 )
               })}
@@ -537,7 +537,7 @@ function Tab1(){
                     <IonLabel>Total time: ({(()=>{
                         let totalTime = 0
                         for (let verse of currentContent) {
-                            totalTime += verse[2]
+                            totalTime += verse[2]/wordsPerMin
                         }
                         return totalTime
                     })()} Minutes)</IonLabel>
@@ -545,7 +545,7 @@ function Tab1(){
                 </div>
             <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
             {contentMode === "random_text" ? <IonButton onClick={()=>{
-                setCurrentContent(findRandomPurports)
+                setCurrentContent(findRandomPurports(booksMap,vaniTime,wordsPerMin))
             }}>Try again</IonButton> : null}
             <IonButton onClick={()=>{
                  setAlertsMap(prev => {

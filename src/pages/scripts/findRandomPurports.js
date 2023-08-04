@@ -16,7 +16,7 @@ function purportsList(booksData) {
       }
     }
     books.push(purports);
-  } else if (booksData["SB"]["checked"] != "false") {
+  } if (booksData["SB"]["checked"] != "false") {
     let purports = [];
     for (const cantoIndex in booksData["SB"]["parts"]) {
       if (booksData["SB"]["parts"][cantoIndex]["checked"] != "false") {
@@ -34,7 +34,7 @@ function purportsList(booksData) {
       }
     }
     books.push(purports);
-  } else if (booksData["CC"]["checked"] != "false") {
+  } if (booksData["CC"]["checked"] != "false") {
     let purports = [];
     for (const lila in booksData["CC"]["parts"]) {
       if (booksData["CC"]["parts"][lila]["checked"] != "false") {
@@ -42,7 +42,7 @@ function purportsList(booksData) {
           if (booksData["CC"]["parts"][lila]["parts"][chapterIndex]["checked"] != "false") {
             for (const verse in booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"]) {
               purports.push([
-                "CC_" + lila + "." + chapterIndex + "." + verse,
+                "CC_" + lila + "_" + chapterIndex + "." + verse,
                 "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse,
                 booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"][verse]["words_count"],
               ]);
@@ -59,8 +59,7 @@ function purportsList(booksData) {
 function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
   let counter = 0;
   const purportList = purportsList(booksMap);
-	// console.log(purportList);
-	console.log(vaniTime,wordsPerMin);
+	if(purportList.length==0) return []
 	vaniTime = hoursToMinutes(vaniTime);
   let totalWords = wordsPerMin * vaniTime;
   console.log(wordsPerMin, vaniTime, totalWords)
@@ -69,15 +68,19 @@ function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
     if (counter == 20) {
       start = 0;
     }
-    let wordsSumSoFar = 0;
+    let wordsSumSoFar = purportList[start][2];
     let purports = [];
-    while (wordsSumSoFar < totalWords && start < purportList.length) {
+    purports.push(purportList[start])
+    start += 1;
+    while (wordsSumSoFar <= totalWords && start < purportList.length) {
+      if(wordsSumSoFar+purportList[start][2] > totalWords) break 
       wordsSumSoFar += purportList[start][2];
       purports.push(purportList[start]);
       start += 1;
     }
-    if (wordsSumSoFar >= totalWords || counter == 20) {
+    if ((wordsSumSoFar >= (totalWords - wordsPerMin*5) && wordsSumSoFar<=totalWords) || counter == 20) {
 			console.log(purports);
+      console.log("counter:", counter)
       return purports;
     }
     counter++;

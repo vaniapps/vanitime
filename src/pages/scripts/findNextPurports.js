@@ -30,7 +30,7 @@ function purportsList(booksData, bookName) {
       for (const chapterIndex in booksData["CC"]["parts"][lila]["parts"]) {
         for (const verse in booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"]) {
           purports.push([
-            "CC_" + lila + "." + chapterIndex + "." + verse,
+            "CC_" + lila + "_" + chapterIndex + "." + verse,
             "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse,
             booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"][verse]["words_count"],
           ]);
@@ -42,12 +42,13 @@ function purportsList(booksData, bookName) {
   return purports;
 }
 
-function findNextPurports(booksMap, startingPurport, vaniTime, wordsPerMin = 50) {
+function findNextPurports(booksMap, currentBook, vaniTime, wordsPerMin = 50) {
+  let startingPurport=currentBook["name"]+"_"+currentBook["part"]+ (currentBook["name"]=="CC" ? "_" : ".") + currentBook["sub_part"] + (currentBook["sub_part"] ? "." : "")+currentBook["verse"]
+  console.log(startingPurport)
   const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
   let totalWords = wordsPerMin * hoursToMinutes(vaniTime);
   let wordsSumSoFar = 0;
   const startingIndex = purportList.findIndex(purport => purport[0] === startingPurport);
-	console.log(startingIndex,purportList[startingIndex]);
   if (startingIndex === -1) {
     console.error("Starting purport not found.");
     return [];
@@ -55,8 +56,11 @@ function findNextPurports(booksMap, startingPurport, vaniTime, wordsPerMin = 50)
 
   let currentIndex = startingIndex;
   const selectedPurports = [];
-
+  selectedPurports.push(purportList[currentIndex])
+  wordsSumSoFar += purportList[currentIndex][2];
+  currentIndex++;
   while (wordsSumSoFar < totalWords && currentIndex < purportList.length) {
+    if(wordsSumSoFar+purportList[currentIndex][2] > totalWords) break 
     selectedPurports.push(purportList[currentIndex]);
     wordsSumSoFar += purportList[currentIndex][2];
     currentIndex++;
