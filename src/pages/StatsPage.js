@@ -4,20 +4,23 @@ IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton
 IonToast } from '@ionic/react';
 import { chevronBackCircle, chevronDownOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState, useRef } from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import { UserHistory, WordsPerMin } from '../context';
 import { useLocal } from '../lshooks';
 import '../styles.css';
+import Highcharts from 'highcharts';
 
 function Stats(){
     const [viewRange, setViewRange] = useState("Today")
+    const [graphViewRange, setGraphViewRange] = useState("Days")
     const [userHistory, setUserHistory] = useContext(UserHistory)
     const [dayList, setDayList] = useState([])
     const [weekList, setWeekList] = useState([]);
     const [monthList, setMonthList] = useState([]);
     const [yearList, setYearList] = useState([]);
     const [currentList, setCurrentList] = useState([]);
+    const [currentGraphList, setCurrentGraphList] = useState([]);
     const [currentMode, setCurrentMode] = useState("all")
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
     const modal = useRef(null);
@@ -85,20 +88,22 @@ function Stats(){
         
         const currentDate = new Date(oldestDate);
         const today = new Date();
-        console.log(currentDate.getDay(), today.getDay())
+        console.log(oldestDate)
         
-        while (formatDate(currentDate) <= formatDate(today)) {
-            console.log(currentDate)
+        while (formatDate(currentDate).split("-").reverse().join("-") <= formatDate(today).split("-").reverse().join("-")) {
+            
             const formattedDate = formatDate(currentDate);
+            console.log(formattedDate)
             const week = getWeekNumber(currentDate).padStart(2, '0');
             
             let duration = 0;
             let count = 0;
-
-            for(let content of Object.entries(userHistory[formattedDate])) {
-                for (let entry of content[1]) {
-                    duration+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? (!entry.duration ? Math.round(entry.words_count / wordsPerMin) : entry.duration) : 0)
-                    count+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? 1 : 0)                    
+            if(userHistory[formattedDate]) {
+                for(let content of Object.entries(userHistory[formattedDate])) {
+                    for (let entry of content[1]) {
+                        duration+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? (!entry.duration ? Math.round(entry.words_count / wordsPerMin) : entry.duration) : 0)
+                        count+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? 1 : 0)                    
+                    }
                 }
             }
 
@@ -156,6 +161,7 @@ function Stats(){
         setMonthList(monthList);
         setYearList(yearList); 
         setCurrentList(dayList);
+        setCurrentGraphList(dayList);
         setCurrentGoal(prev=>{
             let dum = {...prev}
             if (currentMode == "all") {
@@ -186,18 +192,17 @@ function Stats(){
             return dum
         })
     },[goal])
-
-    console.log(dayList)
     function valueToColor(value, maxValue) {
         // Calculate lightness value (ranging from 0 to 100) based on the given value and maxValue
+        if(value <= 0) {
+            return { backgroundColor: "#ffffff", textColor: "#000000" };
+        }
         if(value>=maxValue) {
-            return { backgroundColor: "#0088CC", textColor: "#ffffff" };
+            return { backgroundColor: "#0088FF", textColor: "#ffffff" };
         }
         if (value > 0) {
             return { backgroundColor: "#CCEEFF", textColor: "#000000" };
         }
-
-        return { backgroundColor: "#ffffff", textColor: "#000000" };
     }
 
     const Parentdiv = {
@@ -208,6 +213,59 @@ function Stats(){
         margin: 0,
         overflow: "hidden"
       }
+
+    useEffect(()=>{
+        const chartOptions = {
+            chart: {
+              type: 'line',
+              scrollablePlotArea: {
+                minWidth: currentGraphList.length * 15,
+                scrollPositionX: 10
+              }
+            },
+            title: {
+                text: '', // Set the title text to an empty string
+              },
+            xAxis: {
+                categories: currentGraphList.map(item=>{
+                    return item.name
+                }),
+              min:0,
+              max: currentGraphList.length-1,
+              labels: {
+                overflow: 'justify'
+              }
+            },
+            yAxis: {
+              tickWidth: 1,
+              title: {
+                text: 'Minutes'
+              },
+              lineWidth: 1,
+              opposite: true
+            },
+            tooltip: {
+              valueSuffix: ' minutes',
+              split: false
+            },
+            legend: {
+                enabled: false, // Disable the legend
+              },
+            credits: {
+                enabled: false, // Disable credits
+            },
+            series: [{
+              name: 'Time',
+              data: currentGraphList.map(item=>{
+                return item.duration
+              })
+          
+            }]
+          }
+        Highcharts.chart('container', chartOptions);
+    },[currentGraphList])
+
+    
       
       
     
@@ -248,8 +306,10 @@ function Stats(){
                     </IonCard>
                     <IonCard>
                         <IonCardContent>
+                    <p>Click on a date to view that day's history</p>
                     <IonDatetime
                         presentation="date"
+                        firstDayOfWeek={1}
                         highlightedDates={(isoString) => {
                             const date = new Date(isoString);
                             const formattedDate = formatDate(date)
@@ -269,7 +329,8 @@ function Stats(){
                             const formattedDate = formatDate(date)
                             history.push(`/history/${formattedDate}`)
                         }}
-                        ></IonDatetime>
+                        >
+                        </IonDatetime>
                         </IonCardContent>
                         </IonCard>
                         <IonCard>
@@ -334,14 +395,14 @@ function Stats(){
                             </IonCardContent>
                         </IonCard>
                         <IonCard>
-                            <IonCardContent>
-                            <LineChart width={300} height={300} data={currentList}  margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                                <Line type="monotone" dataKey="duration" stroke="#8884d8" />
-                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip />
-                            </LineChart>
+                           
+                            <IonCardContent style={{paddingRight:0}}>
+                            <div style={{display:"flex", justifyContent:"space-between", marginRight:"20px", marginBottom:"20px"}}>
+                                <IonCardSubtitle>VaniTime</IonCardSubtitle>
+                                <IonLabel id="graph-popover-button">{graphViewRange}<IonIcon icon={chevronDownOutline}></IonIcon></IonLabel>
+                            
+                                </div>
+                            <div id="container"></div>
                         </IonCardContent>
                         </IonCard>
                     <IonPopover trigger="popover-button" dismissOnSelect={true} triggerAction="click">
@@ -370,6 +431,36 @@ function Stats(){
                                 setCurrentList(yearList)
                                 }} button={true} detail={false}>
                             This Year
+                            </IonItem>
+                        </IonList>
+                        </IonContent>
+                    </IonPopover>
+                    <IonPopover trigger="graph-popover-button" dismissOnSelect={true} triggerAction="click">
+                        <IonContent class="ion-padding">
+                        <IonList>
+                            <IonItem onClick={()=>{
+                                setGraphViewRange("Days")
+                                setCurrentGraphList(dayList)
+                                }} button={true} detail={false}>
+                            Days
+                            </IonItem>
+                            <IonItem onClick={()=>{
+                                setGraphViewRange("Weeks")
+                                setCurrentGraphList(weekList)
+                                }} button={true} detail={false}>
+                            Weeks
+                            </IonItem>
+                            <IonItem onClick={()=>{
+                                setGraphViewRange("Months")
+                                setCurrentGraphList(monthList)
+                                }} button={true} detail={false}>
+                            Months
+                            </IonItem>
+                            <IonItem onClick={()=>{
+                                setGraphViewRange("Years")
+                                setCurrentGraphList(yearList)
+                                }} button={true} detail={false}>
+                            Years
                             </IonItem>
                         </IonList>
                         </IonContent>

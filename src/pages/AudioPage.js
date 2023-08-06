@@ -73,7 +73,7 @@ function Audio(){
     <IonHeader>
     <IonToolbar>
     <IonButtons slot="start">
-    <IonButton onClick={goback}>
+    <IonButton style={{ fontSize:"20px"}} onClick={goback}>
     <IonIcon icon={chevronBackOutline}></IonIcon>
     </IonButton>
     </IonButtons>
@@ -91,7 +91,7 @@ function Audio(){
         return dum
       })
     }}
-    style={{marginRight:"7px"}}
+    style={{marginRight:"7px", fontSize:"20px"}}
    >
     <IonIcon icon={checkboxOutline}></IonIcon>
    </IonButton>
@@ -100,10 +100,10 @@ function Audio(){
     </IonHeader>
     <IonContent>
         <br />
-    <div>
+    
       {htmlContent ?
-      <div dangerouslySetInnerHTML={{ __html: htmlContent }} /> : <div style={{height:"85vh", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}
-    </div>
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} /> : <div style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}
+    
     <IonModal id="example-modal" isOpen={alertsMap["user_history"]} onDidDismiss={()=>{
       setAlertsMap(prev => {
         let dum = {...prev}

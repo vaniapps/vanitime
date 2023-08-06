@@ -17,3 +17,8 @@ ion-modal#example-modal {
   .mw-headline {
     text-align: center;
   }
+
+  #container {
+    min-width: 200px;
+    height: 400px;
+  }

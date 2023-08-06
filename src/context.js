@@ -13,7 +13,7 @@ export const VaniTime = createContext()
 export const ContentMode = createContext()
 
 export function ContextProvider({ children }) {
-    const [userHistory, setUserHistory] = useLocal("user-history", {} )
+    const [userHistory, setUserHistory] = useLocal("user-history", {})
     const [booksMap, setBooksMap] = useLocal("books-data",booksMapData)
     const [lecturesMap, setLecturesMap] = useLocal("lectures-data",lecturesMapData)
     const [wordsPerMin, setWordsPerMin] = useLocal("words-per-min",50)
