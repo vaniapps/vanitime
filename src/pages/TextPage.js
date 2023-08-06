@@ -7,6 +7,7 @@ import '../styles.css';
 import { Books, CurrentBook, IncompleteUserHistory, UserHistory } from '../context';
 import { arrowDownOutline, arrowUpOutline, checkboxOutline, chevronBackOutline } from 'ionicons/icons';
 import {findNextPurport, findPreviousPurport} from "../scripts/findNextPurports"
+import { Plugins, Capacitor } from "@capacitor/core";
 
 function Text(){
   let { path, url } = useRouteMatch();
@@ -87,6 +88,14 @@ function Text(){
       }
     }
    }
+
+   useEffect(() => {
+    if (Capacitor.isNative) {
+     Plugins.App.addListener("backButton", (e) => {
+      goback()
+     });
+    }
+   }, []);
 
 
 

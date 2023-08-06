@@ -1,6 +1,7 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonDatetime, IonButton,
 IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion, 
-IonAccordionGroup, IonRouterOutlet, IonModal, IonToast, IonSegment, IonSegmentButton, IonIcon, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote } from '@ionic/react';
+IonAccordionGroup, IonRouterOutlet, IonModal, IonToast, IonSegment, IonSegmentButton, IonIcon,
+ IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote, isPlatform } from '@ionic/react';
 import { useState, useRef } from 'react';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import {Accordion, AccordionBody, AccordionHeader, AccordionItem} from "react-headless-accordion";
@@ -117,7 +118,10 @@ function Time(){
             </IonSegment>
         </IonToolbar>
       </IonHeader>
+      
       <IonContent >
+                <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
+                <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
        
         <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Select Vani Time: (HH:MM)</div>
     
@@ -297,6 +301,9 @@ function Time(){
             </IonCardContent>
         </IonCard> }
     </> : null}
+
+    </div>
+    </div>
 
 
 

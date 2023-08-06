@@ -122,6 +122,7 @@ function Audio(){
                   dum["user_history"] = false
                   return dum
               })
+              if(lectureListened){
               setUserHistory(prev=>{
                 let dum = {...prev}
                 const now = new Date();
@@ -146,6 +147,7 @@ function Audio(){
                 }
                 return dum
              })
+            }
               if(isGoBack) {
                 if(history.length > 1){
                   history.goBack()

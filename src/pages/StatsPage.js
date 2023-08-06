@@ -1,7 +1,7 @@
 import { IonPage, IonHeader, IonToolbar, IonSegment, IonSegmentButton, IonLabel, IonContent,
 IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton, IonIcon,
  IonPopover, IonList, IonItem, IonDatetime, IonRouterOutlet, IonRange, IonModal, IonInput,
-IonToast } from '@ionic/react';
+IonToast, isPlatform } from '@ionic/react';
 import { chevronBackCircle, chevronDownOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -292,6 +292,8 @@ function Stats(){
                 </IonToolbar>
                 </IonHeader>
                 <IonContent>
+                <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
+                <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
                 <IonCard>
                     <IonCardContent style={{"textAlign": "center"}}>
                     <div style={{display:"flex", justifyContent:"space-between"}}>
@@ -465,6 +467,8 @@ function Stats(){
                         </IonList>
                         </IonContent>
                     </IonPopover>
+                    </div>
+                    </div>
                     <IonModal ref={modal} trigger="open-modal" id="example-modal">
                     <div style={{textAlign:"center", marginTop:"10px"}}>Input the Goals</div>
                     <IonList>

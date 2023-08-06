@@ -1,9 +1,14 @@
 import { Redirect, Route, useHistory } from 'react-router-dom';
 import {
   IonApp,
+  IonContent,
+  IonFooter,
   IonIcon,
   IonLabel,
+  IonPage,
   IonRouterOutlet,
+  IonSegment,
+  IonSegmentButton,
   IonTabBar,
   IonTabButton,
   IonTabs,
@@ -13,6 +18,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { ellipse, square, triangle, settingsSharp, hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline } from 'ionicons/icons';
 import YouTube from 'react-youtube';
 import Time from './pages/HomePage';
+import './styles.css';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -51,8 +57,10 @@ function App() {
   return (
     <IonApp>
    
-      <IonTabs>
+      <IonPage>
+        <IonContent>
         <IonRouterOutlet>
+        
           <Route path="/time">
             <Time />
           </Route>
@@ -72,25 +80,53 @@ function App() {
             <Redirect to="/time" />
           </Route>
         </IonRouterOutlet>
-        <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/time">
-            <IonIcon aria-hidden="true" icon={hourglassOutline} />
+        </IonContent>
+        <IonFooter>
+        <IonSegment  value="default" >
+          <IonSegmentButton style={{ minWidth: 0 }} value="default"  onClick={()=>history.push("/time")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={hourglassOutline} />
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
             <IonLabel>VaniTime</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab2" href="/stats">
-            <IonIcon aria-hidden="true" icon={statsChartOutline} />
+            </div>
+            </div>
+          </IonSegmentButton>
+          <IonSegmentButton style={{ minWidth: 0 }}  onClick={()=>history.push("/stats")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={statsChartOutline} />
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
             <IonLabel>Stats</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab3" href="/bookmarks">
-            <IonIcon aria-hidden="true" icon={bookmarksOutline} />
-            <IonLabel>BooksMarks</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab4" href="/setting">
-            <IonIcon aria-hidden="true" icon={settingsOutline} />
+            </div>
+            </div>
+          </IonSegmentButton>
+          <IonSegmentButton style={{ minWidth: 0 }}  onClick={()=>history.push("/bookmarks")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={bookmarksOutline} />
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
+            <IonLabel>Bookmarks</IonLabel>
+            </div>
+            </div>
+          </IonSegmentButton>
+
+          <IonSegmentButton style={{ minWidth: 0 }}  onClick={()=>history.push("/setting")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={settingsOutline}/>
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
             <IonLabel>Setting</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
-      </IonTabs>
+            </div>
+            </div>
+          </IonSegmentButton>
+        </IonSegment>
+        </IonFooter>
+        </IonPage>
   </IonApp>
   );
 }

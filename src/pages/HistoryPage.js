@@ -42,8 +42,8 @@ function History() {
                             console.log(entry)
                             return (
                                 <IonItem onClick={()=>{
-                                    if(entry.name.indexOf("Lecture") != -1){
-                                        history.push("/time/lectures/"+entry.name)
+                                    if(entry.name.indexOf("_-_") != -1){
+                                        history.push("/time/lecture/"+entry.name)
                                     }else{
                                         history.push("/time/purports/"+entry.name)
                                     }

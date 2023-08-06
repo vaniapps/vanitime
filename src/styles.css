@@ -22,3 +22,20 @@ ion-modal#example-modal {
     min-width: 200px;
     height: 400px;
   }
+
+  ion-segment-button {
+    --indicator-color: #fff;
+  }
+  
+  /* Material Design styles */
+  ion-segment-button.md {
+    --color: #000;
+    --color-checked: #3880ff;
+    --indicator-height: 4px;
+  }
+  
+  /* iOS styles */
+  ion-segment-button.ios {
+    --color: #000;
+    --color-checked: #3880ff;
+  }
