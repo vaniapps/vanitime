@@ -5,10 +5,10 @@ function purportsList(booksData, bookName) {
 
   if (bookName === "BG") {
     for (const chapterIndex in booksData["BG"]["parts"]) {
-      for (const verse in booksData["BG"]["parts"][chapterIndex]["parts"]) {
+      for (const verse of Object.keys(booksData["BG"]["parts"][chapterIndex]["parts"])) {
         purports.push([
-          "BG_" + chapterIndex + "." + verse,
-          "Bhagavad Gita " + chapterIndex + "." + verse,
+          "BG_" + chapterIndex + "." + verse.slice(1),
+          "Bhagavad Gita " + chapterIndex + "." + verse.slice(1),
           booksData["BG"]["parts"][chapterIndex]["parts"][verse]["words_count"],
         ]);
       }
@@ -18,8 +18,8 @@ function purportsList(booksData, bookName) {
       for (const chapterIndex in booksData["SB"]["parts"][cantoIndex]["parts"]) {
         for (const verse in booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["parts"]) {
           purports.push([
-            "SB_" + cantoIndex + "." + chapterIndex + "." + verse,
-            "Srimad Bhagavatam " + cantoIndex + "." + chapterIndex + "." + verse,
+            "SB_" + cantoIndex + "." + chapterIndex + "." + verse.slice(1),
+            "Srimad Bhagavatam " + cantoIndex + "." + chapterIndex + "." + verse.slice(1),
             booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["parts"][verse]["words_count"],
           ]);
         }
@@ -30,8 +30,8 @@ function purportsList(booksData, bookName) {
       for (const chapterIndex in booksData["CC"]["parts"][lila]["parts"]) {
         for (const verse in booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"]) {
           purports.push([
-            "CC_" + lila + "_" + chapterIndex + "." + verse,
-            "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse,
+            "CC_" + lila + "_" + chapterIndex + "." + verse.slice(1),
+            "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse.slice(1),
             booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"][verse]["words_count"],
           ]);
         }
@@ -67,6 +67,34 @@ function findNextPurports(booksMap, currentBook, vaniTime, wordsPerMin = 50) {
   }
 	console.log(selectedPurports);
   return selectedPurports;
+}
+
+export function findNextPurport(booksMap, currentVerse) {
+  let startingPurport=currentVerse
+  const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
+  const startingIndex = purportList.findIndex(purport => purport[0] === startingPurport);
+  if (startingIndex === -1) {
+    console.error("Starting purport not found.");
+    return "";
+  }
+
+  let currentIndex = startingIndex;
+  if(currentIndex == purportList.length - 1) return ""
+  return purportList[currentIndex+1][0]
+}
+
+export function findPreviousPurport(booksMap, currentVerse) {
+  let startingPurport=currentVerse
+  const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
+  const startingIndex = purportList.findIndex(purport => purport[0] === startingPurport);
+  if (startingIndex === -1) {
+    console.error("Starting purport not found.");
+    return "";
+  }
+
+  let currentIndex = startingIndex;
+  if(currentIndex == 0) return ""
+  return purportList[currentIndex-1][0]
 }
 
 export default findNextPurports;

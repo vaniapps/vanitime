@@ -1,6 +1,6 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonDatetime, IonButton,
 IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion, 
-IonAccordionGroup, IonRouterOutlet, IonModal, IonToast } from '@ionic/react';
+IonAccordionGroup, IonRouterOutlet, IonModal, IonToast, IonSegment, IonSegmentButton, IonIcon, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote } from '@ionic/react';
 import { useState, useRef } from 'react';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import {Accordion, AccordionBody, AccordionHeader, AccordionItem} from "react-headless-accordion";
@@ -8,14 +8,16 @@ import Text from './TextPage';
 import Audio from './AudioPage';
 import '../styles.css';
 
-import booksMapData from "../data/booksMap.json";
-import lecturesMapData from "../data/lecturesMap.json";
-import findRandomLecture from './scripts/findRandomLecture';
-import findRandomPurports from './scripts/findRandomPurports';
-import findNextPurports from './scripts/findNextPurports';
-function Tab1(){
+
+import findRandomLecture from '../scripts/findRandomLecture';
+import findRandomPurports from '../scripts/findRandomPurports';
+import findNextPurports from '../scripts/findNextPurports';
+import { useContext } from 'react';
+import { Books, ContentMode, CurrentBook, Lectures, VaniTime, WordsPerMin } from '../context';
+import { chevronDownSharp } from 'ionicons/icons';
+function Time(){
 	
-    const [contentMode, setContentMode] = useState("random_audio");
+    const [contentMode, setContentMode] = useContext(ContentMode)
     const [contentModesMap, setContentModesMap] = useState({
         "random_audio": {
             "name": "Lecture",
@@ -31,8 +33,8 @@ function Tab1(){
         }
     });
     
-    const [booksMap, setBooksMap] = useState(booksMapData);
-    const [lecturesMap, setLecturesMap] = useState(lecturesMapData);
+    const [booksMap, setBooksMap] = useContext(Books)
+    const [lecturesMap, setLecturesMap] = useContext(Lectures)
 	
     const [alertsMap, setAlertsMap] = useState({
         "books": false,
@@ -51,13 +53,8 @@ function Tab1(){
         "sub_part": "",
         "verse": ""
     })
-        let [currentBook, setCurrentBook] = useState({
-            "name": "",
-            "part": "",
-            "sub_part": "",
-            "verse": ""
-        })
-    const [vaniTime, setVaniTime] = useState("00:05")
+    let [currentBook, setCurrentBook] = useContext(CurrentBook)
+    const [vaniTime, setVaniTime] = useContext(VaniTime)
     const [currentContent, setCurrentContent] = useState([])
     let history = useHistory();
     let { path, url } = useRouteMatch();
@@ -66,20 +63,7 @@ function Tab1(){
     function modalDismiss() {
         modal.current?.dismiss();
     }
-    const [wordsPerMin, setWordsPerMin] = useState(50)
-
-    // function findRandomLecture(test) {
-    //   return ["761017_-_Lecture_and_Conversation_at_Rotary_Club_-_Chandigarh", "Let Krishna Speak for Himself", 58]
-    // }
-
-    // function findRandomPurports() {
-		// 	return [["BG_9.27", "Bhagavad Gita 9.27", 10], ["BG_9.28", "Bhagavad Gita 9.28", 5], ["BG_9.28", "Bhagavad Gita 9.29", 15]]
-    // }
-
-    // function findNextPurports() {
-		// 	return [["BG_9.27", "Bhagavad Gita 9.27", 10], ["BG_9.28", "Bhagavad Gita 9.28", 5], ["BG_9.28", "Bhagavad Gita 9.29", 15]]
-    // }
-
+    const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
     function getContent() {
         console.log(contentMode)
         if (contentMode == "random_audio") {
@@ -114,41 +98,35 @@ function Tab1(){
 
   return (
     <>
-   
-
-
      <IonRouterOutlet>
      <Route exact path={path}>
      <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Vani Time</IonTitle>
+            <IonSegment onIonChange={(e)=>{
+                setContentMode(e.detail.value);
+            }} value={contentMode}>
+
+            {Object.entries(contentModesMap).map(([modeKey, modeValue])=>{
+                return(
+                    <IonSegmentButton value={modeKey}>
+                        <IonLabel>{modeValue.name}</IonLabel>
+                </IonSegmentButton>
+                );
+            })}
+            </IonSegment>
         </IonToolbar>
       </IonHeader>
       <IonContent >
        
-        <h1 textAlign="center">Select Vani Time</h1>
+        <div style={{marginTop:"10px", fontSize:"20px"}}>Select Vani Time: (HH:MM)</div>
     
       <IonDatetime style={{display:"flex", justifyContent: "center"}} size='cover' value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
        setVaniTime(e.detail.value);
-      }}></IonDatetime>
+      }}>
+      </IonDatetime>
    
-      <IonRadioGroup
-    value={contentMode}
-    onIonChange={(e) => {
-    setContentMode(e.detail.value);
-    }}
-   >
-    {Object.entries(contentModesMap).map(([modeKey, modeValue])=>{
-        return(
-            <IonItem>
-            <IonLabel>{modeValue.name}</IonLabel>
-            <IonRadio slot="end" value={modeKey} />
-           </IonItem>
-        );
-    })}
-   </IonRadioGroup>
-   <div style={{ textAlign: "center", marginTop:"30px", marginBottom:"30px" }}>
+   <div style={{ textAlign: "center", marginTop:"0px", marginBottom:"30px" }}>
       <IonButton onClick={getContent}>{contentModesMap[contentMode]["button"]}</IonButton>
    </div>
 
@@ -179,7 +157,8 @@ function Tab1(){
                
             <AccordionHeader as={"div"}>
               <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
-                <IonLabel style={{"marginLeft": "20px"}}>{bookValue.name}</IonLabel>
+                <IonLabel style={{"marginLeft": "20px"}}><IonIcon icon={chevronDownSharp}></IonIcon> {bookValue.name} </IonLabel>
+                
                 <IonCheckbox indeterminate={bookValue.checked === "partial"} style={{"marginRight": "20px"}} checked={bookValue.checked === "true"} onIonChange={(e) => {
                     setBooksMap(prev=>{
                         let dum = {...prev}
@@ -203,12 +182,12 @@ function Tab1(){
             
         
         {Object.entries(bookValue.parts).map(([partsKey, partsValue]) => {
-               
+                console.log(partsKey, partsValue)
                 return(
                 <>{Object.entries(partsValue.parts)[0][1]["parts"] ?  <AccordionItem>
                      <AccordionHeader as={"div"}>
                      <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
-                    <IonLabel style={{"marginLeft": "40px"}}>{partsValue.name}</IonLabel>
+                    <IonLabel style={{"marginLeft": "40px"}}><IonIcon icon={chevronDownSharp}></IonIcon>{partsValue.name}</IonLabel>
                     <IonCheckbox indeterminate={partsValue.checked === "partial"} style={{"marginRight": "40px"}} checked={partsValue.checked === "true"} onIonChange={(e) => {
                         setBooksMap(prev=>{
                             let dum = {...prev}
@@ -290,12 +269,33 @@ function Tab1(){
     </> : null}
 
     {contentMode == "book_text" ? <>
-        {currentBook["verse"] ? <p>Current Book: {currentBook.name} {currentBook.part} {currentBook.sub_part} {currentBook.verse} </p> : <p>Please select a Book</p>}
-        <div style={{ textAlign: "center", marginTop:"30px", marginBottom:"30px" }}><IonButton onClick={e=> setAlertsMap(prev => {
+        {currentBook.verse ? <IonCard onClick={()=>{setAlertsMap(prev => {
             let dum = {...prev}
             dum["books"] = true
             return dum
-        })}>{currentBook["verse"] ? "Change Book": "Select Book"}</IonButton></div>
+        })
+        }}>
+            <IonCardHeader>
+                <IonCardTitle>{booksMap[currentBook.name]["name"]}</IonCardTitle>
+                <IonCardSubtitle>Current Book</IonCardSubtitle>
+            </IonCardHeader>
+            <IonCardContent>
+                <div style = {{textAlign:"center"}}>
+                {currentBook.name=="BG" ? <>Chapter: {currentBook.part} | Verse: {currentBook.verse}</> : null}
+                {currentBook.name=="SB" ? <>Canto: {currentBook.part} | Chapter: {currentBook.sub_part} | Verse: {currentBook.verse}</> : null}
+                {currentBook.name=="CC" ? <>Lila: {currentBook.part} | Chapter: {currentBook.sub_part} | Verse: {currentBook.verse}</> : null}
+                </div>
+            </IonCardContent>
+        </IonCard> : <IonCard>
+            <IonCardContent style={{textAlign:"center"}}>
+                <IonButton onClick={()=>{setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["books"] = true
+                        return dum
+                    })
+                }}>Select Book</IonButton>
+            </IonCardContent>
+        </IonCard> }
     </> : null}
 
 
@@ -316,7 +316,7 @@ function Tab1(){
                         return dum
                     })
         }}>
-             <p style={{textAlign:"center"}}>Selct the Book</p>
+             <p style={{textAlign:"center"}}>Select the Book</p>
         <div className="wrapper">
            
 
@@ -488,7 +488,7 @@ function Tab1(){
                     })
         }}>
         
-            <p style={{marginLeft:"10px"}}>Proceed with the below lecture?</p>
+        <div style={{textAlign:"center", marginTop:"10px", marginBottom:"10px"}}>Proceed with the below Lecture?</div>
             <div className="wrapper">
             <div style={{marginBottom:"10px"}}>
                 <IonLabel>Title: {currentContent[1]}</IonLabel>
@@ -524,24 +524,25 @@ function Tab1(){
                     })
         }}>
         
-            <p style={{marginLeft:"10px"}}>Proceed with the below verses?</p>
+        <div style={{textAlign:"center", margin:"10px"}}>Proceed with the below Purports?</div>
             <div className="wrapper">
               {currentContent.map(verse => {
                 return (
-                    <div style={{textAlign:"center"}}>
-                        <IonLabel>{verse[0]} ({verse[2]/wordsPerMin} Minutes)</IonLabel>
-                    </div>
+                    <IonItem>
+                        <IonLabel>{verse[0]} </IonLabel>
+                        <IonNote>{Math.round(verse[2]/wordsPerMin)} Min</IonNote>
+                    </IonItem>
                 )
               })}
-              <div style={{textAlign:"center"}}>
-                    <IonLabel>Total time: ({(()=>{
+              <IonItem style={{textAlign:"center"}} lines='none'>
+                    <IonLabel>Total time: {(()=>{
                         let totalTime = 0
                         for (let verse of currentContent) {
-                            totalTime += verse[2]/wordsPerMin
+                            totalTime += Math.round(verse[2]/wordsPerMin)
                         }
                         return totalTime
-                    })()} Minutes)</IonLabel>
-                </div>
+                    })()} Minutes</IonLabel>
+                </IonItem>
                 </div>
             <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
             {contentMode === "random_text" ? <IonButton onClick={()=>{
@@ -568,7 +569,7 @@ function Tab1(){
     </IonPage>
      </Route>
      <Route path={`${path}/lecture/:key`}>
-      <Audio booksMap={[lecturesMap, setLecturesMap]} />
+      <Audio />
      </Route>
      <Route path={`${path}/purports/:key`}>
       <Text />
@@ -580,4 +581,4 @@ function Tab1(){
   );
 };
 
-export default Tab1;
+export default Time;
