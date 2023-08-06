@@ -8,8 +8,8 @@ function purportsList(booksData) {
       if (booksData["BG"]["parts"][chapterIndex]["checked"] != "false") {
         for (const verse in booksData["BG"]["parts"][chapterIndex]["parts"]) {
           purports.push([
-            "BG_" + chapterIndex + "." + verse,
-            "Bhagavad Gita " + chapterIndex + "." + verse,
+            "BG_" + chapterIndex + "." + verse.slice(1),
+            "Bhagavad Gita " + chapterIndex + "." + verse.slice(1),
             booksData["BG"]["parts"][chapterIndex]["parts"][verse]["words_count"],
           ]);
         }
@@ -24,8 +24,8 @@ function purportsList(booksData) {
           if (booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["checked"] != "false") {
             for (const verse in booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["parts"]) {
               purports.push([
-                "SB_" + cantoIndex + "." + chapterIndex + "." + verse,
-                "Srimad Bhagavatam " + cantoIndex + "." + chapterIndex + "." + verse,
+                "SB_" + cantoIndex + "." + chapterIndex + "." + verse.slice(1),
+                "Srimad Bhagavatam " + cantoIndex + "." + chapterIndex + "." + verse.slice(1),
                 booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["parts"][verse]["words_count"],
               ]);
             }
@@ -42,8 +42,8 @@ function purportsList(booksData) {
           if (booksData["CC"]["parts"][lila]["parts"][chapterIndex]["checked"] != "false") {
             for (const verse in booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"]) {
               purports.push([
-                "CC_" + lila + "_" + chapterIndex + "." + verse,
-                "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse,
+                "CC_" + lila + "_" + chapterIndex + "." + verse.slice(1),
+                "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse.slice(1),
                 booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"][verse]["words_count"],
               ]);
             }

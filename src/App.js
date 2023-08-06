@@ -10,9 +10,9 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, square, triangle, settingsSharp } from 'ionicons/icons';
+import { ellipse, square, triangle, settingsSharp, hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline } from 'ionicons/icons';
 import YouTube from 'react-youtube';
-import Tab1 from './pages/HomePage';
+import Time from './pages/HomePage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -29,6 +29,8 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import Stats from './pages/StatsPage';
+import History from './pages/HistoryPage';
 
 
 
@@ -51,32 +53,41 @@ function App() {
    
       <IonTabs>
         <IonRouterOutlet>
-          <Route path="/tab1">
-            <Tab1 />
+          <Route path="/time">
+            <Time />
           </Route>
-          <Route path="/tab2">
-          <YouTube videoId="2g811Eo7K8U" opts={opts} />
+          <Route path="/stats">
+            <Stats />
+          </Route>
+          <Route path={"/history/:key"}>
+            <History />
+          </Route>
+          <Route path={"/bookmarks"}>
+           <h1>Page Under Construction</h1>
+          </Route>
+          <Route path={"/setting"}>
+          <h1>Page Under Construction</h1>
           </Route>
           <Route exact path="/">
-            <Redirect to="/tab1" />
+            <Redirect to="/time" />
           </Route>
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/tab1">
-            <IonIcon aria-hidden="true" icon={triangle} />
+          <IonTabButton tab="tab1" href="/time">
+            <IonIcon aria-hidden="true" icon={hourglassOutline} />
             <IonLabel>VaniTime</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/tab2">
-            <IonIcon aria-hidden="true" icon={ellipse} />
-            <IonLabel>History</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab3" href="/tab1">
-            <IonIcon aria-hidden="true" icon={square} />
+          <IonTabButton tab="tab2" href="/stats">
+            <IonIcon aria-hidden="true" icon={statsChartOutline} />
             <IonLabel>Stats</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab4" href="/tab1">
-            <IonIcon aria-hidden="true" icon={settingsSharp} />
-            <IonLabel>Settings</IonLabel>
+          <IonTabButton tab="tab3" href="/bookmarks">
+            <IonIcon aria-hidden="true" icon={bookmarksOutline} />
+            <IonLabel>BooksMarks</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="tab4" href="/setting">
+            <IonIcon aria-hidden="true" icon={settingsOutline} />
+            <IonLabel>Setting</IonLabel>
           </IonTabButton>
         </IonTabBar>
       </IonTabs>
