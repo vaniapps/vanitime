@@ -98,8 +98,8 @@ function Audio(){
   </IonButtons>
       </IonToolbar>
     </IonHeader>
-    <IonContent>
-        <br />
+    <IonContent className="ion-padding">
+       
     
       {htmlContent ?
       <div dangerouslySetInnerHTML={{ __html: htmlContent }} /> : <div style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}

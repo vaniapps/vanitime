@@ -119,7 +119,7 @@ function Time(){
       </IonHeader>
       <IonContent >
        
-        <div style={{marginTop:"10px", fontSize:"20px"}}>Select Vani Time: (HH:MM)</div>
+        <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Select Vani Time: (HH:MM)</div>
     
       <IonDatetime style={{display:"flex", justifyContent: "center"}} size='cover' value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
        setVaniTime(e.detail.value);

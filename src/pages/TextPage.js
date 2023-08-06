@@ -120,7 +120,7 @@ function Text(){
   </IonButtons>
       </IonToolbar>
     </IonHeader>
-    <IonContent>
+    <IonContent className="ion-padding">
     {htmlContent != "" ? <>{Object.entries(versesMap).length > 0 && findPreviousPurport(booksMap,  Object.entries(versesMap)[0][0]) ? <IonChip onClick={()=>{
         setVersesMap(prev=>{
           let prevVerse = {}
