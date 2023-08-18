@@ -44,7 +44,6 @@ function purportsList(booksData, bookName) {
 
 function findNextPurports(booksMap, currentBook, vaniTime, wordsPerMin = 50) {
   let startingPurport=currentBook["name"]+"_"+currentBook["part"]+ (currentBook["name"]=="CC" ? "_" : ".") + currentBook["sub_part"] + (currentBook["sub_part"] ? "." : "")+currentBook["verse"]
-  console.log(startingPurport)
   const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
   let totalWords = wordsPerMin * hoursToMinutes(vaniTime);
   let wordsSumSoFar = 0;
@@ -65,7 +64,6 @@ function findNextPurports(booksMap, currentBook, vaniTime, wordsPerMin = 50) {
     wordsSumSoFar += purportList[currentIndex][2];
     currentIndex++;
   }
-	console.log(selectedPurports);
   return selectedPurports;
 }
 

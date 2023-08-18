@@ -1,10 +1,10 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonButton,
- IonItem, IonLabel, IonIcon, IonModal, IonSpinner} from '@ionic/react';
+ IonItem, IonLabel, IonIcon, IonModal, IonSpinner, IonToast, IonRadio, IonRadioGroup, IonInput} from '@ionic/react';
 import { useEffect, useState, useContext } from 'react';
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import axios from 'axios';
-import { checkboxOutline, chevronBackOutline } from 'ionicons/icons';
-import { IncompleteUserHistory, Lectures, UserHistory } from '../context';
+import { checkboxOutline, chevronBackOutline, bookmarkOutline } from 'ionicons/icons';
+import { Bookmarks, IncompleteUserHistory, Lectures, UserHistory } from '../context';
 import minutesToMinutes from '../scripts/durationToMinutes';
 
 function Audio(){
@@ -15,11 +15,19 @@ function Audio(){
     const [incompleteUserHistory, setIncompleteUserHistory] = useContext(IncompleteUserHistory)
     const [isGoBack, setIsGoBack] = useState(false)  
     const [alertsMap, setAlertsMap] = useState({
-        "user_history": false
+        "user_history": false,
+        "bookmark_input": false
     })
     const [userHistory, setUserHistory] = useContext(UserHistory)
     const [lectureListened, setLectureListend] = useState(false)
     const [lectureMap, setLecturesMap] = useContext(Lectures)
+    const [tempLectureMap, setTempLecturesMap] = useState({})
+    const [bookmarksMap, setBookmarksMap] = useContext(Bookmarks)
+    const [bookmarkInput, setBookmarkInput] = useState({"radio": "", "text": ""})
+    const [toast, setToast] = useState("false")
+    const [toastMessageMap, setToastMessageMap] = useState({
+        "bookmark_input": "Please select a boomark folder/input a new boomark folder name"
+    })
 
     const parseXmlToHtml = (xmlData) => {
         const parser = new DOMParser();
@@ -28,8 +36,7 @@ function Audio(){
         let textContent = xmlDoc.querySelector('text').textContent;
         textContent = textContent.slice(textContent.indexOf("<div class=\"code\">"))
         textContent = textContent.slice(0, textContent.indexOf("<!--"))
-        textContent = textContent.replace(/\/wiki/g, "/time/purports")
-        console.log(textContent.indexOf("/wiki"))
+        textContent = textContent.replace(/\/wiki/g, "/purports")
         const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
         return htmlData;
     }
@@ -47,6 +54,7 @@ function Audio(){
     };
         fetchData();
         setIncompleteUserHistory(true)
+        setTempLecturesMap(JSON.parse(JSON.stringify(lectureMap)))
     },[])
 
     function goback() {
@@ -77,7 +85,7 @@ function Audio(){
     <IonIcon icon={chevronBackOutline}></IonIcon>
     </IonButton>
     </IonButtons>
-    <IonButtons style={{"width": "80%"}} slot="start">
+    <IonButtons style={{"width": "70%"}} slot="start">
       <IonItem lines="none">
     <IonLabel >{key}</IonLabel>
     </IonItem>
@@ -91,9 +99,23 @@ function Audio(){
         return dum
       })
     }}
-    style={{marginRight:"7px", fontSize:"20px"}}
+    style={{fontSize:"20px"}}
    >
     <IonIcon icon={checkboxOutline}></IonIcon>
+   </IonButton>
+  </IonButtons>
+  <IonButtons slot="end">
+   <IonButton
+    onClick={() => {
+      setAlertsMap(prev=>{
+        let dum = {...prev}
+        dum["bookmark_input"] = true
+        return dum
+      })
+    }}
+    style={{marginRight:"7px"}}
+   >
+    <IonIcon icon={bookmarkOutline}></IonIcon>
    </IonButton>
   </IonButtons>
       </IonToolbar>
@@ -136,18 +158,11 @@ function Audio(){
                 }    
                 return dum
               })
-              setLecturesMap(prev=>{
-                let dum = {...prev}
-                for (let category of Object.entries(dum)) {
-                    for (let lecture of Object.entries(category[1]["parts"])) {
-                        if(lecture[0] == key) {
-                            lecture[1]["read"] = false
-                        }
-                    }
-                }
-                return dum
-             })
             }
+            setLecturesMap(prev=>{
+              let dum = JSON.parse(JSON.stringify(tempLectureMap))
+              return dum
+           })
               if(isGoBack) {
                 if(history.length > 1){
                   history.goBack()
@@ -178,9 +193,7 @@ function Audio(){
                     if(!dum[date][key]) dum[date][key]=[]
                     let duration = 0;
                     for (let category of Object.entries(lectureMap)) {
-                        console.log(category)
                         for (let lecture of Object.entries(category[1]["parts"])) {
-                            console.log(lecture)
                             if(lecture[0] == key) {
                                 duration = minutesToMinutes(lecture[1]["duration"])
                             }
@@ -190,7 +203,7 @@ function Audio(){
                     return dum
                     })
                     setLecturesMap(prev=>{
-                        let dum = {...prev}
+                        let dum = JSON.parse(JSON.stringify(tempLectureMap))
                         for (let category of Object.entries(dum)) {
                             for (let lecture of Object.entries(category[1]["parts"])) {
                                 if(lecture[0] == key) {
@@ -214,6 +227,101 @@ function Audio(){
       </div>
 
     </IonModal>
+
+    <IonModal id="example-modal" isOpen={alertsMap["bookmark_input"]} onDidDismiss={()=>{
+      setAlertsMap(prev => {
+        let dum = {...prev}
+        dum["bookmark_input"] = false
+        return dum
+      })
+      setBookmarkInput(prev=>{
+        let dum = {...prev}
+        dum["radio"] = ""
+        dum["text"] =  ""
+        return dum
+      })
+    }}>
+    <p style={{margin:"10px"}}>Select the bookmark folder/collection</p>
+    <div className='wrapper'>
+    <IonItem>
+        <IonInput onIonFocus={()=>{
+          setBookmarkInput(prev=>{
+            let dum = {...prev}
+            dum["radio"] = ""
+            return dum
+        })
+        }} onIonChange={(e)=>{
+            setBookmarkInput(prev=>{
+                let dum = {...prev}
+                dum["radio"] = ""
+                dum["text"] =  e.detail.value
+                return dum
+            })
+        }} type="text" placeholder="New Bookmark" value={bookmarkInput["text"]}></IonInput>
+    </IonItem>
+    {Object.keys(bookmarksMap).length > 0 ? <IonRadioGroup allowEmptySelection={true}  onIonChange={e=>{
+        setBookmarkInput(prev=>{
+          let dum = {...prev}
+          dum["radio"] = e.detail.value
+          dum["text"] =  ""
+          return dum
+      })   
+    }} value = {bookmarkInput["radio"]}>
+    {Object.keys(bookmarksMap).map((bookmarkFolder) => {
+        return (
+          <IonItem>
+            <IonLabel>{bookmarkFolder}</IonLabel>
+            <IonRadio slot="end" value={bookmarkFolder} />
+          </IonItem>
+        )
+    })}
+    </IonRadioGroup> : null}
+   
+    </div> 
+      <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
+            <IonButton onClick={()=>{
+                setAlertsMap(prev => {
+                  let dum = {...prev}
+                  dum["bookmark_input"] = false
+                  return dum
+              })
+              setBookmarkInput(prev=>{
+                let dum = {...prev}
+                dum["radio"] = ""
+                dum["text"] =  ""
+                return dum
+              })
+            }}>Cancel</IonButton> 
+            <IonButton onClick={()=>{
+                if(!bookmarkInput["radio"] && !bookmarkInput["text"]) setToast("bookmark_input")
+                setAlertsMap(prev => {
+                    let dum = {...prev}
+                    dum["bookmark_input"] = false
+                    return dum
+                })
+                setBookmarksMap((prev)=>{
+                  let dum = {...prev}
+                  let bookmark_folder_name = bookmarkInput["radio"]
+                  if(bookmarkInput["text"]) {
+                    bookmark_folder_name = bookmarkInput["text"]
+                    dum[bookmark_folder_name] = {"children": [], "isChecked": false}
+                  }  
+                  dum[bookmark_folder_name]["children"].push({"name": key,  "type": "lecture", "isChecked": false})
+                  return dum 
+                })
+
+                setBookmarkInput(prev=>{
+                  let dum = {...prev}
+                  dum["radio"] = ""
+                  dum["text"] =  ""
+                  return dum
+                })
+                
+            }}>Done</IonButton>
+      </div>
+
+    </IonModal>
+    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={5000}></IonToast>
           </IonContent>
   </IonPage>   
   );

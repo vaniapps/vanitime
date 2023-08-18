@@ -10,7 +10,6 @@ function generateLectures(lectureMap,vaniTime){
 					if(!lectureMap[topic]["parts"][lecture]["read"]){
 						let currTime = minutesToMinutes(lectureMap[topic]["parts"][lecture]["duration"]);
 						if (vaniTime-currTime >=0 && vaniTime-currTime<5) {
-							console.log(currTime, vaniTime, Math.abs(currTime-vaniTime)) 
 							lectures.push([lecture,lectureMap[topic]["parts"][lecture]["name"],currTime])
 						}
 					}
@@ -66,7 +65,6 @@ const findRandomLecture = (lectureMap,vaniTime) => {
 	vaniTime = hoursToMinutes(vaniTime); 
 	let lectures = generateLectures(lectureMap,vaniTime);
 	if(lectures.length==0) {
-		console.log("working")
 		lectures = generateAllLectures(lectureMap);
 		if(lectures.length == 0) return[]
 		lectures.sort((a, b) => a[2] - b[2]);

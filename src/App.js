@@ -1,4 +1,4 @@
-import { Redirect, Route, useHistory } from 'react-router-dom';
+import { Redirect, Route, useHistory, useRouteMatch } from 'react-router-dom';
 import {
   IonApp,
   IonContent,
@@ -14,10 +14,8 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, square, triangle, settingsSharp, hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline } from 'ionicons/icons';
-import YouTube from 'react-youtube';
-import Time from './pages/HomePage';
+import { hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline, bookOutline } from 'ionicons/icons';
+import { useEffect, useState, useContext } from 'react';
 import './styles.css';
 
 /* Core CSS required for Ionic components to work properly */
@@ -37,7 +35,13 @@ import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 import Stats from './pages/StatsPage';
 import History from './pages/HistoryPage';
-
+import BookmarkFolders from './pages/BookmarkFoldersPage';
+import VaniTimePage from './pages/VaniTimePage';
+import Vedabase from './pages/VedabasePage';
+import Text from './pages/TextPage';
+import Audio from './pages/AudioPage';
+import Book from './pages/BookPage';
+import Lecture from './pages/LecturePage';
 
 
 setupIonicReact({
@@ -46,14 +50,17 @@ setupIonicReact({
 
 function App() {
   let history = useHistory();
-  const opts = {
-    height: '390',
-    width: '640',
-    playerVars: {
-      // https://developers.google.com/youtube/player_parameters
-      autoplay: 1,
-    },
-  };
+  const [currentTab, setCurrentTab] = useState()
+  useEffect(()=>{
+    let currentPath = window.location.pathname
+    if(currentPath.includes("vanitime")) setCurrentTab("vanitime")
+    if(currentPath.includes("vedabase")) setCurrentTab("vedabase")
+    if(currentPath.includes("stats")) setCurrentTab("stats")
+    if(currentPath.includes("setting")) setCurrentTab("setting")
+    if(currentPath.includes("bookmarks")) setCurrentTab("bookmarks")
+
+  },[])
+  
   return (
     <IonApp>
    
@@ -61,8 +68,11 @@ function App() {
         <IonContent>
         <IonRouterOutlet>
         
-          <Route path="/time">
-            <Time />
+          <Route path="/vanitime">
+            <VaniTimePage />
+          </Route>
+          <Route path="/vedabase">
+            <Vedabase />
           </Route>
           <Route path="/stats">
             <Stats />
@@ -71,19 +81,54 @@ function App() {
             <History />
           </Route>
           <Route path={"/bookmarks"}>
-           <h1>Page Under Construction</h1>
+           <BookmarkFolders />
           </Route>
           <Route path={"/setting"}>
           <h1>Page Under Construction</h1>
           </Route>
+          <Route path={"/lecture/:key"}>
+            <Audio />
+          </Route>
+          <Route path={"/purports/:key"}>
+          <Text />
+          </Route>
+          <Route path={"/lectureindex/:key"}>
+            <Lecture />
+          </Route>
+          <Route path={"/bookindex/:key"}>
+          <Book />
+          </Route>
+          <Route path={"/otherbooks"}>
+            <h1>Page Under Construction</h1>
+          </Route>
           <Route exact path="/">
-            <Redirect to="/time" />
+            <Redirect to="/vanitime" />
           </Route>
         </IonRouterOutlet>
         </IonContent>
         <IonFooter>
-        <IonSegment  value="default" >
-          <IonSegmentButton style={{ minWidth: 0 }} value="default"  onClick={()=>history.push("/time")}>
+        <IonSegment  value={currentTab} >
+        <IonSegmentButton style={{ minWidth: 0 }} value="setting"  onClick={()=>history.push("/setting")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={settingsOutline}/>
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
+            <IonLabel>Setting</IonLabel>
+            </div>
+            </div>
+          </IonSegmentButton>
+          <IonSegmentButton style={{ minWidth: 0 }} value="vedabase"  onClick={()=>history.push("/vedabase")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={bookOutline}/>
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
+            <IonLabel>Vedabase</IonLabel>
+            </div>
+            </div>
+          </IonSegmentButton>
+          <IonSegmentButton style={{ minWidth: 0 }} value="vanitime"  onClick={()=>history.push("/vanitime")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
             <IonIcon icon={hourglassOutline} />
@@ -93,7 +138,7 @@ function App() {
             </div>
             </div>
           </IonSegmentButton>
-          <IonSegmentButton style={{ minWidth: 0 }}  onClick={()=>history.push("/stats")}>
+          <IonSegmentButton style={{ minWidth: 0 }} value="stats"  onClick={()=>history.push("/stats")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
             <IonIcon icon={statsChartOutline} />
@@ -103,7 +148,7 @@ function App() {
             </div>
             </div>
           </IonSegmentButton>
-          <IonSegmentButton style={{ minWidth: 0 }}  onClick={()=>history.push("/bookmarks")}>
+          <IonSegmentButton style={{ minWidth: 0 }} value="bookmarks"  onClick={()=>history.push("/bookmarks")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
             <IonIcon icon={bookmarksOutline} />
@@ -114,16 +159,7 @@ function App() {
             </div>
           </IonSegmentButton>
 
-          <IonSegmentButton style={{ minWidth: 0 }}  onClick={()=>history.push("/setting")}>
-            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
-            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
-            <IonIcon icon={settingsOutline}/>
-            </div>
-            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
-            <IonLabel>Setting</IonLabel>
-            </div>
-            </div>
-          </IonSegmentButton>
+         
         </IonSegment>
         </IonFooter>
         </IonPage>

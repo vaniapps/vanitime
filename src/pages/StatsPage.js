@@ -10,6 +10,7 @@ import { UserHistory, WordsPerMin } from '../context';
 import { useLocal } from '../lshooks';
 import '../styles.css';
 import Highcharts from 'highcharts';
+import { formatMinutes, formatMinutes2, formatMinutes3 } from "../scripts/durationToMinutes";
 
 function Stats(){
     const [viewRange, setViewRange] = useState("Today")
@@ -77,7 +78,6 @@ function Stats(){
         // Find the oldest date
         const dates = Object.keys(userHistory);
         const oldestDate = new Date(Math.min(...dates.map(date => new Date(date.split("-").reverse().join("-")))));
-        console.log(oldestDate)
         // Generate dayList, weekList, monthList, and yearList
         const dayList = [];
         const weekList = [];
@@ -88,12 +88,10 @@ function Stats(){
         
         const currentDate = new Date(oldestDate);
         const today = new Date();
-        console.log(oldestDate)
         
         while (formatDate(currentDate).split("-").reverse().join("-") <= formatDate(today).split("-").reverse().join("-")) {
             
             const formattedDate = formatDate(currentDate);
-            console.log(formattedDate)
             const week = getWeekNumber(currentDate).padStart(2, '0');
             
             let duration = 0;
@@ -120,7 +118,6 @@ function Stats(){
         
             const monthKey = `${((currentDate.getMonth() + 1)+"").padStart(2, '0')}-${currentDate.getFullYear()}`;
             const monthIndex = monthList.findIndex(item => item.name === monthKey);
-            if(monthKey=="07-2023") console.log(duration, currentDate)
             if (monthIndex === -1) {
                 monthList.push({ name: monthKey, duration, count });
             } else {
@@ -159,9 +156,15 @@ function Stats(){
         setDayList(dayList);
         setWeekList(weekList);
         setMonthList(monthList);
-        setYearList(yearList); 
-        setCurrentList(dayList);
-        setCurrentGraphList(dayList);
+        setYearList(yearList);
+        if(viewRange == "Today") setCurrentList(dayList);
+        if(viewRange == "This Week") setCurrentList(weekList);
+        if(viewRange == "This Month") setCurrentList(monthList);
+        if(viewRange == "This Year") setCurrentList(yearList);
+        if(graphViewRange == "Days") setCurrentGraphList(dayList);
+        if(graphViewRange == "Weeks") setCurrentGraphList(weekList);
+        if(graphViewRange == "Months") setCurrentGraphList(monthList);
+        if(graphViewRange == "Years") setCurrentGraphList(yearList);
         setCurrentGoal(prev=>{
             let dum = {...prev}
             if (currentMode == "all") {
@@ -205,13 +208,13 @@ function Stats(){
         }
     }
 
-    const Parentdiv = {
+    const ParentBar = {
         height: 10,
         width: '100%',
         backgroundColor: 'whitesmoke',
         borderRadius: 0,
         margin: 0,
-        overflow: "hidden"
+        position:"relative"
       }
 
     useEffect(()=>{
@@ -276,7 +279,6 @@ function Stats(){
             <IonHeader>
                 <IonToolbar>
                     <IonSegment onIonChange={(e)=>{
-                        console.log(currentMode)
                         setCurrentMode(e.detail.value)
                     }} value={currentMode}>
                     <IonSegmentButton value="all">
@@ -301,7 +303,7 @@ function Stats(){
                     <IonLabel id="popover-button">{viewRange}<IonIcon icon={chevronDownOutline}></IonIcon></IonLabel>
                    
                     </div>
-                    <IonCardTitle>{currentList.length > 0 ? currentList[currentList.length-1]['duration'] : 0} Minutes</IonCardTitle>
+                    <IonCardTitle>{formatMinutes2(currentList.length > 0 ? currentList[currentList.length-1]['duration'] : 0)}</IonCardTitle>
                         
                         {currentMode == "all" ? <>No of Lectures/Verses: {currentList.length > 0 ? currentList[currentList.length-1]['count'] : 0}</>: <>No of {currentMode == "lectures" ? "Lectures Listened" : "Verses Read"} : {currentList.length > 0 ? currentList[currentList.length-1]['count'] : 0}</>}
                         </IonCardContent>
@@ -323,6 +325,12 @@ function Stats(){
                                     }
                                 }
                             }
+
+                            if(formattedDate == formatDate(new Date())) {
+                                let colorObj = valueToColor(duration, currentGoal["day"])
+                                colorObj["textColor"] = "red"
+                                return colorObj
+                            }
                             
                             return valueToColor(duration, currentGoal["day"]);
                         }}
@@ -336,59 +344,82 @@ function Stats(){
                         </IonCardContent>
                         </IonCard>
                         <IonCard>
-                            <IonCardContent>
+                            <IonCardContent >
                             {goal["books"]["day"] != -1  ?
                             <>
+                            
+                            <div style={{display:"flex", justifyContent:"space-between", marginBottom:"2px"}}>
+                            <div style={{marginRight:"5px"}}>{formatMinutes3(dayList.length ? dayList[dayList.length-1]['duration'] : 0)}</div>
                             <div style={{textAlign:"center"}}>
                                 Day Goal
                             </div>
-                            <div style={{display:"flex", alignItems:"center"}}>
-                            <div style={{marginRight:"5px"}}>{dayList.length ? dayList[dayList.length-1]['duration'] : 0}</div>
-                            <div style={Parentdiv}>
+                            <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["day"])}</div>
+                            </div>
+                            <div style={ParentBar}>
                             <div style={{
                                 height: '100%',
-                                width: dayList.length ? (dayList[dayList.length-1]['duration']/currentGoal["day"])*100+"%" : 0,
-                                backgroundColor: "blue",
+                                width: dayList.length ? dayList[dayList.length-1]['duration']/currentGoal["day"] < 1 ? (dayList[dayList.length-1]['duration']/currentGoal["day"])*100+"%" : "100%" : 0,
+                                backgroundColor: "#0088FF",
                                 borderRadius: 0,
-                                textAlign: 'right'
+                                textAlign: 'right',
+                                display:"flex",
+                                justifyContent:"end",
+                                alignItems:"center"
+                                
                             }}>
+                                <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
+                                left:dayList.length ? dayList[dayList.length-1]['duration']/currentGoal["day"] < 1 ? ((dayList[dayList.length-1]['duration']/currentGoal["day"])*100-4.5)+"%" : "95.5%" : "-4.5%"
+                                }}>{dayList.length ? Math.round((dayList[dayList.length-1]['duration']/currentGoal["day"])*100) : 0}%</div>
                             </div>
+                          
                             </div>
-                            <div style={{marginLeft:"5px"}}>{currentGoal["day"]}</div>
-                            </div>
-                            <div style={{textAlign:"center", marginTop:"10px"}}>
+                           
+                            <div style={{display:"flex", justifyContent:"space-between", marginTop:"20px", marginBottom:"2px"}}>
+                            <div style={{marginRight:"5px"}}>{formatMinutes3(weekList.length ? weekList[weekList.length-1]['duration'] : 0)}</div>
+                            <div style={{textAlign:"center"}}>
                                 Week Goal
                             </div>
-                            <div style={{display:"flex", alignItems:"center"}}>
-                            <div style={{marginRight:"5px"}}>{weekList.length ? weekList[weekList.length-1]['duration'] : 0}</div>
-                            <div style={Parentdiv}>
+                            <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["week"])}</div>
+                            </div>
+                            <div style={ParentBar}>
                             <div style={{
                                 height: '100%',
-                                width: weekList.length ? (weekList[weekList.length-1]['duration']/currentGoal["week"])*100+"%" : 0,
-                                backgroundColor: "blue",
+                                width: weekList.length ? weekList[weekList.length-1]['duration']/currentGoal["week"] < 1 ? (weekList[weekList.length-1]['duration']/currentGoal["week"])*100+"%" : "100%" : 0,
+                                backgroundColor: "#0088FF",
                                 borderRadius: 0,
-                                textAlign: 'right'
+                                textAlign: 'right',
+                                display:"flex",
+                                justifyContent:"end",
+                                alignItems:"center"
                             }}>
+                                <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
+                                left:weekList.length ? weekList[weekList.length-1]['duration']/currentGoal["week"] < 1 ? ((weekList[weekList.length-1]['duration']/currentGoal["week"])*100-4.5)+"%" : "95.5%" : "-4.5%"
+                                }}>{weekList.length ? Math.round((weekList[weekList.length-1]['duration']/currentGoal["week"])*100) : 0}%</div>
                             </div>
                             </div>
-                            <div style={{marginLeft:"5px"}}>{currentGoal["week"]}</div>
-                            </div>
-                            <div style={{textAlign:"center", marginTop:"10px"}}>
+                            
+                            <div style={{display:"flex", justifyContent:"space-between", marginTop:"20px", marginBottom:"2px"}}>
+                            <div style={{marginRight:"5px"}}>{formatMinutes3(monthList.length ? monthList[monthList.length-1]['duration'] : 0)}</div>
+                            <div style={{textAlign:"center"}}>
                                 Month Goal
                             </div>
-                            <div style={{display:"flex", alignItems:"center"}}>
-                            <div style={{marginRight:"5px"}}>{monthList.length ? monthList[monthList.length-1]['duration'] : 0}</div>
-                            <div style={Parentdiv}>
+                            <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["month"])}</div>
+                            </div>
+                            <div style={ParentBar}>
                             <div style={{
                                 height: '100%',
-                                width: monthList.length ? (monthList[monthList.length-1]['duration']/currentGoal["month"])*100+"%" : 0,
-                                backgroundColor: "blue",
+                                width: monthList.length ? monthList[monthList.length-1]['duration']/currentGoal["month"] < 1 ? (monthList[monthList.length-1]['duration']/currentGoal["month"])*100+"%" : "100%" : 0,
+                                backgroundColor: "#0088FF",
                                 borderRadius: 0,
-                                textAlign: 'right'
+                                textAlign: 'right',
+                                display:"flex",
+                                justifyContent:"end",
+                                alignItems:"center"
                             }}>
+                                <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
+                                left:monthList.length ? monthList[monthList.length-1]['duration']/currentGoal["month"] < 1 ? ((monthList[monthList.length-1]['duration']/currentGoal["month"])*100-4.5)+"%" : "95.5%" : "-4.5%"
+                                }}>{monthList.length ? Math.round((monthList[monthList.length-1]['duration']/currentGoal["month"])*100) : 0}%</div>
                             </div>
-                            </div>
-                            <div style={{marginLeft:"5px"}}>{currentGoal["month"]}</div>
                             </div> </> : 
                             <div style={{display:"flex", justifyContent:"space-around"}}>
                                 <IonButton id="open-modal">Set Goals</IonButton>

@@ -62,7 +62,6 @@ function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
 	if(purportList.length==0) return []
 	vaniTime = hoursToMinutes(vaniTime);
   let totalWords = wordsPerMin * vaniTime;
-  console.log(wordsPerMin, vaniTime, totalWords)
   while (true) {
     let start = Math.floor(Math.random() * purportList.length);
     if (counter == 20) {
@@ -79,8 +78,6 @@ function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
       start += 1;
     }
     if ((wordsSumSoFar >= (totalWords - wordsPerMin*5) && wordsSumSoFar<=totalWords) || counter == 20) {
-			console.log(purports);
-      console.log("counter:", counter)
       return purports;
     }
     counter++;

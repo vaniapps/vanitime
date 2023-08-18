@@ -16,7 +16,7 @@ import findNextPurports from '../scripts/findNextPurports';
 import { useContext } from 'react';
 import { Books, ContentMode, CurrentBook, Lectures, VaniTime, WordsPerMin } from '../context';
 import { chevronDownSharp } from 'ionicons/icons';
-function Time(){
+function VaniTimePage(){
 	
     const [contentMode, setContentMode] = useContext(ContentMode)
     const [contentModesMap, setContentModesMap] = useState({
@@ -66,10 +66,8 @@ function Time(){
     }
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
     function getContent() {
-        console.log(contentMode)
         if (contentMode == "random_audio") {
             setCurrentContent(findRandomLecture(lecturesMap,vaniTime));
-            console.log(findRandomLecture(lecturesMap,vaniTime));
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["audio"] = true
@@ -97,10 +95,8 @@ function Time(){
 
     console.log(alertsMap)
 
+
   return (
-    <>
-     <IonRouterOutlet>
-     <Route exact path={path}>
      <IonPage>
       <IonHeader>
         <IonToolbar>
@@ -186,7 +182,6 @@ function Time(){
             
         
         {Object.entries(bookValue.parts).map(([partsKey, partsValue]) => {
-                console.log(partsKey, partsValue)
                 return(
                 <>{Object.entries(partsValue.parts)[0][1]["parts"] ?  <AccordionItem>
                      <AccordionHeader as={"div"}>
@@ -224,7 +219,6 @@ function Time(){
                                         for (let part of Object.entries(dum[bookKey]["parts"][partsKey]["parts"])){
                                             if (part[1]["checked"] === "true") count++
                                         }
-                                        console.log(count, Object.entries(dum[bookKey]["parts"][partsKey]["parts"]).length)
                                         if(count === Object.entries(dum[bookKey]["parts"][partsKey]["parts"]).length) dum[bookKey]["parts"][partsKey]["checked"] = "true"
                                         else if (count === 0) dum[bookKey]["parts"][partsKey]["checked"] = "false"
                                         else dum[bookKey]["parts"][partsKey]["checked"] = "partial"
@@ -517,13 +511,13 @@ function Time(){
                     dum["audio"] = false
                     return dum
                 })
-                history.push(path+"/lecture/"+ currentContent[0])
+                history.push("/lecture/"+ currentContent[0])
             }}>Proceed</IonButton>
             </div>
          
         </IonModal>
 
-        <IonModal id="example-modal" ref={modal} isOpen={alertsMap["text"]} onDidDismiss={()=>{
+        <IonModal id="example-modal"  isOpen={alertsMap["text"]} onDidDismiss={()=>{
                     setAlertsMap(prev => {
                         let dum = {...prev}
                         dum["text"] = false
@@ -565,7 +559,7 @@ function Time(){
                 for (let i=1; i<currentContent.length; i++) {
                     verses+=","+currentContent[i][0]
                 }
-                history.push(path+"/purports/"+ verses)
+                history.push("/purports/"+ verses)
             }}>Proceed</IonButton>
             </div>
          
@@ -574,18 +568,10 @@ function Time(){
 
       </IonContent>
     </IonPage>
-     </Route>
-     <Route path={`${path}/lecture/:key`}>
-      <Audio />
-     </Route>
-     <Route path={`${path}/purports/:key`}>
-      <Text />
-     </Route>
-     </IonRouterOutlet>
-    </>
+
 
 
   );
 };
 
-export default Time;
+export default VaniTimePage;

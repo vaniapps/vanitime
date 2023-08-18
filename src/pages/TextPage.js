@@ -1,11 +1,11 @@
 import { IonContent, IonHeader, IonModal, IonPage, IonTitle, 
-IonToolbar, IonItem, IonLabel, IonCheckbox, IonButtons, IonButton, IonIcon, IonChip, IonSpinner } from '@ionic/react';
+IonToolbar, IonItem, IonLabel, IonCheckbox, IonButtons, IonButton, IonIcon, IonChip, IonSpinner, IonRadio, IonRadioGroup, IonInput, IonToast } from '@ionic/react';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import axios from 'axios';
 import '../styles.css';
-import { Books, CurrentBook, IncompleteUserHistory, UserHistory } from '../context';
-import { arrowDownOutline, arrowUpOutline, checkboxOutline, chevronBackOutline } from 'ionicons/icons';
+import { Bookmarks, Books, CurrentBook, IncompleteUserHistory, UserHistory } from '../context';
+import { arrowDownOutline, arrowUpOutline, checkboxOutline, chevronBackOutline, bookmarkOutline } from 'ionicons/icons';
 import {findNextPurport, findPreviousPurport} from "../scripts/findNextPurports"
 import { Plugins, Capacitor } from "@capacitor/core";
 
@@ -17,13 +17,22 @@ function Text(){
   const [userHistory, setUserHistory] = useContext(UserHistory)
   const [versesMap, setVersesMap] = useState({});
   const [booksMap, setBooksMap] = useContext(Books)
+  const [tempBooksMap, setTempBooksMap] = useState({});
   const [alertsMap, setAlertsMap] = useState({
-    "user_history": false
+    "user_history": false,
+    "bookmark_verses": false,
+    "bookmark_input": false
   })
   const [incompleteUserHistory, setIncompleteUserHistory] = useContext(IncompleteUserHistory)
   const [isGoBack, setIsGoBack] = useState(false)
   const [currentBook, setCurrentBook] = useContext(CurrentBook)
   const [tempCurrentBook, setTempCurrentBook] = useState({})
+  const [bookmarksMap, setBookmarksMap] = useContext(Bookmarks)
+  const [bookmarkInput, setBookmarkInput] = useState({"radio": "", "text": ""})
+  const [toast, setToast] = useState("false")
+  const [toastMessageMap, setToastMessageMap] = useState({
+      "bookmark_input": "Please select a boomark folder/input a new boomark folder name"
+  })
 
   const parseXmlToHtml = (xmlData) => {
       const parser = new DOMParser();
@@ -32,10 +41,9 @@ function Text(){
       let textContent = xmlDoc.querySelector('text').textContent;
       textContent = textContent.slice(textContent.indexOf("<h4><span class"))
       textContent = textContent.slice(0, textContent.indexOf("<div style=\"float:right"))
-      textContent = textContent.replace(/\/wiki/g, "/time/purports")
+      textContent = textContent.replace(/\/wiki/g, "/purports")
       textContent = textContent.replace(/<p><br \/>\n<\/p>/g, "")
       const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
-      console.log(htmlData);
       return htmlData;
   }
   
@@ -49,14 +57,16 @@ function Text(){
     }
     setVersesMap(dumVersesMap)
       setIncompleteUserHistory(true)
-      setTempCurrentBook(currentBook)
+      setTempCurrentBook(JSON.parse(JSON.stringify(currentBook)))
+      setTempBooksMap(JSON.parse(JSON.stringify(booksMap)))
+      console.log("chanignf")
   },[])
 
   useEffect(()=>{
     
     const fetchData = async () => {
       try {
-        console.log(versesMap)
+        console.log("fetching....")
         const fetchPromises = Object.keys(versesMap).map(verse => axios.get("https://vanisource.org/w/api.php?action=parse&prop=text&format=xml&page="+verse));
         const responses = await Promise.all(fetchPromises);
   
@@ -70,7 +80,7 @@ function Text(){
       }
     };
     fetchData();
-  }, [versesMap])
+  }, [Object.entries(versesMap).length])
 
   function goback() {
     if(incompleteUserHistory){
@@ -125,6 +135,21 @@ function Text(){
     style={{marginRight:"7px"}}
    >
     <IonIcon icon={checkboxOutline}></IonIcon>
+   </IonButton>
+  </IonButtons>
+
+  <IonButtons slot="end">
+   <IonButton
+    onClick={() => {
+      setAlertsMap(prev=>{
+        let dum = {...prev}
+        dum["bookmark_verses"] = true
+        return dum
+      })
+    }}
+    style={{marginRight:"7px"}}
+   >
+    <IonIcon icon={bookmarkOutline}></IonIcon>
    </IonButton>
   </IonButtons>
       </IonToolbar>
@@ -185,7 +210,6 @@ function Text(){
                     verse = verse['parts'][verseKeyParts[i]]
                   }
                   verse = verse['parts']["_"+verseKeyParts[verseKeyParts.length-1]]
-                  console.log(verse)
                   dum[verseKey]["words_count"] = verse['words_count']
                   return dum
                 })
@@ -239,6 +263,33 @@ function Text(){
                   }
                   return dum
                 })
+                console.log(tempBooksMap)
+                setBooksMap(prev=>{
+                  let dum =  JSON.parse(JSON.stringify(tempBooksMap))
+                  let book = ""
+                  let chap = ""
+                  let sub_chap = ""
+                  let verse = ""
+                  for (let verseObj of Object.entries(versesMap)) {
+                    let verseKeyParts = verseObj[0].split(/[_\.]/);
+                    if(verseKeyParts.length == 3) {
+                      book=verseKeyParts[0] 
+                      chap = verseKeyParts[1]
+                      verse = "_"+verseKeyParts[2]
+                      if(!dum[book]['parts'][chap]['parts'][verse]["read"] && verseObj[1]["checked"]) dum[book]['parts'][chap]['parts'][verse]["read"] = true
+                      if(!dum[book]['parts'][chap]['parts'][verse]["read"] && !verseObj[1]["checked"]) dum[book]['parts'][chap]['parts'][verse]["read"] = false
+                    } 
+                    if(verseKeyParts.length == 4){
+                      book=verseKeyParts[0] 
+                      chap = verseKeyParts[1]
+                      sub_chap = verseKeyParts[2]
+                      verse = "_"+verseKeyParts[3]
+                      if(!dum[book]['parts'][chap]['parts'][sub_chap]['parts'][verse]["read"] && verseObj[1]["checked"]) dum[book]['parts'][chap]['parts'][sub_chap]['parts'][verse]["read"] = true
+                      if(!dum[book]['parts'][chap]['parts'][sub_chap]['parts'][verse]["read"] && !verseObj[1]["checked"]) dum[book]['parts'][chap]['parts'][sub_chap]['parts'][verse]["read"] = false
+                    }
+                  }
+                  return dum
+                })
                 setCurrentBook(prev=>{
                   let dum = {...tempCurrentBook}
                   let finalVerse = ""
@@ -257,7 +308,6 @@ function Text(){
                   }
                   if(finalVerse) {
                     finalVerse = findNextPurport(booksMap, finalVerse)
-                    console.log(finalVerse)
                     if (!finalVerse){
                       dum["name"] = ""
                       dum["part"] = ""
@@ -293,6 +343,179 @@ function Text(){
       </div>
 
     </IonModal>
+
+
+    <IonModal id="example-modal" isOpen={alertsMap["bookmark_verses"]} onDidDismiss={()=>{
+      setAlertsMap(prev => {
+        let dum = {...prev}
+        dum["bookmark_verses"] = false
+        return dum
+    })
+    }}>
+    <p style={{margin:"10px"}}>Tick the verse which you have want to bookmark</p>
+    <div className='wrapper'> 
+    {Object.entries(versesMap).map(([verseKey, verseValue]) => {
+        return (
+          <IonItem>
+            <IonLabel>{verseKey}</IonLabel>
+            <IonCheckbox checked={verseValue.bookmarked} onIonChange={(e) => {
+                setVersesMap(prev=>{
+                  let dum = {...prev}
+                  console.log(e.detail.checked)
+                  dum[verseKey]["bookmarked"] = e.detail.checked
+                  console.log(dum)
+                  return dum
+                })
+            }} />
+          </IonItem>
+        )
+    })}
+    </div> 
+      <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
+            <IonButton onClick={()=>{
+                setAlertsMap(prev => {
+                  let dum = {...prev}
+                  dum["bookmark_verses"] = false
+                  return dum
+                })
+                setVersesMap(prev=>{
+                  let dum = {...prev}
+                  for (let verse of Object.entries(versesMap)) {
+                    dum[verse[0]]["bookmarked"] = false
+                  }
+                  return dum
+                })
+            }}>Cancel</IonButton> 
+            <IonButton onClick={()=>{
+                setAlertsMap(prev => {
+                    let dum = {...prev}
+                    dum["bookmark_verses"] = false
+                    dum["bookmark_input"] = true
+                    return dum
+                })
+            }}>Done</IonButton>
+      </div>
+
+    </IonModal>
+
+    <IonModal id="example-modal" isOpen={alertsMap["bookmark_input"]} onDidDismiss={()=>{
+      setAlertsMap(prev => {
+        let dum = {...prev}
+        dum["bookmark_input"] = false
+        return dum
+      })
+      setBookmarkInput(prev=>{
+        let dum = {...prev}
+        dum["radio"] = ""
+        dum["text"] =  ""
+        return dum
+      })
+      setVersesMap(prev=>{
+        let dum = {...prev}
+        for (let verse of Object.entries(versesMap)) {
+          dum[verse[0]]["bookmarked"] = false
+        }
+        return dum
+      })
+    }}>
+    <p style={{margin:"10px"}}>Select the bookmark folder/collection</p>
+    <div className='wrapper'>
+    <IonItem>
+        <IonInput onIonFocus={()=>{
+          setBookmarkInput(prev=>{
+            let dum = {...prev}
+            dum["radio"] = ""
+            return dum
+        })
+        }} onIonChange={(e)=>{
+            setBookmarkInput(prev=>{
+                let dum = {...prev}
+                dum["radio"] = ""
+                dum["text"] =  e.detail.value
+                return dum
+            })
+        }} type="text" placeholder="New Bookmark" value={bookmarkInput["text"]}></IonInput>
+    </IonItem>
+    {Object.keys(bookmarksMap).length > 0 ? <IonRadioGroup allowEmptySelection={true}  onIonChange={e=>{
+        setBookmarkInput(prev=>{
+          let dum = {...prev}
+          dum["radio"] = e.detail.value
+          dum["text"] =  ""
+          return dum
+      })   
+    }} value = {bookmarkInput["radio"]}>
+    {Object.keys(bookmarksMap).map((bookmarkFolder) => {
+        return (
+          <IonItem>
+            <IonLabel>{bookmarkFolder}</IonLabel>
+            <IonRadio slot="end" value={bookmarkFolder} />
+          </IonItem>
+        )
+    })}
+    </IonRadioGroup> : null}
+   
+    </div> 
+      <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
+            <IonButton onClick={()=>{
+                setAlertsMap(prev => {
+                  let dum = {...prev}
+                  dum["bookmark_input"] = false
+                  return dum
+              })
+              setBookmarkInput(prev=>{
+                let dum = {...prev}
+                dum["radio"] = ""
+                dum["text"] =  ""
+                return dum
+              })
+              setVersesMap(prev=>{
+                let dum = {...prev}
+                for (let verse of Object.entries(versesMap)) {
+                  dum[verse[0]]["bookmarked"] = false
+                }
+                return dum
+              })
+            }}>Cancel</IonButton> 
+            <IonButton onClick={()=>{
+                if(!bookmarkInput["radio"] && !bookmarkInput["text"]) setToast("bookmark_input")
+                setAlertsMap(prev => {
+                    let dum = {...prev}
+                    dum["bookmark_input"] = false
+                    return dum
+                })
+                setBookmarksMap((prev)=>{
+                  let dum = {...prev}
+                  let bookmark_folder_name = bookmarkInput["radio"]
+                  if(bookmarkInput["text"]) {
+                    bookmark_folder_name = bookmarkInput["text"]
+                    dum[bookmark_folder_name] = {"children": [], "isChecked": false}
+                  }  
+                  for (let verse of Object.entries(versesMap)) {
+                    console.log(verse)
+                    if(verse[1]["bookmarked"]) dum[bookmark_folder_name]["children"].push({"name": verse[0], "type": "verse", "isChecked": false})
+                  }
+                  return dum 
+                })
+
+                setBookmarkInput(prev=>{
+                  let dum = {...prev}
+                  dum["radio"] = ""
+                  dum["text"] =  ""
+                  return dum
+                })
+                setVersesMap(prev=>{
+                  let dum = {...prev}
+                  for (let verse of Object.entries(versesMap)) {
+                    dum[verse[0]]["bookmarked"] = false
+                  }
+                  return dum
+                })
+                
+            }}>Done</IonButton>
+      </div>
+
+    </IonModal>
+    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={5000}></IonToast>
 
           </IonContent>
   </IonPage>   

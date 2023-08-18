@@ -11,6 +11,8 @@ export const IncompleteUserHistory = createContext()
 export const CurrentBook = createContext()
 export const VaniTime = createContext()
 export const ContentMode = createContext()
+export const Bookmarks = createContext()
+export const LecturesTime = createContext()
 
 export function ContextProvider({ children }) {
     const [userHistory, setUserHistory] = useLocal("user-history", {})
@@ -26,6 +28,8 @@ export function ContextProvider({ children }) {
     })
     const [vaniTime, setVaniTime] = useLocal("vani-time","00:05")
     const [contentMode, setContentMode] = useLocal("content-mode","random_audio");
+    const [bookmarksMap, setBookmarksMap] = useLocal("bookmarks", {})
+    const [lecturesTime, setLecturesTime] = useLocal("lectures-time", {"heard": 0, "total": 0})
     
 
     return (
@@ -37,7 +41,11 @@ export function ContextProvider({ children }) {
         <CurrentBook.Provider value={[currentBook, setCurrentBook]}>
         <VaniTime.Provider value={[vaniTime, setVaniTime]}>
         <ContentMode.Provider value={[contentMode, setContentMode]}>
+        <Bookmarks.Provider value={[bookmarksMap, setBookmarksMap]}>
+        <LecturesTime.Provider value={[lecturesTime, setLecturesTime]}>
             {children}
+        </LecturesTime.Provider>
+        </Bookmarks.Provider>
         </ContentMode.Provider>
         </VaniTime.Provider>
         </CurrentBook.Provider>
