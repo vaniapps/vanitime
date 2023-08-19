@@ -93,7 +93,7 @@ function Book() {
             <IonHeader>
             <IonToolbar>
                 <IonButtons slot="start">
-                    <IonLabel style={{ marginLeft: "10px" }}>{key}</IonLabel>
+                    <IonLabel style={{ marginLeft: "10px" }}>{key.replace(/_/g, " ")}</IonLabel>
                 </IonButtons>
                 {!markRead && !markUnread ? (
                     <IonButtons

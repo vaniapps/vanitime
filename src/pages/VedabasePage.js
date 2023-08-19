@@ -130,7 +130,7 @@ function Vedabase() {
                 history.push(`/lectureindex/year`)
             }}>
                 <IonCardContent style={{"textAlign": "center", paddingTop: "20px", paddingBottom:"5px"}}>
-                    <IonCardTitle style={{"textAlign": "center", color:"black"}}><IonLabel>Lectures by Year</IonLabel></IonCardTitle>
+                    <IonCardTitle style={{"textAlign": "center"}}><IonLabel>Lectures by Year</IonLabel></IonCardTitle>
                     <div style={{display:"flex", justifyContent:"space-between"}}>
                     <IonLabel>{formatMinutes(lecturesTime.heard)} ({Math.floor((lecturesTime.heard/lecturesTime.total)*100)}%)</IonLabel>
                     <IonLabel>{formatMinutes(lecturesTime.total)}</IonLabel>
@@ -147,7 +147,7 @@ function Vedabase() {
                 </IonCardContent>
             </IonCard>
             <IonCard onClick={()=>{
-                history.push(`${path}/lectureindex/place`)
+                history.push(`/lectureindex/place`)
             }}>
                 <IonCardContent style={{"textAlign": "center", paddingTop: "25px", paddingBottom:"25px"}}>
                 <IonCardTitle><IonLabel style={{"textAlign": "center"}}>Lectures by Place</IonLabel></IonCardTitle>

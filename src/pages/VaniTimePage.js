@@ -13,6 +13,7 @@ import '../styles.css';
 import findRandomLecture from '../scripts/findRandomLecture';
 import findRandomPurports from '../scripts/findRandomPurports';
 import findNextPurports from '../scripts/findNextPurports';
+import { formatVaniTime } from "../scripts/durationToMinutes";
 import { useContext } from 'react';
 import { Books, ContentMode, CurrentBook, Lectures, VaniTime, WordsPerMin } from '../context';
 import { chevronDownSharp } from 'ionicons/icons';
@@ -100,7 +101,7 @@ function VaniTimePage(){
      <IonPage>
       <IonHeader>
         <IonToolbar>
-            <IonSegment onIonChange={(e)=>{
+            <IonSegment  onIonChange={(e)=>{
                 setContentMode(e.detail.value);
             }} value={contentMode}>
 
@@ -119,9 +120,9 @@ function VaniTimePage(){
                 <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
                 <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
        
-        <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Select Vani Time: (HH:MM)</div>
+        <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Select Vani Time: {formatVaniTime(vaniTime)}</div>
     
-      <IonDatetime style={{display:"flex", justifyContent: "center"}} size='cover' value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
+      <IonDatetime color={"primary"} style={{display:"flex", justifyContent: "center"}} size='cover' value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
        setVaniTime(e.detail.value);
       }}>
       </IonDatetime>
@@ -498,7 +499,7 @@ function VaniTimePage(){
                 <IonLabel>Duration: {currentContent[2]} Minutes</IonLabel>
               </div>
               <div style={{marginBottom:"10px"}}>
-                <IonLabel>Details: {currentContent[0]}</IonLabel>
+                <IonLabel>Details: {`${currentContent[0]}`.replace(/_/g, " ")}</IonLabel>
               </div>
               </div>
             <div style={{display:"flex", justifyContent:"space-evenly"}}>
@@ -530,8 +531,8 @@ function VaniTimePage(){
               {currentContent.map(verse => {
                 return (
                     <IonItem>
-                        <IonLabel>{verse[0]} </IonLabel>
-                        <IonNote>{Math.round(verse[2]/wordsPerMin)} Min</IonNote>
+                        <IonLabel>{`${verse[0]}`.replace(/_/g, " ")} </IonLabel>
+                        <IonNote>{Math.ceil(verse[2]/wordsPerMin)} Min</IonNote>
                     </IonItem>
                 )
               })}

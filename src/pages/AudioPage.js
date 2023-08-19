@@ -4,7 +4,7 @@ import { useEffect, useState, useContext } from 'react';
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import axios from 'axios';
 import { checkboxOutline, chevronBackOutline, bookmarkOutline } from 'ionicons/icons';
-import { Bookmarks, IncompleteUserHistory, Lectures, UserHistory } from '../context';
+import { Bookmarks, CurrentLecture, IncompleteUserHistory, Lectures, Settings, UserHistory } from '../context';
 import minutesToMinutes from '../scripts/durationToMinutes';
 
 function Audio(){
@@ -13,7 +13,6 @@ function Audio(){
     let history = useHistory();
     const [htmlContent, setHtmlContent] = useState('');
     const [incompleteUserHistory, setIncompleteUserHistory] = useContext(IncompleteUserHistory)
-    const [isGoBack, setIsGoBack] = useState(false)  
     const [alertsMap, setAlertsMap] = useState({
         "user_history": false,
         "bookmark_input": false
@@ -28,6 +27,8 @@ function Audio(){
     const [toastMessageMap, setToastMessageMap] = useState({
         "bookmark_input": "Please select a boomark folder/input a new boomark folder name"
     })
+    const [currentLecture, setCurrentLecture] = useContext(CurrentLecture)
+    const [settings, setSettings] = useContext(Settings)
 
     const parseXmlToHtml = (xmlData) => {
         const parser = new DOMParser();
@@ -36,7 +37,9 @@ function Audio(){
         let textContent = xmlDoc.querySelector('text').textContent;
         textContent = textContent.slice(textContent.indexOf("<div class=\"code\">"))
         textContent = textContent.slice(0, textContent.indexOf("<!--"))
+        textContent = textContent.replace(/href="\/(?!wiki\/(BG|SB|CC))[^"]+/g, "")
         textContent = textContent.replace(/\/wiki/g, "/purports")
+        textContent = textContent.replace(/_\(1972\)/g, "")
         const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
         return htmlData;
     }
@@ -53,26 +56,12 @@ function Audio(){
         }
     };
         fetchData();
-        setIncompleteUserHistory(true)
+        if(settings.check_alerts != "never") setIncompleteUserHistory("lecture")
         setTempLecturesMap(JSON.parse(JSON.stringify(lectureMap)))
+        setCurrentLecture(key)
     },[])
 
-    function goback() {
-        if(incompleteUserHistory){
-        setIsGoBack(true)
-        setAlertsMap(prev=>{
-          let dum = {...prev}
-          dum["user_history"] = true
-          return dum
-        })
-        }else {
-          if(history.length > 1){
-            history.goBack()
-          }else{
-            history.push("/")
-          }
-        }
-       }
+
 
 
 
@@ -81,13 +70,19 @@ function Audio(){
     <IonHeader>
     <IonToolbar>
     <IonButtons slot="start">
-    <IonButton style={{ fontSize:"20px"}} onClick={goback}>
+    <IonButton style={{ fontSize:"20px"}} onClick={()=>{
+            if(history.length > 1){
+              history.goBack()
+            }else{
+              history.push("/")
+            }
+    }}>
     <IonIcon icon={chevronBackOutline}></IonIcon>
     </IonButton>
     </IonButtons>
     <IonButtons style={{"width": "70%"}} slot="start">
-      <IonItem lines="none">
-    <IonLabel >{key}</IonLabel>
+      <IonItem style={{color:"#ffffff"}} lines="none">
+    <IonLabel >{key.replace(/_/g, " ")}</IonLabel>
     </IonItem>
     </IonButtons>
     <IonButtons slot="end">
@@ -124,7 +119,7 @@ function Audio(){
        
     
       {htmlContent ?
-      <div dangerouslySetInnerHTML={{ __html: htmlContent }} /> : <div style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}
+      <div style={{"fontSize":settings.font_size}}><div dangerouslySetInnerHTML={{ __html: htmlContent }} /></div> : <div style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}
     
     <IonModal id="example-modal" isOpen={alertsMap["user_history"]} onDidDismiss={()=>{
       setAlertsMap(prev => {
@@ -135,7 +130,7 @@ function Audio(){
     }}>
     <div style={{textAlign:"center", marginTop:"10px"}}>Have heard the Lecture?</div>
     <div className='wrapper'> 
-    <p>{key}</p>
+    <p>{key.replace(/_/g, " ")}</p>
     </div> 
       <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
             <IonButton onClick={()=>{
@@ -163,15 +158,8 @@ function Audio(){
               let dum = JSON.parse(JSON.stringify(tempLectureMap))
               return dum
            })
-              if(isGoBack) {
-                if(history.length > 1){
-                  history.goBack()
-                }else{
-                  history.push("/")
-                }
-              }
               setLectureListend(false)
-              setIncompleteUserHistory(false)
+              if(settings.check_alerts == "manual") setIncompleteUserHistory("")
             }}>Not Listend</IonButton> 
             <IonButton onClick={()=>{
                 setAlertsMap(prev => {
@@ -215,14 +203,8 @@ function Audio(){
                     })
                 }
                 setLectureListend(true)
-                setIncompleteUserHistory(false)
-                if(isGoBack) {
-                  if(history.length > 1){
-                    history.goBack()
-                  }else{
-                    history.push("/")
-                  }
-                }
+                if(settings.check_alerts == "manual") setIncompleteUserHistory("")
+               
             }}>Listend</IonButton>
       </div>
 

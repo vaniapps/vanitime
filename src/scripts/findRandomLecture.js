@@ -55,9 +55,13 @@ function binarySearch(arr, target) {
 	  }
 	}
 
+	if(left<=0) return arr[0]
+	if(left >= arr.length-1) return arr[arr.length-1]
+
+
 	if(arr[left][2] < target) return arr[left]
-	if(left != 0) return arr[left-1]
-	return arr[left]
+	return arr[left-1]
+
 }
 
 

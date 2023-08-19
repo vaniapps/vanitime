@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import axios from 'axios';
 import '../styles.css';
-import { Bookmarks, Books, CurrentBook, IncompleteUserHistory, UserHistory } from '../context';
+import { Bookmarks, Books, CurrentBook, CurrentVersesMap, IncompleteUserHistory, Settings, UserHistory, VersesMap } from '../context';
 import { arrowDownOutline, arrowUpOutline, checkboxOutline, chevronBackOutline, bookmarkOutline } from 'ionicons/icons';
 import {findNextPurport, findPreviousPurport} from "../scripts/findNextPurports"
 import { Plugins, Capacitor } from "@capacitor/core";
@@ -24,15 +24,16 @@ function Text(){
     "bookmark_input": false
   })
   const [incompleteUserHistory, setIncompleteUserHistory] = useContext(IncompleteUserHistory)
-  const [isGoBack, setIsGoBack] = useState(false)
   const [currentBook, setCurrentBook] = useContext(CurrentBook)
   const [tempCurrentBook, setTempCurrentBook] = useState({})
   const [bookmarksMap, setBookmarksMap] = useContext(Bookmarks)
   const [bookmarkInput, setBookmarkInput] = useState({"radio": "", "text": ""})
   const [toast, setToast] = useState("false")
+  const [settings, setSettings] = useContext(Settings)
   const [toastMessageMap, setToastMessageMap] = useState({
       "bookmark_input": "Please select a boomark folder/input a new boomark folder name"
   })
+  const [currentVersesMap, setCurrentVersesMap] = useContext(CurrentVersesMap)
 
   const parseXmlToHtml = (xmlData) => {
       const parser = new DOMParser();
@@ -41,9 +42,12 @@ function Text(){
       let textContent = xmlDoc.querySelector('text').textContent;
       textContent = textContent.slice(textContent.indexOf("<h4><span class"))
       textContent = textContent.slice(0, textContent.indexOf("<div style=\"float:right"))
+      textContent = textContent.replace(/href="\/(?!wiki\/(BG|SB|CC))[^"]+/g, "")
       textContent = textContent.replace(/\/wiki/g, "/purports")
+      textContent = textContent.replace(/_\(1972\)/g, "")
       textContent = textContent.replace(/<p><br \/>\n<\/p>/g, "")
-      const htmlData = textContent.replace(/"/g, ''); // Remove surrounding quotes
+      textContent = textContent.replace(/h4/g, 'dl'); // Remove surrounding quotes
+      const htmlData = textContent.replace(/"/g, '');
       return htmlData;
   }
   
@@ -56,56 +60,41 @@ function Text(){
       }
     }
     setVersesMap(dumVersesMap)
-      setIncompleteUserHistory(true)
+      if(settings.check_alerts != "never") setIncompleteUserHistory("purports")
       setTempCurrentBook(JSON.parse(JSON.stringify(currentBook)))
       setTempBooksMap(JSON.parse(JSON.stringify(booksMap)))
-      console.log("chanignf")
   },[])
+
 
   useEffect(()=>{
     
     const fetchData = async () => {
       try {
         console.log("fetching....")
-        const fetchPromises = Object.keys(versesMap).map(verse => axios.get("https://vanisource.org/w/api.php?action=parse&prop=text&format=xml&page="+verse));
+        const fetchPromises = Object.keys(versesMap).map(verse => {
+          return axios.get("https://vanisource.org/w/api.php?action=parse&prop=text&format=xml&page="+verse)
+        } );
         const responses = await Promise.all(fetchPromises);
   
         const parsedHtmlContents = responses.map(response => {
           const xmlData = response.data;
           return parseXmlToHtml(xmlData);
         });
-        setHtmlContent(parsedHtmlContents);
+        setHtmlContent(parsedHtmlContents.join(' <br /> '));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
     fetchData();
-  }, [Object.entries(versesMap).length])
+  }, [Object.keys(versesMap).length])
 
-  function goback() {
-    if(incompleteUserHistory){
-    setIsGoBack(true)
-    setAlertsMap(prev=>{
-      let dum = {...prev}
-      dum["user_history"] = true
-      return dum
-    })
-    }else {
-      if(history.length > 1){
-        history.goBack()
-      }else{
-        history.push("/")
-      }
-    }
-   }
+  useEffect(()=>{
+    setCurrentVersesMap(JSON.parse(JSON.stringify(versesMap)))
+  },[versesMap])
 
-   useEffect(() => {
-    if (Capacitor.isNative) {
-     Plugins.App.addListener("backButton", (e) => {
-      goback()
-     });
-    }
-   }, []);
+
+
+
 
 
 
@@ -114,13 +103,19 @@ function Text(){
     <IonHeader>
       <IonToolbar>
     <IonButtons slot="start">
-    <IonButton onClick={goback}>
+    <IonButton onClick={()=>{
+            if(history.length > 1){
+              history.goBack()
+            }else{
+              history.push("/")
+            }
+    }}>
     <IonIcon icon={chevronBackOutline}></IonIcon>
     </IonButton>
     </IonButtons>
     <IonButtons style={{"width": "80%"}} slot="start">
-      <IonItem lines='none'> 
-    <IonLabel >{key.split(",")[0]}{key.split(",").length > 1 ? " to "+key.split(",")[key.split(",").length - 1] : ""}</IonLabel>
+      <IonItem style={{color:"#ffffff"}} lines='none'> 
+    <IonLabel >{key.split(",")[0].replace(/_/g, " ")}{key.split(",").length > 1 ? " to "+key.split(",")[key.split(",").length - 1].replace(/_/g, " ") : ""}</IonLabel>
     </IonItem>
     </IonButtons>
     <IonButtons slot="end">
@@ -162,10 +157,10 @@ function Text(){
           let dum={ ...prevVerse ,...prev}
           return dum
         })
-      }}><IonLabel>{Object.entries(versesMap).length > 0 ? findPreviousPurport(booksMap,  Object.entries(versesMap)[0][0]) : ""}</IonLabel>
+      }} style={{"backgroundColor": settings.theme == "light" ? "#DDDDDD" : "#E0E0E0"}}><IonLabel>{Object.entries(versesMap).length > 0 ? findPreviousPurport(booksMap,  Object.entries(versesMap)[0][0]).replace(/_/g, " ") : ""}</IonLabel>
       <IonIcon icon={arrowUpOutline}></IonIcon>
       </IonChip> : null}
-    <div>
+    <div style={{"fontSize":settings.font_size}}>
      
       <div dangerouslySetInnerHTML={{ __html: htmlContent }} /> 
     </div>
@@ -177,7 +172,7 @@ function Text(){
           let dum={...prev, ...nextVerse}
           return dum
         })
-      }}><IonLabel>{Object.entries(versesMap).length > 0 ? findNextPurport(booksMap,  Object.entries(versesMap)[Object.entries(versesMap).length - 1][0]) : ""}</IonLabel>
+      }} style={{"backgroundColor": settings.theme == "light" ? "#DDDDDD" : "#E0E0E0"}}><IonLabel>{Object.entries(versesMap).length > 0 ? findNextPurport(booksMap,  Object.entries(versesMap)[Object.entries(versesMap).length - 1][0]).replace(/_/g, " ") : ""}</IonLabel>
       <IonIcon icon={arrowDownOutline}></IonIcon>
       </IonChip> : null}
       </div>
@@ -195,7 +190,7 @@ function Text(){
     {Object.entries(versesMap).map(([verseKey, verseValue]) => {
         return (
           <IonItem>
-            <IonLabel>{verseKey}</IonLabel>
+            <IonLabel>{verseKey.replace(/_/g, " ")}</IonLabel>
             <IonCheckbox checked={verseValue.checked} onIonChange={(e) => {
                 setVersesMap(prev=>{
                   let dum = {...prev}
@@ -331,14 +326,8 @@ function Text(){
                   return dum
 
                 })
-                if(isGoBack) {
-                  if(history.length > 1){
-                    history.goBack()
-                  }else{
-                    history.push("/")
-                  }
-                }
-                setIncompleteUserHistory(false)
+  
+                if(settings.check_alerts == "manual") setIncompleteUserHistory("")
             }}>Done</IonButton>
       </div>
 
@@ -357,7 +346,7 @@ function Text(){
     {Object.entries(versesMap).map(([verseKey, verseValue]) => {
         return (
           <IonItem>
-            <IonLabel>{verseKey}</IonLabel>
+            <IonLabel>{verseKey.replace(/_/g, " ")}</IonLabel>
             <IonCheckbox checked={verseValue.bookmarked} onIonChange={(e) => {
                 setVersesMap(prev=>{
                   let dum = {...prev}

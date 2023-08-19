@@ -155,7 +155,7 @@ function BookmarkList() {
         <>
         {reo ? <IonReorder>
         <IonItem>
-         <IonLabel>{child["name"]}</IonLabel>
+         <IonLabel>{child["name"].replace(/_/g, " ")}</IonLabel>
          <IonIcon icon={reorderThreeOutline} />
         </IonItem>
         </IonReorder> :  <IonItem
@@ -166,7 +166,7 @@ function BookmarkList() {
           }
          }}
         >
-         <IonLabel>{child["name"]}</IonLabel>  
+         <IonLabel>{child["name"].replace(/_/g, " ")}</IonLabel>  
          {select ? (
           <IonCheckbox
            checked={child.isChecked}

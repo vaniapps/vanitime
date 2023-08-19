@@ -66,6 +66,17 @@ export function formatMinutes(duration) {
 	  }
   }
 
+  export function formatVaniTime(duration) {
+	const [hours, minutes] = duration.split(":");
+	
+	if (parseInt(hours) === 0) {
+	  return `${minutes} minutes`;
+	} else {
+	  return `${hours.padStart(2, "0")}h:${minutes}m`;
+	}
+  }
+  
+
 export function convertTo12HourFormat(time24) {
 	const [hours, minutes] = time24.split(":");
   	const parsedHours = parseInt(hours);

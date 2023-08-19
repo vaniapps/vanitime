@@ -6,7 +6,7 @@ import { chevronBackCircle, chevronDownOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
-import { UserHistory, WordsPerMin } from '../context';
+import { Settings, UserHistory, WordsPerMin } from '../context';
 import { useLocal } from '../lshooks';
 import '../styles.css';
 import Highcharts from 'highcharts';
@@ -24,7 +24,10 @@ function Stats(){
     const [currentGraphList, setCurrentGraphList] = useState([]);
     const [currentMode, setCurrentMode] = useState("all")
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
+    const [settings, setSettings] = useContext(Settings)
     const modal = useRef(null);
+    let primaryColor = settings.theme == "light" ? "#1e90ff" : "#3498db"
+    let textColor = settings.theme == "light" ? "#000000" : "#ffffff"
     function modalDismiss() {
         modal.current?.dismiss();
     }
@@ -197,21 +200,35 @@ function Stats(){
     },[goal])
     function valueToColor(value, maxValue) {
         // Calculate lightness value (ranging from 0 to 100) based on the given value and maxValue
-        if(value <= 0) {
-            return { backgroundColor: "#ffffff", textColor: "#000000" };
+        if(settings.theme == "light"){
+            if(value <= 0) {
+                return { backgroundColor: "#ffffff", textColor: "#000000" };
+            }
+            if(value>=maxValue) {
+                return { backgroundColor: primaryColor, textColor: "#ffffff" };
+            }
+            if (value > 0) {
+                return { backgroundColor: "#CCEEFF", textColor: "#000000" };
+            }
         }
-        if(value>=maxValue) {
-            return { backgroundColor: "#0088FF", textColor: "#ffffff" };
-        }
-        if (value > 0) {
-            return { backgroundColor: "#CCEEFF", textColor: "#000000" };
+
+        if(settings.theme == "dark"){
+            if(value <= 0) {
+                return { backgroundColor: "#121212", textColor: "#ffffff" };
+            }
+            if(value>=maxValue) {
+                return { backgroundColor: primaryColor, textColor: "#ffffff" };
+            }
+            if (value > 0) {
+                return { backgroundColor: "#CCEEFF", textColor: "#000000" };
+            }
         }
     }
 
     const ParentBar = {
         height: 10,
         width: '100%',
-        backgroundColor: 'whitesmoke',
+        backgroundColor: settings.theme == "light" ? "#DDDDDD" : "#444444",
         borderRadius: 0,
         margin: 0,
         position:"relative"
@@ -224,7 +241,8 @@ function Stats(){
               scrollablePlotArea: {
                 minWidth: currentGraphList.length * 15,
                 scrollPositionX: 10
-              }
+              },
+              backgroundColor: 'transparent'
             },
             title: {
                 text: '', // Set the title text to an empty string
@@ -236,16 +254,27 @@ function Stats(){
               min:0,
               max: currentGraphList.length-1,
               labels: {
-                overflow: 'justify'
+                overflow: 'justify',
+                style: {
+                    color: textColor // Set the color for the xAxis labels
+                }
               }
             },
             yAxis: {
               tickWidth: 1,
               title: {
-                text: 'Minutes'
+                text: 'Minutes',
+                style: {
+                    color: textColor // Set the color for the xAxis labels
+                }
               },
               lineWidth: 1,
-              opposite: true
+              opposite: true,
+              labels: {
+                style: {
+                    color: textColor // Set the color for the xAxis labels
+                }
+              }
             },
             tooltip: {
               valueSuffix: ' minutes',
@@ -350,7 +379,7 @@ function Stats(){
                             
                             <div style={{display:"flex", justifyContent:"space-between", marginBottom:"2px"}}>
                             <div style={{marginRight:"5px"}}>{formatMinutes3(dayList.length ? dayList[dayList.length-1]['duration'] : 0)}</div>
-                            <div style={{textAlign:"center"}}>
+                            <div style={{textAlign:"center", color:textColor}}>
                                 Day Goal
                             </div>
                             <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["day"])}</div>
@@ -359,7 +388,7 @@ function Stats(){
                             <div style={{
                                 height: '100%',
                                 width: dayList.length ? dayList[dayList.length-1]['duration']/currentGoal["day"] < 1 ? (dayList[dayList.length-1]['duration']/currentGoal["day"])*100+"%" : "100%" : 0,
-                                backgroundColor: "#0088FF",
+                                backgroundColor: primaryColor,
                                 borderRadius: 0,
                                 textAlign: 'right',
                                 display:"flex",
@@ -376,7 +405,7 @@ function Stats(){
                            
                             <div style={{display:"flex", justifyContent:"space-between", marginTop:"20px", marginBottom:"2px"}}>
                             <div style={{marginRight:"5px"}}>{formatMinutes3(weekList.length ? weekList[weekList.length-1]['duration'] : 0)}</div>
-                            <div style={{textAlign:"center"}}>
+                            <div style={{textAlign:"center", color:textColor}}>
                                 Week Goal
                             </div>
                             <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["week"])}</div>
@@ -385,7 +414,7 @@ function Stats(){
                             <div style={{
                                 height: '100%',
                                 width: weekList.length ? weekList[weekList.length-1]['duration']/currentGoal["week"] < 1 ? (weekList[weekList.length-1]['duration']/currentGoal["week"])*100+"%" : "100%" : 0,
-                                backgroundColor: "#0088FF",
+                                backgroundColor: primaryColor,
                                 borderRadius: 0,
                                 textAlign: 'right',
                                 display:"flex",
@@ -400,7 +429,7 @@ function Stats(){
                             
                             <div style={{display:"flex", justifyContent:"space-between", marginTop:"20px", marginBottom:"2px"}}>
                             <div style={{marginRight:"5px"}}>{formatMinutes3(monthList.length ? monthList[monthList.length-1]['duration'] : 0)}</div>
-                            <div style={{textAlign:"center"}}>
+                            <div style={{textAlign:"center", color:textColor}}>
                                 Month Goal
                             </div>
                             <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["month"])}</div>
@@ -409,7 +438,7 @@ function Stats(){
                             <div style={{
                                 height: '100%',
                                 width: monthList.length ? monthList[monthList.length-1]['duration']/currentGoal["month"] < 1 ? (monthList[monthList.length-1]['duration']/currentGoal["month"])*100+"%" : "100%" : 0,
-                                backgroundColor: "#0088FF",
+                                backgroundColor: primaryColor,
                                 borderRadius: 0,
                                 textAlign: 'right',
                                 display:"flex",

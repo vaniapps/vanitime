@@ -1,3 +1,7 @@
+
+
+
+
 ion-modal#example-modal {
     --width: fit-content;
     --min-width: 250px;
@@ -23,19 +27,71 @@ ion-modal#example-modal {
     height: 400px;
   }
 
-  ion-segment-button {
-    --indicator-color: #fff;
+  ion-card {
+    box-shadow: var(--ion-box-shadow)
+  }
+
+  ion-datetime {
+    --background: var(--ion-background-color);
+    --background-rgb: var(--ion-background-rgb);
+    --wheel-highlight-background: var(--ion-color-primary);
   }
   
-  /* Material Design styles */
-  ion-segment-button.md {
-    --color: #000;
-    --color-checked: #3880ff;
-    --indicator-height: 4px;
-  }
+
   
-  /* iOS styles */
-  ion-segment-button.ios {
-    --color: #000;
-    --color-checked: #3880ff;
+  ion-datetime::part(wheel-item active) {
+    color: rgba(255, 255, 255);
   }
+
+  ion-item {
+    --background: rgba(0, 0, 0, 0); /* Fully transparent background */
+  }
+
+  ion-checkbox::part(container) {
+    border-radius: 6px;
+    border: var(--ion-border);
+  }
+
+ion-toggle::part(track),
+ion-toggle.toggle-checked::part(track) {
+  
+  border: var(--ion-border);
+  
+}
+
+ion-card-title {
+  white-space: nowrap;        /* Prevent text from wrapping */
+  overflow: hidden;           /* Hide any overflowing content */
+  text-overflow: ellipsis;    /* Show ellipsis (...) when content overflows */
+  max-width: 100%;            /* Limit the width of the container */
+  font-size: 25px;            /* Initial font size */
+}
+
+audio {
+  background-color: var(--ion-color-primary);
+  width: 100%;
+  display: block;
+}
+
+audio::-webkit-media-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+audio::-webkit-media-controls-panel {
+  background-color: var(--ion-color-primary);
+  padding: 0;
+}
+
+
+
+audio::-webkit-media-controls-timeline {
+  background-color: var(--ion-color-primary);
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+  font-size: 14px;
+  color: #333;
+}

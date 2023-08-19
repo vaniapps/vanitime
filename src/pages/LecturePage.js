@@ -117,7 +117,7 @@ function Lecture() {
             <IonHeader>
             <IonToolbar>
                 <IonButtons slot="start">
-                    <IonLabel style={{ marginLeft: "10px" }}>{key}</IonLabel>
+                    <IonLabel style={{ marginLeft: "10px" }}>{key.replace(/:/g, " - ")}</IonLabel>
                 </IonButtons>
                 {!markRead && !markUnread ? (
                     <IonButtons
