@@ -6,7 +6,7 @@ import { chevronBackCircle, chevronDownOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
-import { Settings, UserHistory, WordsPerMin } from '../context';
+import { Goal, Settings, UserHistory, WordsPerMin } from '../context';
 import { useLocal } from '../lshooks';
 import '../styles.css';
 import Highcharts from 'highcharts';
@@ -33,33 +33,11 @@ function Stats(){
     }
     const [toast, setToast] = useState("false")
     const [toastMessageMap, setToastMessageMap] = useState({
-        "input": "Please give the inputs"
+        "input": "Please give valid inputs"
     })
    
-    const [goal, setGoal] = useLocal("goal", {
-        "books" : {
-                    "day": -1,
-                    "week": -1,
-                    "month": -1
-                },
-        "lectures": {
-            "day": -1,
-            "week": -1,
-            "month": -1
-        }
-    })
-    const [tempGoal, setTempGoal] = useState({
-        "books" : {
-            "day": -1,
-            "week": -1,
-            "month": -1
-        },
-        "lectures": {
-            "day": -1,
-            "week": -1,
-            "month": -1
-        }
-    })
+    const [goal, setGoal] = useContext(Goal)
+    const [tempGoal, setTempGoal] = useState(JSON.parse(JSON.stringify(goal)))
     const [currentGoal, setCurrentGoal] = useState({
         "day": 0,
         "week": 0,
@@ -398,7 +376,7 @@ function Stats(){
                             }}>
                                 <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
                                 left:dayList.length ? dayList[dayList.length-1]['duration']/currentGoal["day"] < 1 ? ((dayList[dayList.length-1]['duration']/currentGoal["day"])*100-4.5)+"%" : "95.5%" : "-4.5%"
-                                }}>{dayList.length ? Math.round((dayList[dayList.length-1]['duration']/currentGoal["day"])*100) : 0}%</div>
+                                }}>{dayList.length && currentGoal["day"] >0 ? Math.round((dayList[dayList.length-1]['duration']/currentGoal["day"])*100) : 0}%</div>
                             </div>
                           
                             </div>
@@ -423,7 +401,7 @@ function Stats(){
                             }}>
                                 <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
                                 left:weekList.length ? weekList[weekList.length-1]['duration']/currentGoal["week"] < 1 ? ((weekList[weekList.length-1]['duration']/currentGoal["week"])*100-4.5)+"%" : "95.5%" : "-4.5%"
-                                }}>{weekList.length ? Math.round((weekList[weekList.length-1]['duration']/currentGoal["week"])*100) : 0}%</div>
+                                }}>{weekList.length && currentGoal["week"] >0 ? Math.round((weekList[weekList.length-1]['duration']/currentGoal["week"])*100) : 0}%</div>
                             </div>
                             </div>
                             
@@ -447,7 +425,7 @@ function Stats(){
                             }}>
                                 <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
                                 left:monthList.length ? monthList[monthList.length-1]['duration']/currentGoal["month"] < 1 ? ((monthList[monthList.length-1]['duration']/currentGoal["month"])*100-4.5)+"%" : "95.5%" : "-4.5%"
-                                }}>{monthList.length ? Math.round((monthList[monthList.length-1]['duration']/currentGoal["month"])*100) : 0}%</div>
+                                }}>{monthList.length && currentGoal["month"] >0 ? Math.round((monthList[monthList.length-1]['duration']/currentGoal["month"])*100) : 0}%</div>
                             </div>
                             </div> </> : 
                             <div style={{display:"flex", justifyContent:"space-around"}}>
@@ -533,7 +511,7 @@ function Stats(){
                     <div style={{textAlign:"center", marginTop:"10px"}}>Input the Goals</div>
                     <IonList>
                         <IonItem>
-                            <IonInput label="Lectures Daily Goal" onIonChange={(e)=>{
+                            <IonInput label="Lectures Daily Goal:" onIonChange={(e)=>{
                                 setTempGoal(prev=>{
                                     let dum = {...prev}
                                     dum["lectures"]["day"] = e.detail.value * 1
@@ -541,10 +519,10 @@ function Stats(){
                                     dum["lectures"]["month"] = e.detail.value * 30
                                     return dum
                                 })
-                            }} type="number" placeholder="in minutes"></IonInput>
+                            }} type="number" min='0' placeholder="in minutes"></IonInput>
                         </IonItem>
                         <IonItem>
-                            <IonInput label="Books Daily Goal" onIonChange={(e)=>{
+                            <IonInput label="Books Daily Goal:" onIonChange={(e)=>{
                                 setTempGoal(prev=>{
                                     let dum = {...prev}
                                     dum["books"]["day"] = e.detail.value * 1 
@@ -552,7 +530,7 @@ function Stats(){
                                     dum["books"]["month"] = e.detail.value * 30
                                     return dum
                                 })
-                            }} type="number" placeholder="in minutes"></IonInput>
+                            }} type="number" min='0' placeholder="in minutes"></IonInput>
                         </IonItem>
                         </IonList>
                         <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
@@ -568,7 +546,7 @@ function Stats(){
                             }}>Done</IonButton>
                       </div>
                     </IonModal>
-                    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={5000}></IonToast>
+                    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
                 </IonContent>
         </IonPage>
     

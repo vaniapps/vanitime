@@ -303,7 +303,7 @@ function Audio(){
       </div>
 
     </IonModal>
-    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={5000}></IonToast>
+    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
           </IonContent>
   </IonPage>   
   );

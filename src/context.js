@@ -17,6 +17,7 @@ export const CheckAlerts = createContext()
 export const CurrentVersesMap = createContext()
 export const CurrentLecture = createContext()
 export const Settings = createContext()
+export const Goal = createContext()
 
 export function ContextProvider({ children }) {
     const [userHistory, setUserHistory] = useLocal("user-history", {})
@@ -43,6 +44,18 @@ export function ContextProvider({ children }) {
         "font_size": "16",
         "check_alerts": "manual"
     })
+    const [goal, setGoal] = useLocal("goal", {
+        "books" : {
+                    "day": -1,
+                    "week": -1,
+                    "month": -1
+                },
+        "lectures": {
+            "day": -1,
+            "week": -1,
+            "month": -1
+        }
+    })
     
 
     return (
@@ -60,7 +73,9 @@ export function ContextProvider({ children }) {
         <CurrentVersesMap.Provider value={[currentVersesMap, setCurrentVersesMap]}>
         <CurrentLecture.Provider value={[currentLecture, setCurrentLecture]}>
         <Settings.Provider value={[settings, setSettings]}>
+        <Goal.Provider value={[goal, setGoal]}>
             {children}
+        </Goal.Provider>
         </Settings.Provider>
         </CurrentLecture.Provider>
         </CurrentVersesMap.Provider>

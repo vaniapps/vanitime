@@ -34,13 +34,13 @@ ion-modal#example-modal {
   ion-datetime {
     --background: var(--ion-background-color);
     --background-rgb: var(--ion-background-rgb);
-    --wheel-highlight-background: var(--ion-color-primary);
+    --wheel-highlight-background: #CCEEFF;
   }
   
 
   
   ion-datetime::part(wheel-item active) {
-    color: rgba(255, 255, 255);
+    color: rgba(0, 0, 0);
   }
 
   ion-item {
@@ -68,7 +68,7 @@ ion-card-title {
 }
 
 audio {
-  background-color: var(--ion-color-primary);
+  
   width: 100%;
   display: block;
 }
@@ -80,18 +80,16 @@ audio::-webkit-media-controls {
 }
 
 audio::-webkit-media-controls-panel {
-  background-color: var(--ion-color-primary);
-  padding: 0;
+  
 }
 
 
 
 audio::-webkit-media-controls-timeline {
-  background-color: var(--ion-color-primary);
+  
 }
 
 audio::-webkit-media-controls-current-time-display,
 audio::-webkit-media-controls-time-remaining-display {
-  font-size: 14px;
-  color: #333;
+  
 }
