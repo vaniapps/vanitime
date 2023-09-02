@@ -174,7 +174,7 @@ function Text(){
   
     const containerDiv = document.getElementsByClassName('content-container')[0];
     if(containerDiv){
-    containerDiv.addEventListener("mouseup", () => {
+    function onSelect(){
       const selection = window.getSelection();
       const selectedText = selection.toString();
       if(selectedText){
@@ -212,6 +212,12 @@ function Text(){
       }else {
         setShowHighlightButton(false)
       }
+    }
+    containerDiv.addEventListener("mouseup", () => {
+     onSelect()
+    });
+    containerDiv.addEventListener("touchend", () => {
+      onSelect()
     });
 
     containerDiv.addEventListener("click", (event) => {
@@ -564,7 +570,7 @@ function Text(){
       </> : <div style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}
     
       <>{showHighlightButton ?<>
-            <div style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"0", left:"0"}}>
+            <div style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"5px", left:"10px"}}>
       
             <IonFabButton onClick={()=>{
               setBookmarkType("notes")
@@ -584,7 +590,7 @@ function Text(){
             </IonFabButton>
           
           </div>
-      <div style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"0", right:"0"}}>
+      <div style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"5px", right:"10px"}}>
       
       <IonFabButton style={{marginBottom:"35px"}} onClick={()=>{
          let modidfiedTextBookmark = {...textBookmark}
@@ -645,7 +651,7 @@ function Text(){
 
     <>{editHighlightButton && !showHighlightButton ?
      
-     <div style={{display:"flex", flexDirection:"column", justifyContent: "space-evenly", alignItems:"center", position:"fixed", bottom:"0", right:"0"}}>
+     <div style={{display:"flex", flexDirection:"column", justifyContent: "space-evenly", alignItems:"center", position:"fixed", bottom:"5px", right:"10px"}}>
       
       <IonFabButton style={{marginBottom:"35px"}} onClick={()=>{
         setBookmarksMap(prev=>{
@@ -880,7 +886,7 @@ function Text(){
       style={customStyles}
       closeTimeoutMS={200}
     >
-    <p style={{margin:"10px"}}>Tick the verse which you have want to bookmark</p>
+    <p style={{margin:"10px"}}>Tick the verse which you want to bookmark</p>
     <div className='wrapper'> 
     {Object.entries(versesMap).map(([verseKey, verseValue]) => {
         return (
