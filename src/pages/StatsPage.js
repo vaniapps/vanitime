@@ -7,10 +7,12 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import { Goal, Settings, UserHistory, WordsPerMin } from '../context';
-import { useLocal } from '../lshooks';
+import { useLocal, useLocalr } from '../lshooks';
 import '../styles.css';
 import Highcharts from 'highcharts';
 import { formatMinutes, formatMinutes2, formatMinutes3 } from "../scripts/durationToMinutes";
+import Modal from 'react-modal';
+
 
 function Stats(){
     const [viewRange, setViewRange] = useState("Today")
@@ -22,7 +24,7 @@ function Stats(){
     const [yearList, setYearList] = useState([]);
     const [currentList, setCurrentList] = useState([]);
     const [currentGraphList, setCurrentGraphList] = useState([]);
-    const [currentMode, setCurrentMode] = useState("all")
+    const [currentMode, setCurrentMode] = useLocal("stats-mode","all")
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
     const [settings, setSettings] = useContext(Settings)
     const modal = useRef(null);
@@ -35,6 +37,9 @@ function Stats(){
     const [toastMessageMap, setToastMessageMap] = useState({
         "input": "Please give valid inputs"
     })
+    const [alertsMap, setAlertsMap] = useState({
+        "goals": false
+    })
    
     const [goal, setGoal] = useContext(Goal)
     const [tempGoal, setTempGoal] = useState(JSON.parse(JSON.stringify(goal)))
@@ -45,6 +50,30 @@ function Stats(){
     })
     let { path, url } = useRouteMatch();
     let history = useHistory();
+    const customStyles = {
+        content: {
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          marginRight: '-50%',
+          transform: 'translate(-50%, -50%)',
+          width: "90%",
+          maxWidth: "400px",
+          padding: 0,
+          backgroundColor: settings.theme == "light" ? "#ffffff" : "#121212",
+          color: settings.theme == "light" ? "black" :  "#ffffff",
+          borderColor: settings.theme == "light" ? "#ffffff" : "#121212"
+        },
+        overlay: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)"
+        }
+      };
     
     
    
@@ -356,11 +385,11 @@ function Stats(){
                             <>
                             
                             <div style={{display:"flex", justifyContent:"space-between", marginBottom:"2px"}}>
-                            <div style={{marginRight:"5px"}}>{formatMinutes3(dayList.length ? dayList[dayList.length-1]['duration'] : 0)}</div>
+                            <div style={{marginRight:"5px", width:"75px"}}>{formatMinutes3(dayList.length ? dayList[dayList.length-1]['duration'] : 0)}</div>
                             <div style={{textAlign:"center", color:textColor}}>
-                                Day Goal
+                                Today's Goal
                             </div>
-                            <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["day"])}</div>
+                            <div style={{marginLeft:"5px",  width:"75px", textAlign:"right"}}>{formatMinutes3(currentGoal["day"])}</div>
                             </div>
                             <div style={ParentBar}>
                             <div style={{
@@ -382,11 +411,11 @@ function Stats(){
                             </div>
                            
                             <div style={{display:"flex", justifyContent:"space-between", marginTop:"20px", marginBottom:"2px"}}>
-                            <div style={{marginRight:"5px"}}>{formatMinutes3(weekList.length ? weekList[weekList.length-1]['duration'] : 0)}</div>
+                            <div style={{marginRight:"5px", width:"75px"}}>{formatMinutes3(weekList.length ? weekList[weekList.length-1]['duration'] : 0)}</div>
                             <div style={{textAlign:"center", color:textColor}}>
-                                Week Goal
+                                Week's Goal
                             </div>
-                            <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["week"])}</div>
+                            <div style={{marginLeft:"5px", width:"75px", textAlign:"right"}}>{formatMinutes3(currentGoal["week"])}</div>
                             </div>
                             <div style={ParentBar}>
                             <div style={{
@@ -406,11 +435,11 @@ function Stats(){
                             </div>
                             
                             <div style={{display:"flex", justifyContent:"space-between", marginTop:"20px", marginBottom:"2px"}}>
-                            <div style={{marginRight:"5px"}}>{formatMinutes3(monthList.length ? monthList[monthList.length-1]['duration'] : 0)}</div>
+                            <div style={{marginRight:"5px", width:"75px"}}>{formatMinutes3(monthList.length ? monthList[monthList.length-1]['duration'] : 0)}</div>
                             <div style={{textAlign:"center", color:textColor}}>
-                                Month Goal
+                                Month's Goal
                             </div>
-                            <div style={{marginLeft:"5px"}}>{formatMinutes3(currentGoal["month"])}</div>
+                            <div style={{marginLeft:"5px", width:"75px", textAlign:"right"}}>{formatMinutes3(currentGoal["month"])}</div>
                             </div>
                             <div style={ParentBar}>
                             <div style={{
@@ -429,7 +458,13 @@ function Stats(){
                             </div>
                             </div> </> : 
                             <div style={{display:"flex", justifyContent:"space-around"}}>
-                                <IonButton id="open-modal">Set Goals</IonButton>
+                                <IonButton onClick={()=>{
+                                    setAlertsMap(prev => {
+                                        let dum = {...prev}
+                                        dum["goals"] = true
+                                        return dum
+                                    })
+                                }}>Set Goals</IonButton>
                             </div>
                             }
                             </IonCardContent>
@@ -507,7 +542,18 @@ function Stats(){
                     </IonPopover>
                     </div>
                     </div>
-                    <IonModal ref={modal} trigger="open-modal" id="example-modal">
+                    <Modal
+                    isOpen={alertsMap["goals"]}
+                    onRequestClose={()=>{
+                        setAlertsMap(prev => {
+                        let dum = {...prev}
+                        dum["goals"] = false
+                        return dum
+                    })
+                    }}
+                    style={customStyles}
+                    closeTimeoutMS={200}
+                    >
                     <div style={{textAlign:"center", marginTop:"10px"}}>Input the Goals</div>
                     <IonList>
                         <IonItem>
@@ -535,18 +581,29 @@ function Stats(){
                         </IonList>
                         <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
                             <IonButton onClick={()=>{
-                                modalDismiss()
+                                setAlertsMap(prev => {
+                                    let dum = {...prev}
+                                    dum["goals"] = false
+                                    return dum
+                                })
                             }}>Cancel</IonButton> 
                             <IonButton onClick={()=>{
-                                if(tempGoal["lectures"]["day"] == -1 || tempGoal["books"]["day"] == -1) setToast("input")
+                                if(tempGoal["lectures"]["day"] == -1 || tempGoal["books"]["day"] == -1){
+                                    setToast("input")
+                                    return
+                                } 
                                 else {
                                     setGoal(tempGoal)
-                                    modalDismiss()
+                                    setAlertsMap(prev => {
+                                        let dum = {...prev}
+                                        dum["goals"] = false
+                                        return dum
+                                    })
                                 }
                             }}>Done</IonButton>
                       </div>
-                    </IonModal>
-                    <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
+                    </Modal>
+                    <IonToast onDidDismiss={()=>{setToast("false")}} isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
                 </IonContent>
         </IonPage>
     

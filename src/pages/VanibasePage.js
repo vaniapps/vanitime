@@ -1,20 +1,21 @@
 import { useContext, useEffect, useState } from "react";
-import { Books, Lectures, LecturesTime, VaniTime, WordsPerMin } from "../context";
+import { Books, Lectures, LecturesTime, Settings, VaniTime, WordsPerMin } from "../context";
 import { IonPage, IonHeader, IonToolbar, IonLabel, IonContent, IonCard, IonCardHeader, IonCardContent,
- IonRouterOutlet, isPlatform, IonCardTitle} from "@ionic/react";
+ IonRouterOutlet, isPlatform, IonCardTitle, IonSearchbar} from "@ionic/react";
 import { useHistory, Switch, Route, useLocation, useRouteMatch, useParams } from 'react-router-dom';
 import Book from "./BookPage";
 import Lecture from "./LecturePage";
 import minutesToMinutes, {formatMinutes} from '../scripts/durationToMinutes';
 
 
-function Vedabase() {
+function Vanibase() {
     const [booksMap, setBooksMap] = useContext(Books)
     let history = useHistory();
     let { path, url } = useRouteMatch();
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
     const [lecturesTime, setLecturesTime] = useContext(LecturesTime)
     const [lecturesMap, setLecturesMap] = useContext(Lectures)
+    const [settings, setSettings] = useContext(Settings)
     useEffect(()=>{
      
         let wc1 = 0
@@ -87,10 +88,9 @@ function Vedabase() {
     return (
        <IonPage>
         <IonHeader>
-            <IonToolbar>
-                <div style={{textAlign:"center"}}>
-                <IonLabel>Vedabase</IonLabel>
-                </div>
+           
+            <IonToolbar >
+            <IonSearchbar color={settings.theme == "light" ? "light" : "dark"} placeholder="Search (coming soon...)" style={{"paddingBottom":"0px"}}></IonSearchbar>
             </IonToolbar>
         </IonHeader>
         <IonContent>
@@ -163,4 +163,4 @@ function Vedabase() {
     )
 }
 
-export default Vedabase;
+export default Vanibase;

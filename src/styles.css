@@ -1,56 +1,58 @@
+:root{
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: auto;
+}
 
-
-
-
-ion-modal#example-modal {
-    --width: fit-content;
-    --min-width: 250px;
-    --height: fit-content;
-    --max-height: 350px;
-    --border-radius: 6px;
-    --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+.wrapper {
+  margin-left: 10px;
+  margin-right: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
   
-  ion-modal#example-modal .wrapper {
-    margin-left: 10px;
-    margin-right: 10px;
-    max-height: 200px;
-    overflow-y: auto;
-  }
+.ReactModal__Overlay {
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+}
 
-  .mw-headline {
-    text-align: center;
-  }
+.ReactModal__Overlay--after-open{
+    opacity: 1;
+}
 
-  #container {
-    min-width: 200px;
-    height: 400px;
-  }
+.ReactModal__Overlay--before-close{
+    opacity: 0;
+}
 
-  ion-card {
-    box-shadow: var(--ion-box-shadow)
-  }
+#container {
+  min-width: 200px;
+  height: 400px;
+}
 
-  ion-datetime {
-    --background: var(--ion-background-color);
-    --background-rgb: var(--ion-background-rgb);
-    --wheel-highlight-background: #CCEEFF;
-  }
-  
+ion-card {
+  box-shadow: var(--ion-box-shadow);
+  --color: var(--ion-card-text-color);
+}
 
-  
-  ion-datetime::part(wheel-item active) {
-    color: rgba(0, 0, 0);
-  }
+ion-datetime {
+  --background: var(--ion-background-color);
+  --background-rgb: var(--ion-background-rgb);
+  --wheel-highlight-background: #CCEEFF;
+}
 
-  ion-item {
-    --background: rgba(0, 0, 0, 0); /* Fully transparent background */
-  }
+ion-datetime::part(wheel-item active) {
+  color: rgba(0, 0, 0);
+}
 
-  ion-checkbox::part(container) {
-    border-radius: 6px;
-    border: var(--ion-border);
-  }
+ion-item {
+  --background: rgba(0, 0, 0, 0); /* Fully transparent background */
+}
+
+ion-checkbox::part(container) {
+  border-radius: 6px;
+  border: var(--ion-border);
+}
 
 ion-toggle::part(track),
 ion-toggle.toggle-checked::part(track) {
@@ -60,36 +62,66 @@ ion-toggle.toggle-checked::part(track) {
 }
 
 ion-card-title {
-  white-space: nowrap;        /* Prevent text from wrapping */
-  overflow: hidden;           /* Hide any overflowing content */
-  text-overflow: ellipsis;    /* Show ellipsis (...) when content overflows */
-  max-width: 100%;            /* Limit the width of the container */
-  font-size: 25px;            /* Initial font size */
+  white-space: nowrap;
+  overflow: hidden;    
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-size: var(--ion-card-title-size);
 }
 
 audio {
-  
   width: 100%;
   display: block;
 }
 
-audio::-webkit-media-controls {
-  display: flex;
-  justify-content: space-between;
+ion-range {
+  --bar-height: 3px;
+  --knob-size: 15px;
+}
+
+.container {
   align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 80px;
 }
 
-audio::-webkit-media-controls-panel {
-  
+ion-action-sheet.action-dark .action-sheet-group {
+  background: #181818;
 }
 
 
-
-audio::-webkit-media-controls-timeline {
-  
+.container1 {
+  position: relative;
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-audio::-webkit-media-controls-current-time-display,
-audio::-webkit-media-controls-time-remaining-display {
-  
+.custom-menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
+
+.context-option {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.context-option:hover {
+  background-color: #f0f0f0;
+}
+
+.notes {
+  user-select: none;
+}
+
+/* .highlightotes {
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(to right, #f06, #f93) 1;
+} */
+

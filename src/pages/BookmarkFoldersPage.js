@@ -1,16 +1,33 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { IonItem, IonButton, IonLabel, IonToolbar, IonButtons, IonCheckbox, IonPage, IonHeader, IonContent,
-     IonRouterOutlet, IonIcon } from "@ionic/react";
+     IonRouterOutlet, IonIcon, IonSegment, IonSegmentButton, IonToast } from "@ionic/react";
 import { Route, useRouteMatch, useHistory } from "react-router-dom";
-import { Bookmarks } from '../context';
-import { bookmarkOutline, removeCircleOutline } from 'ionicons/icons';
+import { Bookmarks, Settings } from '../context';
+import { bookmarkOutline, removeCircleOutline, documentTextOutline, brushOutline, timeOutline } from 'ionicons/icons';
 import BookmarkList from "./BookmarkListPage";
+import { useLocal } from "../lshooks";
 
 function BookmarkFolders() {
  let { path, url } = useRouteMatch();
  const [bookmarksMap, setBookmarksMap] = useContext(Bookmarks)
  const [select, setSelect] = useState(false);
  let history = useHistory();
+ const [settings, setSettings] = useContext(Settings)
+ const [toast, setToast] = useState("false")
+ const [toastMessageMap, setToastMessageMap] = useState({
+     "atleast_one_folder": "You need to have atleast one folder",
+ })
+ let bookmarks_present = false;
+ for (let key of Object.keys(bookmarksMap)){
+  if(key.endsWith(settings.bookmark_type) && bookmarksMap[key].children.length > 0){ 
+    bookmarks_present = true
+    break;
+  }
+ }
+ 
+ useEffect(()=>{
+  if(settings.bookmark_type == "Read-Later") history.push(`${url}/Read-Later`)
+},[])
 
  return (
     <>
@@ -18,9 +35,32 @@ function BookmarkFolders() {
     <Route exact path={path}>
      <IonPage>
         <IonHeader>
-      <IonToolbar>
+          <IonToolbar>
+          <IonSegment onIonChange={(e)=>{
+                        setSettings(prev=>{
+                          let dum = {...prev}
+                          dum.bookmark_type = e.target.value
+                          return dum
+                        })
+                        if(e.target.value == "Read-Later") history.push(`${url}/Read-Later`)
+                      }} value={settings.bookmark_type}>
+                      <IonSegmentButton value="Read-Later">
+                          <IonIcon icon={timeOutline}></IonIcon>
+                      </IonSegmentButton>
+                      <IonSegmentButton value="bookmarks">
+                          <IonIcon icon={bookmarkOutline}></IonIcon>
+                      </IonSegmentButton>
+                      <IonSegmentButton value="highlights">
+                      <IonIcon icon={brushOutline}></IonIcon>
+                      </IonSegmentButton>
+                      <IonSegmentButton value="notes">
+                      <IonIcon icon={documentTextOutline}></IonIcon>
+                      </IonSegmentButton>
+                      </IonSegment>
+          </IonToolbar>
+      <IonToolbar >
        <IonButtons slot="start">
-        <IonLabel style={{ marginLeft: "10px" }}>Bookmarks</IonLabel>
+        <IonLabel style={{ marginLeft: "10px" }}>{settings.bookmark_type.charAt(0).toUpperCase() + settings.bookmark_type.slice(1)}</IonLabel>
        </IonButtons>
 
        {select ? (
@@ -38,7 +78,7 @@ function BookmarkFolders() {
          <IonLabel>Cancel</IonLabel>
         </IonButtons>
        ) : (
-        <p></p>
+        null
        )}
 
        {select ? (
@@ -47,10 +87,20 @@ function BookmarkFolders() {
          slot="end"
          onClick={() => {
           setSelect(false)
-          setBookmarksMap(prev=>{
+          let count = 0;
+          for (let key of Object.keys(bookmarksMap)) {
+            if (key.endsWith(settings.bookmark_type) && !bookmarksMap[key].isChecked) count++
+          }
+          if(count < 1){
+            setToast("atleast_one_folder")
+            Object.values(bookmarksMap).map((value) => {
+              value.isChecked = false;
+             });
+          } 
+          else setBookmarksMap(prev=>{
             let dum = {...prev}
             for (let key of Object.keys(dum)) {
-                if (dum[key].isChecked) delete dum[key]
+                if (key.endsWith(settings.bookmark_type) && dum[key].isChecked) delete dum[key]
             }
             return dum
           })
@@ -59,7 +109,7 @@ function BookmarkFolders() {
          <IonLabel>Remove</IonLabel>
         </IonButtons>
        ) : (
-        <p></p>
+       null
        )}
 
        {!select ? (
@@ -67,9 +117,10 @@ function BookmarkFolders() {
          onClick={() => {
           setSelect(true);
          }}
+         style={{marginRight: "8px"}}
          slot="end"
         >
-         <IonButton  style={{marginRight:"8px"}}>
+         <IonButton >
          <IonIcon icon={removeCircleOutline}></IonIcon>
          </IonButton>
         </IonButtons>
@@ -83,19 +134,18 @@ function BookmarkFolders() {
       <IonContent>
         
 
-      {Object.entries(bookmarksMap).length === 0 ? (
-        <p style={{ textAlign: "center", margin: "10px" }}>
-          You can bookmark a song by clicking <IonIcon icon={bookmarkOutline}></IonIcon> Icon on the heading toolbar of that song
-        </p> 
-      ) : null}
+      
+       
+  
       {Object.entries(bookmarksMap).map(([folder, value]) => {
+
        return (
-        <IonItem
+        <>{folder.endsWith(settings.bookmark_type) ? <IonItem
          onClick={() => {
           if (!select) history.push(`${url}/${folder}`);
          }}
         >
-         <IonLabel>{folder} </IonLabel>
+         <IonLabel>{folder.slice(0, folder.lastIndexOf("-"))} </IonLabel>
 
          {select ? (
           <IonCheckbox
@@ -107,10 +157,17 @@ function BookmarkFolders() {
          ) : (
           <p></p>
          )}
-        </IonItem>
+        </IonItem> : null}</>
        );
       })}
+       {!bookmarks_present ? <p style={{ textAlign: "center", margin: "10px" }}>
+          {settings.bookmark_type == "bookmarks" ? <>You can bookmark lectures/purports by clicking <IonIcon icon={bookmarkOutline}></IonIcon> Icon on the heading toolbar in their page</> : null}
+          {settings.bookmark_type == "highlights" ? <>You can highlight text of lectures/purports by selecting the text and clicking <IonIcon icon={brushOutline}></IonIcon> Icon on the bottom left in their page</> : null}
+          {settings.bookmark_type == "notes" ? <>You can write notes for text of lectures/purports by clicking <IonIcon icon={documentTextOutline}></IonIcon> Icon on the bottom right in their page</> : null}
+        </p> : null}
      </IonContent>
+     <IonToast onDidDismiss={()=>{setToast("false")}} isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
+
      </IonPage>
     </Route>
     <Route path={`${path}/:key`}>

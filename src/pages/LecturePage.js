@@ -4,7 +4,7 @@ import { useHistory, Switch, Route, useLocation, useRouteMatch, useParams } from
 import { IonHeader, IonPage, IonToolbar, IonLabel, IonContent, IonItem, IonNote, IonButton, IonButtons, IonIcon,
 IonCheckbox } from "@ionic/react";
 import minutesToMinutes, { formatMinutes } from "../scripts/durationToMinutes";
-import { removeCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { removeCircleOutline, checkmarkCircleOutline, checkmarkOutline, chevronBackOutline } from 'ionicons/icons';
 
 function Lecture() {
     const [lecturesMap, setLecturesMap] = useContext(Lectures)
@@ -116,6 +116,17 @@ function Lecture() {
         <IonPage>
             <IonHeader>
             <IonToolbar>
+            <IonButtons slot="start">
+        <IonButton onClick={()=>{
+            if(history.length > 1){
+              history.goBack()
+            }else{
+              history.push("/vanibase")
+            }
+        }}>
+    <IonIcon icon={chevronBackOutline}></IonIcon>
+    </IonButton>
+    </IonButtons>
                 <IonButtons slot="start">
                     <IonLabel style={{ marginLeft: "10px" }}>{key.replace(/:/g, " - ")}</IonLabel>
                 </IonButtons>
@@ -239,10 +250,13 @@ function Lecture() {
                                 else history.push(`${url}:${partKey}`)
                             }
                         }}>
+                            
                             <IonLabel>
-                                {!partKey.includes("-_") ? partKey : partKey.replace(/_/g, " ")}
+                                {partKey.replace(/_/g, " ")}
                             </IonLabel>
-                            {!partKey.includes("-_") ? <IonNote>{formatMinutes(partValue.heard_time)} | {formatMinutes(partValue.time)} ({Math.floor((partValue.heard_time/partValue.time)*100)}%)</IonNote> : <IonNote>{partValue.read ? "Heard": "Unheard"} | {formatMinutes(minutesToMinutes(partValue.duration))}</IonNote>}
+                            
+                            {partValue.read ? <IonIcon color="primary" style={{marginRight:"5px"}} icon={checkmarkOutline}></IonIcon>: ""}
+                            {!partKey.includes("-_") ? <IonNote>{formatMinutes(partValue.heard_time)} | {formatMinutes(partValue.time)} ({Math.floor((partValue.heard_time/partValue.time)*100)}%)</IonNote> : <> <IonNote>{formatMinutes(minutesToMinutes(partValue.duration))}</IonNote></>}
                             {markRead || markUnread ? (
                                 <IonCheckbox
                                 style={{marginLeft:"15px"}}

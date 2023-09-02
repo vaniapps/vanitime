@@ -1,22 +1,25 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonDatetime, IonButton,
 IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion, 
 IonAccordionGroup, IonRouterOutlet, IonModal, IonToast, IonSegment, IonSegmentButton, IonIcon,
- IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote, isPlatform } from '@ionic/react';
+ IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote, isPlatform, IonButtons, IonInput } from '@ionic/react';
 import { useState, useRef } from 'react';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import {Accordion, AccordionBody, AccordionHeader, AccordionItem} from "react-headless-accordion";
 import Text from './TextPage';
 import Audio from './AudioPage';
 import '../styles.css';
-
+import Modal from 'react-modal';
 
 import findRandomLecture from '../scripts/findRandomLecture';
 import findRandomPurports from '../scripts/findRandomPurports';
 import findNextPurports from '../scripts/findNextPurports';
 import { formatVaniTime } from "../scripts/durationToMinutes";
 import { useContext } from 'react';
-import { Books, ContentMode, CurrentBook, Lectures, VaniTime, WordsPerMin } from '../context';
+import { Books, ContentMode, CurrentBook, Lectures, Settings, VaniTime, WordsPerMin } from '../context';
 import { chevronDownSharp } from 'ionicons/icons';
+import { color } from 'highcharts';
+
+  
 function VaniTimePage(){
 	
     const [contentMode, setContentMode] = useContext(ContentMode)
@@ -66,6 +69,31 @@ function VaniTimePage(){
         modal.current?.dismiss();
     }
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
+    const [settings, setSettings] = useContext(Settings)
+    const customStyles = {
+        content: {
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          marginRight: '-50%',
+          transform: 'translate(-50%, -50%)',
+          width: "90%",
+          maxWidth: "400px",
+          padding: 0,
+          backgroundColor: settings.theme == "light" ? "#ffffff" : "#121212",
+          color: settings.theme == "light" ? "black" :  "#ffffff",
+          borderColor: settings.theme == "light" ? "#ffffff" : "#121212"
+        },
+        overlay: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)"
+        }
+      }
     function getContent() {
         if (contentMode == "random_audio") {
             setCurrentContent(findRandomLecture(lecturesMap,vaniTime));
@@ -120,7 +148,7 @@ function VaniTimePage(){
                 <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
                 <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
        
-        <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Select Vani Time: {formatVaniTime(vaniTime)}</div>
+        <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Scroll Vani Time: {formatVaniTime(vaniTime)}</div>
     
       <IonDatetime color={"primary"} style={{display:"flex", justifyContent: "center"}} size='cover' value={vaniTime} presentation="time" hourCycle="h23" hourValues="0,1,2,3" minuteValues="5,10,15,20,25,30,35,40,45,50,55" onIonChange={(e)=>{
        setVaniTime(e.detail.value);
@@ -302,23 +330,27 @@ function VaniTimePage(){
 
 
 
-
-<IonModal id="example-modal" ref={modal} isOpen={alertsMap["books"] || alertsMap["parts"] || alertsMap["sub_parts"]} onDidDismiss={()=>{
-                    setTempCurrentBook({
-                        "name": "",
-                        "part": "",
-                        "sub_part": "",
-                        "verse": ""
-                    })
-                    setAlertsMap(prev => {
-                        let dum = {...prev}
-                        dum["sub_parts"] = false
-                        dum["parts"] = false
-                        dum["books"] = false
-                        return dum
-                    })
-        }}>
-             <p style={{textAlign:"center"}}>Select the Book</p>
+    <Modal
+      isOpen={alertsMap["books"] || alertsMap["parts"] || alertsMap["sub_parts"]}
+      onRequestClose={()=>{
+        setTempCurrentBook({
+            "name": "",
+            "part": "",
+            "sub_part": "",
+            "verse": ""
+        })
+        setAlertsMap(prev => {
+            let dum = {...prev}
+            dum["sub_parts"] = false
+            dum["parts"] = false
+            dum["books"] = false
+            return dum
+        })
+      }}
+      style={customStyles}
+      closeTimeoutMS={200}
+    >
+     <p style={{textAlign:"center"}}>Select the Book</p>
         <div className="wrapper">
            
 
@@ -478,17 +510,21 @@ function VaniTimePage(){
                 
             }}>Next</IonButton>
             </div>
-        </IonModal>
+        </Modal>
 
 
-
-    <IonModal id="example-modal" ref={modal} isOpen={alertsMap["audio"]} onDidDismiss={()=>{
-                    setAlertsMap(prev => {
-                        let dum = {...prev}
-                        dum["audio"] = false
-                        return dum
-                    })
-        }}>
+      <Modal
+        isOpen={alertsMap["audio"]}
+        onRequestClose={()=>{
+            setAlertsMap(prev => {
+                let dum = {...prev}
+                dum["audio"] = false
+                return dum
+            })
+        }}
+        style={customStyles}
+        closeTimeoutMS={200}
+      >
         
         <div style={{textAlign:"center", marginTop:"10px", marginBottom:"10px"}}>Proceed with the below Lecture?</div>
             <div className="wrapper">
@@ -512,20 +548,27 @@ function VaniTimePage(){
                     dum["audio"] = false
                     return dum
                 })
-                history.push("/lecture/"+ currentContent[0])
+                setTimeout(()=>{
+                    history.push("/lecture/"+ currentContent[0])
+                },200)
+               
             }}>Proceed</IonButton>
             </div>
          
-        </IonModal>
+        </Modal>
 
-        <IonModal id="example-modal"  isOpen={alertsMap["text"]} onDidDismiss={()=>{
-                    setAlertsMap(prev => {
-                        let dum = {...prev}
-                        dum["text"] = false
-                        return dum
-                    })
-        }}>
-        
+        <Modal
+      isOpen={alertsMap["text"]}
+      onRequestClose={()=>{
+        setAlertsMap(prev => {
+            let dum = {...prev}
+            dum["text"] = false
+            return dum
+        })
+      }}
+      style={customStyles}
+      closeTimeoutMS={200}
+    >
         <div style={{textAlign:"center", margin:"10px"}}>Proceed with the below Purports?</div>
             <div className="wrapper">
               {currentContent.map(verse => {
@@ -560,12 +603,15 @@ function VaniTimePage(){
                 for (let i=1; i<currentContent.length; i++) {
                     verses+=","+currentContent[i][0]
                 }
-                history.push("/purports/"+ verses)
+                setTimeout(()=>{
+                    history.push("/purports/"+ verses)
+                },200)
+               
             }}>Proceed</IonButton>
             </div>
-         
-        </IonModal>
-        <IonToast isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
+            <div style={{margin:"5px 5px 0 5px", fontSize:"10px"}}>*You can change your reading speed in settings</div>
+        </Modal>
+        <IonToast onDidDismiss={()=>{setToast("false")}} isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
 
       </IonContent>
     </IonPage>

@@ -3,7 +3,7 @@ IonIcon, IonCheckbox } from '@ionic/react';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from "react-router-dom";
 import { UserHistory, WordsPerMin } from '../context';
-import { bookmarkOutline, removeCircleOutline } from 'ionicons/icons';
+import { bookmarkOutline, removeCircleOutline, chevronBackOutline } from 'ionicons/icons';
 import {convertTo12HourFormat, formatMinutes} from "../scripts/durationToMinutes"
 
 function History() {
@@ -33,6 +33,17 @@ function History() {
         <IonPage>
             <IonHeader>
                 <IonToolbar>
+    <IonButtons slot="start">
+        <IonButton onClick={()=>{
+            if(history.length > 1){
+              history.goBack()
+            }else{
+              history.push("/stats")
+            }
+        }}>
+    <IonIcon icon={chevronBackOutline}></IonIcon>
+    </IonButton>
+    </IonButtons>
                 <IonButtons slot="start">
         <IonLabel style={{ marginLeft: "10px" }}>{key}</IonLabel>
        </IonButtons>

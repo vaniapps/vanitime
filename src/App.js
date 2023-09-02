@@ -22,6 +22,7 @@ import {
 import { hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline, bookOutline } from 'ionicons/icons';
 import { useEffect, useState, useContext } from 'react';
 import {findNextPurport} from "./scripts/findNextPurports"
+import Modal from 'react-modal';
 import './styles.css';
 
 /* Core CSS required for Ionic components to work properly */
@@ -46,7 +47,7 @@ import Stats from './pages/StatsPage';
 import History from './pages/HistoryPage';
 import BookmarkFolders from './pages/BookmarkFoldersPage';
 import VaniTimePage from './pages/VaniTimePage';
-import Vedabase from './pages/VedabasePage';
+import Vanibase from './pages/VanibasePage';
 import Text from './pages/TextPage';
 import Audio from './pages/AudioPage';
 import Book from './pages/BookPage';
@@ -54,6 +55,9 @@ import Lecture from './pages/LecturePage';
 import { Books, CheckAlerts, CurrentBook, CurrentLecture, CurrentVersesMap, IncompleteUserHistory, Lectures, Setting, Settings, UserHistory } from './context';
 import minutesToMinutes from './scripts/durationToMinutes';
 import SettingPage from './pages/SettingPage';
+
+
+
 
 
 setupIonicReact({
@@ -73,7 +77,32 @@ function App() {
   const [incompleteUserHistory, setIncompleteUserHistory] = useContext(IncompleteUserHistory)
   const [lectureMap, setLecturesMap] = useContext(Lectures)
   const [settings, setSettings] = useContext(Settings)
+  const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      width: "90%",
+      maxWidth: "400px",
+      padding: 0,
+      backgroundColor: settings.theme == "light" ? "#ffffff" : "#121212",
+      color: settings.theme == "light" ? "black" :  "#ffffff",
+      borderColor: settings.theme == "light" ? "#ffffff" : "#121212"
+    },
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)"
+    }
+  };
   let location = useLocation();
+
 
 
 
@@ -82,20 +111,26 @@ function App() {
     let backgroundRGB;
     let textColor;
     let primaryColor;
+    let primaryHoverColor;
     let boxShadow;
+    let cardTextColor;
     if(settings.theme == "light"){
       backgroundColor = "#ffffff"
       backgroundRGB = "255, 255, 255"
       textColor = "#000000"
       primaryColor = "#1e90ff"
+      primaryHoverColor = "#1871b5"
       boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.08)"
+      cardTextColor = "black"
     }
     if(settings.theme == "dark"){
       backgroundColor = "#121212"
       backgroundRGB = "18, 18, 18"
       textColor = "#ffffff"
       primaryColor = "#3498db"
+      primaryHoverColor = "#2980b9"
       boxShadow = "0 4px 6px rgba(255, 255, 255, 0.06), 0 5px 15px rgba(255, 255, 255, 0.08)"
+      cardTextColor = "white"
     }
 
 
@@ -103,6 +138,8 @@ function App() {
     document.documentElement.style.setProperty('--ion-background-rgb', backgroundRGB);
     document.documentElement.style.setProperty('--ion-text-color', textColor);
     document.documentElement.style.setProperty('--ion-color-primary', primaryColor);
+    document.documentElement.style.setProperty('--ion-color-primary-shade', primaryHoverColor);
+    document.documentElement.style.setProperty('--ion-color-primary-tint', primaryHoverColor);
     document.documentElement.style.setProperty('--ion-toolbar-background', primaryColor);
     document.documentElement.style.setProperty('--ion-toolbar-color', "#ffffff");
 
@@ -115,6 +152,8 @@ function App() {
     document.documentElement.style.setProperty('--ion-font-family', settings.font_style);
     document.documentElement.style.setProperty('font-size', '16px');
     document.documentElement.style.setProperty('font-weight', settings.font_style == "Papyrus, fantasy" ? '500' : "normal");
+    document.documentElement.style.setProperty('--ion-card-title-size', settings.font_style.includes('monospace') ? "20px" : "25px");
+    document.documentElement.style.setProperty('--ion-card-text-color', cardTextColor);
 
     
   },[settings])
@@ -123,7 +162,7 @@ function App() {
     console.log(location)
     let currentPath = window.location.pathname
     if(currentPath.includes("vanitime")) setCurrentTab("vanitime")
-    if(currentPath.includes("vedabase") || currentPath.includes("index")) setCurrentTab("vedabase")
+    if(currentPath.includes("vanibase") || currentPath.includes("index")) setCurrentTab("vanibase")
     if(currentPath.includes("stats") || currentPath.includes("history")) setCurrentTab("stats")
     if(currentPath.includes("setting")) setCurrentTab("setting")
     if(currentPath.includes("bookmarks")) setCurrentTab("bookmarks")
@@ -156,8 +195,8 @@ function App() {
           <Route path="/vanitime">
             <VaniTimePage />
           </Route>
-          <Route path="/vedabase">
-            <Vedabase />
+          <Route path="/vanibase">
+            <Vanibase />
           </Route>
           <Route path="/stats">
             <Stats />
@@ -184,7 +223,10 @@ function App() {
           <Book />
           </Route>
           <Route path={"/otherbooks"}>
-            <h1>Page Under Construction</h1>
+            <h1 style={{marginLeft:"10px"}}>Coming soon...</h1>
+            <div class="container">
+    <p id="selectable-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+  </div>
           </Route>
           <Route exact path="/">
             <Redirect to="/vanitime" />
@@ -204,13 +246,13 @@ function App() {
             </div>
             </div>
           </IonSegmentButton>
-          <IonSegmentButton style={{ minWidth: 0 }} value="vedabase"  onClick={()=>history.push("/vedabase")}>
+          <IonSegmentButton style={{ minWidth: 0 }} value="vanibase"  onClick={()=>history.push("/vanibase")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
             <IonIcon icon={bookOutline}/>
             </div>
             <div style={{flexBasis:"100%" , fontSize:"10px"}}>
-            <IonLabel>Vedabase</IonLabel>
+            <IonLabel>VaniBase</IonLabel>
             </div>
             </div>
           </IonSegmentButton>
@@ -250,14 +292,20 @@ function App() {
         </IonToolbar>
         </IonFooter> : null}
 
-        <IonModal id="example-modal" isOpen={checkAlerts["purports"]} onDidDismiss={()=>{
-      setCheckAlerts(prev => {
-        let dum = {...prev}
-        dum["purports"] = false
-        return dum
-    })
-    setIncompleteUserHistory("")
-    }}>
+      <Modal
+      isOpen={checkAlerts['purports']}
+      onRequestClose={()=>{
+        setCheckAlerts(prev => {
+          let dum = {...prev}
+          dum["purports"] = false
+          return dum
+      })
+      setIncompleteUserHistory("")
+      }}
+      style={customStyles}
+      closeTimeoutMS={200}
+    >
+
     <p style={{margin:"10px"}}>Tick the verse which you have read</p>
     <div className='wrapper'> 
     {Object.entries(currentVersesMap).map(([verseKey, verseValue]) => {
@@ -402,22 +450,28 @@ function App() {
                 setIncompleteUserHistory("")
             }}>Done</IonButton>
       </div>
+      <div style={{margin:"5px 5px 0 5px", fontSize:"10px"}}>*You can turn off the alerts in settings</div>
+    </Modal>
 
-    </IonModal>
-
-    <IonModal id="example-modal" isOpen={checkAlerts["lecture"]} onDidDismiss={()=>{
-      setCheckAlerts(prev => {
-        let dum = {...prev}
-        dum["lecture"] = false
-        return dum
-    })
-    setIncompleteUserHistory("")
-    }}>
+    
+    <Modal
+      isOpen={checkAlerts['lecture']}
+      onRequestClose={()=>{
+        setCheckAlerts(prev => {
+          let dum = {...prev}
+          dum["lecture"] = false
+          return dum
+      })
+      setIncompleteUserHistory("")
+      }}
+      style={customStyles}
+      closeTimeoutMS={200}
+    >
     <div style={{textAlign:"center", marginTop:"10px"}}>Have heard the Lecture?</div>
     <div className='wrapper'> 
     <p>{`${currentLecture}`.replace(/_/g, " ")}</p>
     </div> 
-      <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
+      <div style={{display:"flex", justifyContent:"space-evenly"}}>
             <IonButton onClick={()=>{
                 setCheckAlerts(prev => {
                   let dum = {...prev}
@@ -471,8 +525,8 @@ function App() {
       
             }}>Listend</IonButton>
       </div>
-
-    </IonModal>
+      <div style={{margin:"5px 5px 0 5px", fontSize:"12px"}}>*You can turn off the alerts in settings</div>
+    </Modal>
         </IonPage>
   </IonApp>
   );

@@ -23,7 +23,7 @@ export function ContextProvider({ children }) {
     const [userHistory, setUserHistory] = useLocal("user-history", {})
     const [booksMap, setBooksMap] = useLocal("books-data",booksMapData)
     const [lecturesMap, setLecturesMap] = useLocal("lectures-data",lecturesMapData)
-    const [wordsPerMin, setWordsPerMin] = useLocal("words-per-min",50)
+    const [wordsPerMin, setWordsPerMin] = useLocal("words-per-min",100)
     const [incompleteUserHistory, setIncompleteUserHistory] = useLocal("incomplete-userhistory","")
     let [currentBook, setCurrentBook] = useLocal("current-book",{
         "name": "",
@@ -33,7 +33,12 @@ export function ContextProvider({ children }) {
     })
     const [vaniTime, setVaniTime] = useLocal("vani-time","00:05")
     const [contentMode, setContentMode] = useLocal("content-mode","random_audio");
-    const [bookmarksMap, setBookmarksMap] = useLocal("bookmarks", {})
+    const [bookmarksMap, setBookmarksMap] = useLocal("bookmarks", {
+        "Read-Later": {"children": [], "isChecked": false},
+        "Default-bookmarks": {"children": [], "isChecked": false},
+        "Default-highlights": {"children": [], "isChecked": false},
+        "Default-notes": {"children": [], "isChecked": false}
+    })
     const [lecturesTime, setLecturesTime] = useLocal("lectures-time", {"heard": 0, "total": 0})
     const [checkAlerts, setCheckAlerts] = useLocal("check-alerts", {"purports": false, "lecture": false})
     const [currentVersesMap, setCurrentVersesMap] = useLocal("current-verses-map", {})
@@ -42,7 +47,12 @@ export function ContextProvider({ children }) {
         "theme": "light",
         "font_style": "Arial, Helvetica, sans-serif",
         "font_size": "16",
-        "check_alerts": "manual"
+        "check_alerts": "manual",
+        "highlights_color": "#66B2FF",
+        "highlights_folder": "Default-highlights",
+        "notes_folder": "Default-notes",
+        "bookmarks_folder": "Default-bookmarks",
+        "bookmark_type": "Read-Later"
     })
     const [goal, setGoal] = useLocal("goal", {
         "books" : {

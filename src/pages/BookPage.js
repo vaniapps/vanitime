@@ -4,7 +4,7 @@ import { useHistory, Switch, Route, useLocation, useRouteMatch, useParams } from
 import { IonHeader, IonPage, IonToolbar, IonLabel, IonContent, IonItem, IonNote, IonIcon, IonButton, IonButtons,
 IonCheckbox } from "@ionic/react";
 import { formatMinutes } from "../scripts/durationToMinutes";
-import { removeCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { removeCircleOutline, checkmarkCircleOutline, checkmarkOutline, chevronBackOutline } from 'ionicons/icons';
 
 function Book() {
     const [booksMap, setBooksMap] = useContext(Books)
@@ -92,6 +92,17 @@ function Book() {
         <IonPage>
             <IonHeader>
             <IonToolbar>
+            <IonButtons slot="start">
+        <IonButton onClick={()=>{
+            if(history.length > 1){
+              history.goBack()
+            }else{
+              history.push("/vanibase")
+            }
+        }}>
+    <IonIcon icon={chevronBackOutline}></IonIcon>
+    </IonButton>
+    </IonButtons>
                 <IonButtons slot="start">
                     <IonLabel style={{ marginLeft: "10px" }}>{key.replace(/_/g, " ")}</IonLabel>
                 </IonButtons>
@@ -212,8 +223,9 @@ function Book() {
                             <IonLabel>
                                 {partValue.name ?? partKey.replace("_", "")}
                             </IonLabel>
+                            {partValue.read ? <IonIcon color="primary" style={{marginRight:"5px"}} icon={checkmarkOutline}></IonIcon> : ""}
                             {!partKey.startsWith("_") ? <IonNote>{formatMinutes(Math.round(partValue.read_words_count/wordsPerMin))} | {formatMinutes(Math.round(partValue.words_count/wordsPerMin))} ({Math.floor((partValue.read_words_count/partValue.words_count)*100)}%)</IonNote> :
-                            <IonNote>{partValue.read ? "Read":"Unread" } | {formatMinutes(Math.round(partValue.words_count/wordsPerMin))}</IonNote>}
+                            <IonNote>{formatMinutes(Math.round(partValue.words_count/wordsPerMin))}</IonNote>}
                             {markRead || markUnread ? (
                                 <IonCheckbox
                                 style={{marginLeft:"15px"}}
