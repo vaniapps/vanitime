@@ -5,6 +5,13 @@ html.plt-mobile ion-app {
   user-select: auto;
 }
 
+.noselect{
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
 .wrapper {
   margin-left: 10px;
   margin-right: 10px;
@@ -124,4 +131,22 @@ ion-action-sheet.action-dark .action-sheet-group {
   border-bottom: 2px solid transparent;
   border-image: linear-gradient(to right, #f06, #f93) 1;
 } */
+
+.video-list-container {
+  height: 100%;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video {
+  width: 100%;
+}
+
+
+
+
+
+
 

@@ -244,10 +244,10 @@ function Stats(){
     useEffect(()=>{
         const chartOptions = {
             chart: {
-              type: 'line',
+                type: 'line',
               scrollablePlotArea: {
                 minWidth: currentGraphList.length * 15,
-                scrollPositionX: 10
+                scrollPositionX: 1
               },
               backgroundColor: 'transparent'
             },
@@ -258,16 +258,18 @@ function Stats(){
                 categories: currentGraphList.map(item=>{
                     return item.name
                 }),
-              min:0,
-              max: currentGraphList.length-1,
+              
               labels: {
                 overflow: 'justify',
                 style: {
                     color: textColor // Set the color for the xAxis labels
                 }
-              }
+              },
+             
             },
             yAxis: {
+            gridLineColor: "grey",
+            gridLineDashStyle: "ShortDash",
               tickWidth: 1,
               title: {
                 text: 'Minutes',

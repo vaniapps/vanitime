@@ -19,8 +19,8 @@ import {
   IonButton,
   IonToolbar,
 } from '@ionic/react';
-import { hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline, bookOutline } from 'ionicons/icons';
-import { useEffect, useState, useContext } from 'react';
+import { hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline, bookOutline, albumsOutline } from 'ionicons/icons';
+import { useEffect, useState, useContext, useRef } from 'react';
 import {findNextPurport} from "./scripts/findNextPurports"
 import Modal from 'react-modal';
 import './styles.css';
@@ -55,6 +55,8 @@ import Lecture from './pages/LecturePage';
 import { Books, CheckAlerts, CurrentBook, CurrentLecture, CurrentVersesMap, IncompleteUserHistory, Lectures, Setting, Settings, UserHistory } from './context';
 import minutesToMinutes from './scripts/durationToMinutes';
 import SettingPage from './pages/SettingPage';
+import Shorts from './pages/ShortsPage';
+
 
 
 
@@ -102,6 +104,55 @@ function App() {
     }
   };
   let location = useLocation();
+  const containerRef = useRef(null);
+  const scrollY = useRef(0);
+
+  // useEffect(() => {
+  //   const container = containerRef.current;
+
+  //   const handleScroll = () => {
+  //     console.log("working")
+  //     // Get the current scroll position
+  //     const currentScrollY = window.scrollY;
+
+  //     // Calculate the difference in scroll position
+  //     const scrollDelta = currentScrollY - scrollY.current;
+
+  //     // Update the scroll position reference
+  //     scrollY.current = currentScrollY;
+
+  //     // Find the currently visible video
+  //     const videos = container.querySelectorAll('.video');
+  //     let visibleVideo = null;
+
+  //     videos.forEach((video) => {
+  //       const rect = video.getBoundingClientRect();
+  //       console.log(rect, window.innerHeight)
+  //       if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+  //         visibleVideo = video;
+  //       }
+  //     });
+
+  //     // Scroll to the nearest video based on the scroll direction
+  //     if (visibleVideo) {
+  //       console.log(visibleVideo, scrollDelta)
+  //       if ( visibleVideo.nextElementSibling) {
+  //         visibleVideo.nextElementSibling.scrollIntoView({ behavior: 'smooth' });
+  //       } else if ( visibleVideo.previousElementSibling) {
+  //         visibleVideo.previousElementSibling.scrollIntoView({ behavior: 'smooth' });
+  //       }
+  //     }
+  //   };
+
+  //   // Attach the scroll event listener
+  //   container.addEventListener('scroll', handleScroll);
+
+  //   // Clean up the event listener when the component unmounts
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, []);
+
 
 
 
@@ -166,6 +217,7 @@ function App() {
     if(currentPath.includes("stats") || currentPath.includes("history")) setCurrentTab("stats")
     if(currentPath.includes("setting")) setCurrentTab("setting")
     if(currentPath.includes("bookmarks")) setCurrentTab("bookmarks")
+    if(currentPath.includes("vanishorts")) setCurrentTab("vanishorts")
     
 
   },[location])
@@ -222,6 +274,10 @@ function App() {
           <Route path={"/bookindex/:key"}>
           <Book />
           </Route>
+          <Route path={"/vanishorts"}>
+          <Shorts />
+          </Route>
+
           <Route path={"/otherbooks"}>
             <h1 style={{marginLeft:"10px"}}>Coming soon...</h1>
             <div class="container">
@@ -236,13 +292,23 @@ function App() {
         {!`${location.pathname}`.includes("/lecture/") && !`${location.pathname}`.includes("/purports/") ? <IonFooter>
           <IonToolbar>
         <IonSegment   value={currentTab} >
-        <IonSegmentButton style={{ minWidth: 0 }} value="setting"  onClick={()=>history.push("/setting")}>
+        {/* <IonSegmentButton style={{ minWidth: 0 }} value="setting"  onClick={()=>history.push("/setting")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
             <IonIcon icon={settingsOutline}/>
             </div>
             <div style={{flexBasis:"100%" , fontSize:"10px"}}>
             <IonLabel>Setting</IonLabel>
+            </div>
+            </div>
+          </IonSegmentButton> */}
+          <IonSegmentButton style={{ minWidth: 0 }} value="stats"  onClick={()=>history.push("/stats")}>
+            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
+            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
+            <IonIcon icon={statsChartOutline} />
+            </div>
+            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
+            <IonLabel>Stats</IonLabel>
             </div>
             </div>
           </IonSegmentButton>
@@ -266,16 +332,17 @@ function App() {
             </div>
             </div>
           </IonSegmentButton>
-          <IonSegmentButton style={{ minWidth: 0 }} value="stats"  onClick={()=>history.push("/stats")}>
+          <IonSegmentButton style={{ minWidth: 0 }} value="vanishorts"  onClick={()=>history.push("/vanishorts")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
-            <IonIcon icon={statsChartOutline} />
+            <IonIcon icon={albumsOutline} />
             </div>
             <div style={{flexBasis:"100%" , fontSize:"10px"}}>
-            <IonLabel>Stats</IonLabel>
+            <IonLabel>VaniShorts</IonLabel>
             </div>
             </div>
           </IonSegmentButton>
+         
           <IonSegmentButton style={{ minWidth: 0 }} value="bookmarks"  onClick={()=>history.push("/bookmarks")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>

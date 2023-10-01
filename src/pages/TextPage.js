@@ -50,6 +50,7 @@ function Text(){
   const [editHighlightButton, setEditHighlightButton] = useState(false)
   const [selectedHighlight, setSelectedHighlight] = useState({})
   const [editNotes, setEditNotes] = useState(false)
+  const [fabButtonActivated, setFabButtonActivated] = useState(false)
   const customStyles = {
     content: {
       top: '50%',
@@ -85,6 +86,7 @@ function Text(){
       textContent = textContent.slice(0, textContent.indexOf("<div style=\"float:right"))
       textContent = textContent.replace(/<a\s+href="\/(?!wiki\/(BG|SB|CC))[^"][^>]*>/g, "")
       textContent = textContent.replace(/<b*>/g, "")
+      textContent = textContent.replace(/<br \/>/g, "")
       textContent = textContent.replace(/\/wiki/g, "/purports")
       textContent = textContent.replace(/_\(1972\)/g, "")
       textContent = textContent.replace(/<p><br \/>\n<\/p>/g, "")
@@ -195,17 +197,20 @@ function Text(){
           focusOffset+=parseInt(focusId.slice(focusId.indexOf("*")+1, focusId.indexOf("^") != -1 ? focusId.indexOf("^") : focusId.length))
           focusId=focusId.slice(0,focusId.indexOf("*"))
         }
-        setTextBookmark({
-          "name": selectedVerses,
-          "type": "verse",
-          "text": selectedText,
-          "start_id": anchorId,
-          "end_id": focusId,
-          "start_index": anchorOffset,
-          "end_index": focusOffset,
-          "color": settings.highlights_color,
-          "timestamp": new Date().toISOString()
-        })
+        setTimeout(()=>{
+          setTextBookmark({
+            "name": selectedVerses,
+            "type": "verse",
+            "text": selectedText,
+            "start_id": anchorId,
+            "end_id": focusId,
+            "start_index": anchorOffset,
+            "end_index": focusOffset,
+            "color": settings.highlights_color,
+            "timestamp": new Date().toISOString()
+          })
+        },1)
+        
         setTimeout(()=>{
           if(!window.getSelection().toString()) setShowHighlightButton(false)
         },1)
@@ -262,6 +267,7 @@ function Text(){
         setEditHighlightButton(false)
         setSelectedHighlight({})
       }
+      setFabButtonActivated(false)
     })
   }
   if(focusElement){
@@ -281,9 +287,6 @@ function Text(){
     }
     },1)
   }
-
-
-
 
   },[htmlContent])
 
@@ -570,9 +573,22 @@ function Text(){
       </> : <div style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}><IonSpinner /></div>}
     
       <>{showHighlightButton ?<>
-            <div style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"5px", left:"10px"}}>
+            <div className='noselect' style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"5px", left:"10px"}}>
       
-            <IonFabButton onClick={()=>{
+            <IonFabButton onTouchStart={()=>{
+              setBookmarkType("notes")
+              setBookmarkInput(prev=>{
+                let dum = {...prev}
+                dum["radio"] = settings.notes_folder
+                return dum
+              })
+              setAlertsMap(prev=>{
+                let dum = {...prev}
+                dum["bookmark_input"] = true
+                return dum
+              })
+              setEditHighlightButton(false)
+            }} onClick={()=>{
               setBookmarkType("notes")
               setBookmarkInput(prev=>{
                 let dum = {...prev}
@@ -590,43 +606,77 @@ function Text(){
             </IonFabButton>
           
           </div>
-      <div style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"5px", right:"10px"}}>
+      <div className='noselect' style={{display:"flex", flexDirection:"column", justifyContent: "center", alignItems:"center", position:"fixed", bottom:"5px", right:"10px"}}>
       
-      <IonFabButton style={{marginBottom:"35px"}} onClick={()=>{
-         let modidfiedTextBookmark = {...textBookmark}
-         modidfiedTextBookmark.color = settings.highlights_color
-          setBookmarksMap((prev)=>{
-          let dum = {...prev}
-          let bookmark_folder_name = settings.highlights_folder
-          dum[bookmark_folder_name]["children"].push(modidfiedTextBookmark)
-          return dum 
-        })
-        setShowHighlightButton(false)
-        setEditHighlightButton(false)
+      <IonFabButton onTouchStart={()=>{
+              let modidfiedTextBookmark = {...textBookmark}
+              modidfiedTextBookmark.color = settings.highlights_color
+               setBookmarksMap((prev)=>{
+               let dum = {...prev}
+               let bookmark_folder_name = settings.highlights_folder
+               dum[bookmark_folder_name]["children"].push(modidfiedTextBookmark)
+               return dum 
+             })
+             setShowHighlightButton(false)
+             setEditHighlightButton(false)
+             const timerInterval = setInterval(() => {
+              setEditHighlightButton(false)
+            }, 1);
+            setTimeout(()=>{
+              clearInterval(timerInterval);
+            },500)
+      }}  style={{marginBottom:"35px"}} onClick={(e)=>{
+        let modidfiedTextBookmark = {...textBookmark}
+        modidfiedTextBookmark.color = settings.highlights_color
+         setBookmarksMap((prev)=>{
+         let dum = {...prev}
+         let bookmark_folder_name = settings.highlights_folder
+         dum[bookmark_folder_name]["children"].push(modidfiedTextBookmark)
+         return dum 
+       })
+       setShowHighlightButton(false)
+       setEditHighlightButton(false)
+        
       }}>
         <div style={{backgroundColor:settings.highlights_color, borderRadius:"50%", height:"100%", width:"100%", display:'flex', alignItems:"center", justifyContent:"center"}}>
         <IonIcon style={{fontSize:"30px"}}  icon={brushOutline}></IonIcon>
         </div>
       </IonFabButton>
      
-    <IonFab>
+    <IonFab onTouchStart={()=>{
+      if(fabButtonActivated) setFabButtonActivated(false)
+      else setFabButtonActivated(true)
+    }} activated={fabButtonActivated}>
       <IonFabButton >
         <IonIcon icon={colorPaletteOutline}></IonIcon>
       </IonFabButton>
       <IonFabList side="start">
-      <IonFabButton  onClick={()=>{setHighlightColor("#66B2FF")}}>
+      <IonFabButton onTouchStart={()=>{setHighlightColor("#66B2FF")}}  onClick={()=>{setHighlightColor("#66B2FF")}}>
         <div style={{backgroundColor:"#66B2FF", height:"100%", width:"100%"}}></div>
       </IonFabButton>
-      <IonFabButton  onClick={()=>{setHighlightColor("#EFD610")}}>
+      <IonFabButton onTouchStart={()=>{setHighlightColor("#EFD610")}}  onClick={()=>{setHighlightColor("#EFD610")}}>
         <div style={{backgroundColor:"#EFD610", height:"100%", width:"100%"}}></div>
       </IonFabButton>
-      <IonFabButton  onClick={()=>{setHighlightColor("#2ECC71")}}>
+      <IonFabButton onTouchStart={()=>{setHighlightColor("#2ECC71")}}  onClick={()=>{setHighlightColor("#2ECC71")}}>
         <div style={{backgroundColor:"#2ECC71", height:"100%", width:"100%"}}></div>
       </IonFabButton>
       </IonFabList>
       </IonFab>
      
-      <IonFabButton style={{marginTop: "35px"}} onClick={()=>{
+      <IonFabButton style={{marginTop: "35px"}} onTouchStart={()=>{
+        setBookmarkType("highlights")
+        setBookmarkInput(prev=>{
+          let dum = {...prev}
+          dum["radio"] = settings.highlights_folder
+          return dum
+        })
+        setAlertsMap(prev=>{
+          let dum = {...prev}
+          dum["bookmark_input"] = true
+          return dum
+        })
+        setEditHighlightButton(false)
+      }} onClick={()=>{
         setBookmarkType("highlights")
         setBookmarkInput(prev=>{
           let dum = {...prev}

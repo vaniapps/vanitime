@@ -3,6 +3,7 @@ IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion,
 IonAccordionGroup, IonRouterOutlet, IonModal, IonToast, IonSegment, IonSegmentButton, IonIcon,
  IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote, isPlatform, IonButtons, IonInput } from '@ionic/react';
 import { useState, useRef } from 'react';
+import {  settingsOutline, menuOutline } from 'ionicons/icons';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import {Accordion, AccordionBody, AccordionHeader, AccordionItem} from "react-headless-accordion";
 import Text from './TextPage';
@@ -129,6 +130,11 @@ function VaniTimePage(){
      <IonPage>
       <IonHeader>
         <IonToolbar>
+        <IonButtons slot='start'>
+                <IonButton>
+                    <IonIcon icon={menuOutline}></IonIcon>
+                </IonButton>
+            </IonButtons>
             <IonSegment  onIonChange={(e)=>{
                 setContentMode(e.detail.value);
             }} value={contentMode}>
@@ -141,6 +147,11 @@ function VaniTimePage(){
                 );
             })}
             </IonSegment>
+            <IonButtons slot='end'>
+                <IonButton onClick={()=>history.push("/setting")}>
+                    <IonIcon icon={settingsOutline}></IonIcon>
+                </IonButton>
+            </IonButtons>
         </IonToolbar>
       </IonHeader>
       
