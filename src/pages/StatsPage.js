@@ -4,7 +4,6 @@ IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton
 IonToast, isPlatform } from '@ionic/react';
 import { chevronBackCircle, chevronDownOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState, useRef } from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import { Goal, Settings, UserHistory, WordsPerMin } from '../context';
 import { useLocal, useLocalr } from '../lshooks';

@@ -227,6 +227,7 @@ function Text(){
 
     containerDiv.addEventListener("click", (event) => {
       const clickedElement = event.target;
+      console.log(clickedElement.id)
       if(clickedElement.id.includes("@notes")){
         for (let bookmark of Object.entries(bookmarksMap)){
           for (let i=0; i<bookmark[1]['children'].length; i++) {
@@ -309,7 +310,7 @@ function Text(){
             let modifiedHTML = highlights[elementId][0][0] != 0 ? `<span id=${elementId}*0 class="non-highlight">${originalHTML.substring(0, highlights[elementId][0][0])}</span>` : ""
             for (let i = 0; i<highlights[elementId].length; i++) {
               if(!highlights[elementId][i][4]) modifiedHTML += `<span id=${elementId}*${highlights[elementId][i][0]}^${highlights[elementId][i][3]} class=${highlights[elementId][i][2] ? "highlight"+highlights[elementId][i][2].slice(1) : "non-highlight"}>${originalHTML.substring(highlights[elementId][i][0], highlights[elementId][i][1])}</span>`
-              else modifiedHTML+=`<svg style="user-select=none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15">
+              else modifiedHTML+=`<svg id=${elementId}*${highlights[elementId][i][1]}^${highlights[elementId][i][4]}@notes style="user-select=none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15">
               <path id=${elementId}*${highlights[elementId][i][1]}^${highlights[elementId][i][4]}@notes style="user-select=none" d="M352 0H80C53.49 0 32 21.49 32 48v416c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V160L352 0zM192 64h160c8.837 0 16 7.163 16 16s-7.163 16-16 16H192c-8.837 0-16-7.163-16-16s7.163-16 16-16zm-64 64h224c8.837 0 16 7.163 16 16s-7.163 16-16 16H128c-8.837 0-16-7.163-16-16s7.163-16 16-16zm0 64h224c8.837 0 16 7.163 16 16s-7.163 16-16 16H128c-8.837 0-16-7.163-16-16s7.163-16 16-16zm0 64h160c8.837 0 16 7.163 16 16s-7.163 16-16 16H128c-8.837 0-16-7.163-16-16s7.163-16 16-16z" fill="#FFD700"/>
             </svg>`
               if(i<highlights[elementId].length-1 && highlights[elementId][i][1] < highlights[elementId][i+1][0]) modifiedHTML += `<span id=${elementId}*${highlights[elementId][i][1]} class="non-highlight">${originalHTML.substring(highlights[elementId][i][1], highlights[elementId][i+1][0])}</span>`

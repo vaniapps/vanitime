@@ -79,7 +79,7 @@ function BookmarkList() {
         style={{ marginRight: "15px" }}
          onClick={() => {
           setReo(false)
-          setBookmarksMap({})
+          // setBookmarksMap({})
           setChangedIndexes([])
           setTimeout(()=>{
             setBookmarksMap({...bookmarksMap})
@@ -94,15 +94,16 @@ function BookmarkList() {
         <IonButtons
         style={{ marginRight: "8px" }}
          onClick={() => {
+          console.log(bookmarksMap)
           setReo(false)
           setChangedIndexes([])
           let dum = JSON.parse(JSON.stringify(bookmarksMap));
+          console.log(bookmarksMap, dum[key])
           for (let index of changedIndexes) {
             let curr = dum[key]["children"][index.from]
             dum[key]["children"].splice(index.from, 1);
             dum[key]["children"].splice(index.to, 0, curr)
           }
-          setBookmarksMap({})
           setTimeout(()=>{
             setBookmarksMap({...dum})
           },1)

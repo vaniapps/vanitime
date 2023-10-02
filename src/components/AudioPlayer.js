@@ -9,6 +9,9 @@ function AudioPlayer(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0)
     const [play, setPlay] = useState(false);
+    const i = props.i
+    const audios = props.audios
+    const setAudios = props.setAudios
     function formatTime(seconds) {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -29,8 +32,16 @@ function AudioPlayer(props) {
           }}
          };
        }, [audi.current]);
+       useEffect(()=>{
+        if(!audios[i].isPlaying && audi.current) {
+          audi.current.pause();
+          setPlay(false);
+        }
+       },[audios])
     return(
-        <>
+        <div onFocus={(e)=>{
+          console.log(e)
+        }} style={{height: "100%", width:"100%", display:"flex", flexDirection:"column", "justifyContent": "space-between", alignItems:"center", scrollSnapAlign: "start"}}>
         <audio
    
     onTimeUpdate={() => {
@@ -42,7 +53,10 @@ function AudioPlayer(props) {
    >
     Your browser does not support the audio element.
    </audio>
-   <div>
+   <div style={{fontSize:"20px", textAlign:"center", padding:"10px 0 10px 0"}}>{props.audio.src}</div>
+   <div style={{fontSize:"30px", textAlign:"center", padding:"20px"}} >{props.audio.txt}</div>
+   
+   <div style={{ "width":"100%"}}>
         <IonRange value={currentTime} onIonChange={(e)=>{
             if (audi.current) {
               audi.current.currentTime = e.detail.value;
@@ -64,22 +78,14 @@ function AudioPlayer(props) {
             </IonButton>
             <IonButton size='small' style={{"height": "36px", width:"48px"}}  onClick={()=>{
                   if (!play) {
-                    if( props.currentVideoIndex != -1){
-                        props.setVideos(prev=>{
-                            let dum = [...prev]
-                            dum[props.currentVideoIndex].isPlaying = false
-                            return dum
-                        })
-                    }
                     if (audi.current.duration) {
-                    if(props.currentAudio && props.currentAudio.current && props.currentAudio.current != audi.current){
-                        props.currentAudio.current.pause()
-                        props.currentPlaySetter(false)
-                    }
                      audi.current.play();
                      setPlay(!play);
-                     props.setCurrentAudio(audi)
-                     props.setCurrentPlaySetter(() => setPlay)
+                     setAudios(prev=>{
+                        let dum = [...prev]
+                        dum[i].isPlaying = true
+                        return dum
+                     })
                     } else {
                      setToast("loading_audio")
                     }
@@ -105,13 +111,12 @@ function AudioPlayer(props) {
            
             <div style={{marginLeft:"5px"}}>{audi.current ? ((audi.current.duration && audi.current.duration!="Infinity") ? formatTime(audi.current.duration.toFixed(0)) : "0:00") : "0:00"}</div>
             </div>
-            <p>{props.audio.txt}</p>
-            <p>{props.audio.src}</p>
             </div>
+          
             <IonToast isOpen={toast != "false"} onDidDismiss={()=>{
                 setToast("false")
                 }} message={toastMessageMap[toast]} duration={2000}></IonToast>
-            </>
+            </div>
     )
 }
 
