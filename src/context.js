@@ -37,7 +37,8 @@ export function ContextProvider({ children }) {
         "Read-Later": {"children": [], "isChecked": false},
         "Default-bookmarks": {"children": [], "isChecked": false},
         "Default-highlights": {"children": [], "isChecked": false},
-        "Default-notes": {"children": [], "isChecked": false}
+        "Default-notes": {"children": [], "isChecked": false},
+        "media": {}
     })
     const [lecturesTime, setLecturesTime] = useLocal("lectures-time", {"heard": 0, "total": 0})
     const [checkAlerts, setCheckAlerts] = useLocal("check-alerts", {"purports": false, "lecture": false})

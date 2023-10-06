@@ -1,8 +1,10 @@
 import { checkboxOutline, chevronBackOutline, bookmarkOutline, playCircleOutline, playBackOutline, playForwardOutline
     ,speedometerOutline, arrowDownCircleOutline, pauseCircleOutline, documentTextOutline, brushOutline, colorPaletteOutline,
-    removeCircleOutline, folderOpenOutline, timeOutline } from 'ionicons/icons';
-import { IonButton, IonIcon, IonRange, IonToast } from '@ionic/react';
-import { useState, useRef, useEffect } from 'react';
+    removeCircleOutline, folderOpenOutline, timeOutline, openOutline } from 'ionicons/icons';
+import { IonButton, IonIcon, IonRange, IonToast, IonList, IonItem, IonLabel } from '@ionic/react';
+import { useState, useRef, useEffect, useContext } from 'react';
+import Modal from 'react-modal';
+import { Settings } from '../context';
 
 function AudioPlayer(props) {
     const audi = useRef();
@@ -12,6 +14,34 @@ function AudioPlayer(props) {
     const i = props.i
     const audios = props.audios
     const setAudios = props.setAudios
+    const [settings, setSettings] = useContext(Settings)
+    const [alertsMap, setAlertsMap] = useState({
+      "speed": false
+  })
+  const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      width: "90%",
+      maxWidth: "400px",
+      padding: 0,
+      backgroundColor: settings.theme == "light" ? "#ffffff" : "#121212",
+      color: settings.theme == "light" ? "black" :  "#ffffff",
+      borderColor: settings.theme == "light" ? "#ffffff" : "#121212"
+    },
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)"
+    }
+  };
     function formatTime(seconds) {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -53,8 +83,8 @@ function AudioPlayer(props) {
    >
     Your browser does not support the audio element.
    </audio>
-   <div style={{fontSize:"20px", textAlign:"center", padding:"10px 0 10px 0"}}>{props.audio.src}</div>
-   <div style={{fontSize:"30px", textAlign:"center", padding:"20px"}} >{props.audio.txt}</div>
+   <div style={{fontSize:"20px", textAlign:"center", padding:"10px 0 0 0"}}>{props.audio.src}</div>
+   <div style={{fontSize:"20px", textAlign:"justify", padding:"0 20px 0 20px", height:"75%", display:'flex', alignItems:"center", overflowY:"scroll"}} >{props.audio.txt}</div>
    
    <div style={{ "width":"100%"}}>
         <IonRange value={currentTime} onIonChange={(e)=>{
@@ -67,7 +97,11 @@ function AudioPlayer(props) {
            <div style={{marginRight:"5px"}}>{formatTime(currentTime.toFixed(0))}</div>
            
            <IonButton size='small' style={{"height": "36px", width:"48px"}} onClick={()=>{
-            
+            setAlertsMap(prev=>{
+              let dum = {...prev}
+              dum["speed"] = true
+              return dum
+            })
            }} >
               <IonIcon icon={speedometerOutline}></IonIcon>
             </IonButton>
@@ -103,10 +137,9 @@ function AudioPlayer(props) {
               <IonIcon icon={playForwardOutline}></IonIcon>
             </IonButton>
             <IonButton size='small' style={{"height": "36px", width:"48px"}}  onClick={()=>{
-              const downloadLink = document.getElementById('downloadLink');
-              downloadLink.click();
+              window.location.assign(props.audio.url)
             }} >
-              <IonIcon icon={arrowDownCircleOutline}></IonIcon>
+              <IonIcon icon={openOutline}></IonIcon>
             </IonButton>
            
             <div style={{marginLeft:"5px"}}>{audi.current ? ((audi.current.duration && audi.current.duration!="Infinity") ? formatTime(audi.current.duration.toFixed(0)) : "0:00") : "0:00"}</div>
@@ -116,7 +149,52 @@ function AudioPlayer(props) {
             <IonToast isOpen={toast != "false"} onDidDismiss={()=>{
                 setToast("false")
                 }} message={toastMessageMap[toast]} duration={2000}></IonToast>
+
+    <Modal isOpen={alertsMap["speed"]}
+      onRequestClose={()=>{
+        setAlertsMap(prev => {
+          let dum = {...prev}
+          dum["speed"] = false
+          return dum
+        })
+      }}
+      style={customStyles}
+      closeTimeoutMS={200}>
+        <div>
+          <div style={{"textAlign":"center", "marginTop":"10px"}}>Audio Speed Rate {audi.current ? `(${audi.current.playbackRate}x)`  : null}</div>
+          <IonList>
+        {[...["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].map(speed=>{
+          return(
+            <IonItem onClick={()=>{
+              if (audi.current) audi.current.playbackRate = speed;
+              setAlertsMap(prev => {
+                let dum = {...prev}
+                dum["speed"] = false
+                return dum
+              })
+            }} style={{"textAlign":"center"}}>
+              <IonLabel>{speed}x</IonLabel>
+            </IonItem>
+          )
+        })
+      ]}
+      </IonList>
+      <div style={{textAlign:"center", marginTop:"10px"}}>
+        <IonButton onClick={()=>{
+          setAlertsMap(prev => {
+            let dum = {...prev}
+            dum["speed"] = false
+            return dum
+          })
+        }}>
+          Cancel
+        </IonButton>
+      </div>
+        </div>
+
+    </Modal>
             </div>
+            
     )
 }
 
