@@ -6,6 +6,8 @@ import { Goal, Setting, Settings, UserHistory, WordsPerMin } from '../context';
 import { bookmarkOutline, removeCircleOutline } from 'ionicons/icons';
 import {convertTo12HourFormat, formatMinutes} from "../scripts/durationToMinutes"
 import Modal from 'react-modal';
+import uploadObject from '../utils/uploadObject';
+import downloadObject from '../utils/downloadObject';
 
 
 
@@ -162,7 +164,18 @@ function SettingPage() {
                    <IonToggle checked={false} disabled={false}>
                         Backup history with Google Drive
                     </IonToggle>
-                    
+                    <IonButton onClick={()=>{
+												uploadObject("history", userHistory)
+										}} slot="end" fill="outline" style={{marginRight:"10px"}}>Backup
+										</IonButton>
+										
+										<IonButton onClick={()=>{
+											  downloadObject().then((res)=>{
+													setUserHistory(res)
+												})
+										}} slot="end" fill="outline" style={{marginRight:"10px"}}>Restore
+										</IonButton>
+
                     </IonItem>
                     <p style={{margin:"0 0 0 11px"}}>(coming soon...)</p>
                     <div style={{"textAlign": "center", margin:"20px"}}>
