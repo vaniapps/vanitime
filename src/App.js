@@ -289,9 +289,9 @@ function App() {
           </Route>
         </IonRouterOutlet>
         </IonContent>
-        {!`${location.pathname}`.includes("/lecture/") && !`${location.pathname}`.includes("/purports/") ? <IonFooter>
-          <IonToolbar>
-        <IonSegment   value={currentTab} >
+        {!`${location.pathname}`.includes("/lecture/") && !`${location.pathname}`.includes("/purports/") ? <IonFooter style={{zIndex: 0}}>
+          <IonToolbar style={{zIndex: 0}}>
+        <IonSegment  style={{zIndex: 0}}  value={currentTab} >
         {/* <IonSegmentButton style={{ minWidth: 0 }} value="setting"  onClick={()=>history.push("/setting")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>

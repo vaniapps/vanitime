@@ -371,6 +371,7 @@ function Text(){
       }
      
       for(let key of Object.keys(bookmarksMap)) {
+        if(bookmarksMap[key]['children'])
         for (let bookmark of bookmarksMap[key]['children']) {
           if(bookmark["text"]){
             for (let verse of Object.keys(versesMap)) {
