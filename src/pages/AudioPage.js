@@ -347,6 +347,7 @@ function Audio(){
       }
      
       for(let folder of Object.keys(bookmarksMap)) {
+        if(bookmarksMap[folder]['children']){
         for (let bookmark of bookmarksMap[folder]['children']) {
           if(bookmark["text"]){
             if(bookmark["name"] == key) {
@@ -354,6 +355,7 @@ function Audio(){
             }
           }
         }
+      }
       }
 
       for(let highlight of Object.entries(highlights)){

@@ -458,14 +458,48 @@ function Stats(){
                                 }}>{monthList.length && currentGoal["month"] >0 ? Math.round((monthList[monthList.length-1]['duration']/currentGoal["month"])*100) : 0}%</div>
                             </div>
                             </div> </> : 
-                            <div style={{display:"flex", justifyContent:"space-around"}}>
-                                <IonButton onClick={()=>{
-                                    setAlertsMap(prev => {
-                                        let dum = {...prev}
-                                        dum["goals"] = true
-                                        return dum
-                                    })
-                                }}>Set Goals</IonButton>
+                            <div >
+                                <IonList>
+                        <IonItem>
+                        <IonLabel style={{width: "150px"}}>Lectures Daily Goal </IonLabel>
+                        <IonLabel>:</IonLabel>
+                            <IonInput onIonChange={(e)=>{
+                                setTempGoal(prev=>{
+                                    let dum = {...prev}
+                                    dum["lectures"]["day"] = e.detail.value * 1
+                                    dum["lectures"]["week"] = e.detail.value * 7
+                                    dum["lectures"]["month"] = e.detail.value * 30
+                                    return dum
+                                })
+                            }} type="number" min="0" value={tempGoal["lectures"]["day"]!= -1 ? tempGoal["lectures"]["day"] : null} placeholder="in minutes"></IonInput>
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel style={{width: "150px"}}>Books Daily Goal </IonLabel>
+                            <IonLabel>:</IonLabel>
+                            <IonInput onIonChange={(e)=>{
+                                setTempGoal(prev=>{
+                                    let dum = {...prev}
+                                    dum["books"]["day"] = e.detail.value * 1 
+                                    dum["books"]["week"] = e.detail.value * 7
+                                    dum["books"]["month"] = e.detail.value * 30
+                                    return dum
+                                })
+                            }} type="number" min="0" value={tempGoal["books"]["day"] != -1 ? tempGoal["books"]["day"] : null} placeholder="in minutes"></IonInput>
+                        </IonItem>
+                        </IonList>
+                        <div onClick={()=>{
+                            console.log(tempGoal)
+                            if(tempGoal["lectures"]["day"] < 0 || tempGoal["books"]["day"] < 0){
+                                setToast("input")
+                                return
+                            } 
+                            else {
+                                setGoal(tempGoal)
+                            }
+                        }} style={{textAlign:"center", margin: "10px 0 0 0"}}>
+                        <IonButton>Set Goals</IonButton>
+                        </div>
+
                             </div>
                             }
                             </IonCardContent>
@@ -543,67 +577,7 @@ function Stats(){
                     </IonPopover>
                     </div>
                     </div>
-                    <Modal
-                    isOpen={alertsMap["goals"]}
-                    onRequestClose={()=>{
-                        setAlertsMap(prev => {
-                        let dum = {...prev}
-                        dum["goals"] = false
-                        return dum
-                    })
-                    }}
-                    style={customStyles}
-                    closeTimeoutMS={200}
-                    >
-                    <div style={{textAlign:"center", marginTop:"10px"}}>Input the Goals</div>
-                    <IonList>
-                        <IonItem>
-                            <IonInput label="Lectures Daily Goal:" onIonChange={(e)=>{
-                                setTempGoal(prev=>{
-                                    let dum = {...prev}
-                                    dum["lectures"]["day"] = e.detail.value * 1
-                                    dum["lectures"]["week"] = e.detail.value * 7
-                                    dum["lectures"]["month"] = e.detail.value * 30
-                                    return dum
-                                })
-                            }} type="number" min='0' placeholder="in minutes"></IonInput>
-                        </IonItem>
-                        <IonItem>
-                            <IonInput label="Books Daily Goal:" onIonChange={(e)=>{
-                                setTempGoal(prev=>{
-                                    let dum = {...prev}
-                                    dum["books"]["day"] = e.detail.value * 1 
-                                    dum["books"]["week"] = e.detail.value * 7
-                                    dum["books"]["month"] = e.detail.value * 30
-                                    return dum
-                                })
-                            }} type="number" min='0' placeholder="in minutes"></IonInput>
-                        </IonItem>
-                        </IonList>
-                        <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
-                            <IonButton onClick={()=>{
-                                setAlertsMap(prev => {
-                                    let dum = {...prev}
-                                    dum["goals"] = false
-                                    return dum
-                                })
-                            }}>Cancel</IonButton> 
-                            <IonButton onClick={()=>{
-                                if(tempGoal["lectures"]["day"] == -1 || tempGoal["books"]["day"] == -1){
-                                    setToast("input")
-                                    return
-                                } 
-                                else {
-                                    setGoal(tempGoal)
-                                    setAlertsMap(prev => {
-                                        let dum = {...prev}
-                                        dum["goals"] = false
-                                        return dum
-                                    })
-                                }
-                            }}>Done</IonButton>
-                      </div>
-                    </Modal>
+                
                     <IonToast onDidDismiss={()=>{setToast("false")}} isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
                 </IonContent>
         </IonPage>

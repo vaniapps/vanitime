@@ -1,11 +1,14 @@
 import { IonLabel, IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonNote, IonButton, IonButtons,
-IonIcon, IonCheckbox, IonItemDivider, IonRadioGroup, IonRadio, IonRange, IonToggle, IonModal, IonInput, IonToast } from '@ionic/react';
+IonIcon, IonCheckbox, IonItemDivider, IonRadioGroup, IonRadio, IonRange, IonToggle, IonModal, IonInput, IonToast, IonSpinner, IonBackdrop } from '@ionic/react';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useHistory, useParams } from "react-router-dom";
 import { Goal, Setting, Settings, UserHistory, WordsPerMin } from '../context';
 import { bookmarkOutline, removeCircleOutline } from 'ionicons/icons';
 import {convertTo12HourFormat, formatMinutes} from "../scripts/durationToMinutes"
 import Modal from 'react-modal';
+import Login from '../components/Login';
+import Drive from '../components/Drive';
+import axios from 'axios';
 
 
 
@@ -28,36 +31,19 @@ function SettingPage() {
         "input": "Please give valid inputs"
     })
     const [alertsMap, setAlertsMap] = useState({
-        "goals": false
+        "fetching": false,
+        "save": false,
+        "load": false,
     })
-    const customStyles = {
-        content: {
-          top: '50%',
-          left: '50%',
-          right: 'auto',
-          bottom: 'auto',
-          marginRight: '-50%',
-          transform: 'translate(-50%, -50%)',
-          width: "90%",
-          maxWidth: "400px",
-          padding: 0,
-          backgroundColor: settings.theme == "light" ? "#ffffff" : "#121212",
-          color: settings.theme == "light" ? "black" :  "#ffffff",
-          borderColor: settings.theme == "light" ? "#ffffff" : "#121212"
-        },
-        overlay: {
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)"
-        }
-      };
+    
     
     
     return (
+        <>
+       
         <IonPage>
+        
+        {alertsMap["fetching"] ? <div style={{position:"absolute", top:0, left:0, height:"100vh", width:"100%", zIndex:10,  display:"flex", justifyContent:"center", alignItems:"center", backgroundColor:"black", opacity:"0.5"}}><IonSpinner style={{zIndex:11, color:"white"}} /></div> : null}
             <IonHeader>
             <IonToolbar>
                 <div style={{textAlign:"center"}}>
@@ -157,49 +143,13 @@ function SettingPage() {
                     </IonItem>
                    </IonRadioGroup>
 
-                   <IonItemDivider color={"secondary"}>Other Setings</IonItemDivider>
-                   <IonItem>
-                   <IonToggle checked={false} disabled={false}>
-                        Backup history with Google Drive
-                    </IonToggle>
-                    
-                    </IonItem>
-                    <p style={{margin:"0 0 0 11px"}}>(coming soon...)</p>
-                    <div style={{"textAlign": "center", margin:"20px"}}>
-                    <IonButton onClick={()=>{
-                        setAlertsMap(prev => {
-                            let dum = {...prev}
-                            dum["goals"] = true
-                            return dum
-                        })
-                    }} style={{width:"275px"}}>
-                        Edit Goals
-                    </IonButton>
-                    </div>
-                   <div style={{"textAlign": "center", margin:"20px"}}>
-                    <IonButton style={{width:"275px"}}>
-                        Download Content (Offline)
-                    </IonButton>
-                    <p style={{textAlign:"center", margin:"0"}}>(coming soon...)</p>
-                    
-                    </div>
-                    <Modal
-                    isOpen={alertsMap["goals"]}
-                    onRequestClose={()=>{
-                        setAlertsMap(prev => {
-                        let dum = {...prev}
-                        dum["goals"] = false
-                        return dum
-                    })
-                    }}
-                    style={customStyles}
-                    closeTimeoutMS={200}
-                    >
-                  
-                    <div style={{textAlign:"center", marginTop:"10px"}}>Input the Goals</div>
-                    <IonList>
+                   <IonItemDivider color={"secondary"}>VaniTime Goals</IonItemDivider>
+
+                   <IonList>
                         <IonItem>
-                            <IonInput label="Lectures Daily Goal:" onIonChange={(e)=>{
+                        <IonLabel style={{width: "150px"}}>Lectures Daily Goal </IonLabel>
+                        <IonLabel>:</IonLabel>
+                            <IonInput onIonChange={(e)=>{
                                 setTempGoal(prev=>{
                                     let dum = {...prev}
                                     dum["lectures"]["day"] = e.detail.value * 1
@@ -207,10 +157,12 @@ function SettingPage() {
                                     dum["lectures"]["month"] = e.detail.value * 30
                                     return dum
                                 })
-                            }} type="number" min="0" value={tempGoal["lectures"]["day"]} placeholder="in minutes"></IonInput>
+                            }} type="number" min="0" value={tempGoal["lectures"]["day"]!= -1 ? tempGoal["lectures"]["day"] : null} placeholder="in minutes"></IonInput>
                         </IonItem>
                         <IonItem>
-                            <IonInput label="Books Daily Goal:" onIonChange={(e)=>{
+                            <IonLabel style={{width: "150px"}}>Books Daily Goal </IonLabel>
+                            <IonLabel>:</IonLabel>
+                            <IonInput onIonChange={(e)=>{
                                 setTempGoal(prev=>{
                                     let dum = {...prev}
                                     dum["books"]["day"] = e.detail.value * 1 
@@ -218,38 +170,33 @@ function SettingPage() {
                                     dum["books"]["month"] = e.detail.value * 30
                                     return dum
                                 })
-                            }} type="number" min="0" value={tempGoal["books"]["day"]} placeholder="in minutes"></IonInput>
+                            }} type="number" min="0" value={tempGoal["books"]["day"] != -1 ? tempGoal["books"]["day"] : null} placeholder="in minutes"></IonInput>
                         </IonItem>
                         </IonList>
-                        <div style={{display:"flex", justifyContent:"space-evenly", marginTop:"10px"}}>
-                            <IonButton onClick={()=>{
-                                setAlertsMap(prev => {
-                                    let dum = {...prev}
-                                    dum["goals"] = false
-                                    return dum
-                                })
-                            }}>Cancel</IonButton> 
-                            <IonButton onClick={()=>{
-                                if(tempGoal["lectures"]["day"] < 0 || tempGoal["books"]["day"] < 0){
-                                    setToast("input")
-                                    return
-                                } 
-                                else {
-                                    setGoal(tempGoal)
-                                    setAlertsMap(prev => {
-                                        let dum = {...prev}
-                                        dum["goals"] = false
-                                        return dum
-                                    })
-                                }
-                            }}>Done</IonButton>
-                      </div>
-                    </Modal>
+                        <div onClick={()=>{
+                            if(tempGoal["lectures"]["day"] < 0 || tempGoal["books"]["day"] < 0){
+                                setToast("input")
+                                return
+                            } 
+                            else {
+                                setGoal(tempGoal)
+                            }
+                        }} style={{textAlign:"center", margin: "10px"}}>
+                        <IonButton>Save Goals</IonButton>
+                        </div>
+
+                   <IonItemDivider color={"secondary"}>Backup Stats & Bookamrks</IonItemDivider>
+                                     
+                    <div style={{margin: "15px 10px 10px 10px"}}>
+                    <Drive alertsMap={alertsMap} setAlertsMap={setAlertsMap} />
+                    </div>
+                   
                     <IonToast onDidDismiss={()=>{setToast("false")}} isOpen={toast != "false"} message={toastMessageMap[toast]} duration={2000}></IonToast>
                    
-
+                        
                 </IonContent>
         </IonPage>
+        </>
     )
 }
 
