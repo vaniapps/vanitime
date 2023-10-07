@@ -6,8 +6,6 @@ import { Goal, Setting, Settings, UserHistory, WordsPerMin } from '../context';
 import { bookmarkOutline, removeCircleOutline } from 'ionicons/icons';
 import {convertTo12HourFormat, formatMinutes} from "../scripts/durationToMinutes"
 import Modal from 'react-modal';
-import uploadObject from '../utils/uploadObject';
-import downloadObject from '../utils/downloadObject';
 import Login from '../components/Login';
 import Drive from '../components/Drive';
 import axios from 'axios';
