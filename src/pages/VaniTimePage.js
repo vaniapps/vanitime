@@ -314,7 +314,7 @@ function VaniTimePage(){
         })
         }}>
             <IonCardHeader>
-                <IonCardTitle>{booksMap[currentBook.name]["name"]}</IonCardTitle>
+                <IonCardTitle>{currentBook.name=="OB" ? booksMap[currentBook.name]["parts"][currentBook.part]["name"] : booksMap[currentBook.name]["name"]}</IonCardTitle>
                 <IonCardSubtitle>Current Book</IonCardSubtitle>
             </IonCardHeader>
             <IonCardContent>
@@ -322,6 +322,7 @@ function VaniTimePage(){
                 {currentBook.name=="BG" ? <>Chapter: {currentBook.part} | Verse: {currentBook.verse}</> : null}
                 {currentBook.name=="SB" ? <>Canto: {currentBook.part} | Chapter: {currentBook.sub_part} | Verse: {currentBook.verse}</> : null}
                 {currentBook.name=="CC" ? <>Lila: {currentBook.part} | Chapter: {currentBook.sub_part} | Verse: {currentBook.verse}</> : null}
+                {currentBook.name=="OB" ? <>Chapter: {currentBook.verse.replace(/_/g, " ")}</> : null}
                 </div>
             </IonCardContent>
         </IonCard> : <IonCard>
@@ -457,12 +458,12 @@ function VaniTimePage(){
                     }else {
                         setCurrentBook(prev => {
                             let dum = {...tempCurrentBook}
-                            dum["verse"] = "1"
+                            dum["verse"] = Object.keys(booksMap[dum["name"]]["parts"][dum["part"]]["parts"][dum["sub_part"]]["parts"])[0].replace("_", "")
                             return dum
                         });
                         setTempCurrentBook(prev => {
                             let dum = {...prev}
-                            dum["verse"] = "1"
+                            dum["verse"] = Object.keys(booksMap[dum["name"]]["parts"][dum["part"]]["parts"][dum["sub_part"]]["parts"])[0].replace("_", "")
                             return dum
                         });
                         setAlertsMap(prev => {
@@ -487,14 +488,14 @@ function VaniTimePage(){
                             setCurrentBook(prev => {
                                 let dum = {...tempCurrentBook}
                                 dum["sub_part"] = ""
-                                dum["verse"] = "1"
+                                dum["verse"] = Object.keys(booksMap[dum["name"]]["parts"][dum["part"]]["parts"])[0].replace("_", "")
                                 return dum
                             });
 
                             setTempCurrentBook(prev => {
                                 let dum = {...prev}
                                 dum["sub_part"] = ""
-                                dum["verse"] = "1"
+                                dum["verse"] = Object.keys(booksMap[dum["name"]]["parts"][dum["part"]]["parts"])[0].replace("_", "")
                                 return dum
                             });
                             

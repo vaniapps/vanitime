@@ -388,12 +388,15 @@ function App() {
                   const minutes = String(now.getMinutes()).padStart(2, '0');
                   dum[verseKey]["time"] = `${hours}:${minutes}`
                   let verseKeyParts = verseKey.split(/[_\.]/);
+                  if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
+                    verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                  }
                   let verse = booksMap[verseKeyParts[0]]
                   for (let i=1; i<verseKeyParts.length-1; i++) {
                     verse = verse['parts'][verseKeyParts[i]]
                   }
                   verse = verse['parts']["_"+verseKeyParts[verseKeyParts.length-1]]
-                  dum[verseKey]["words_count"] = verse['words_count']
+                  dum[verseKey]["wc"] = verse['wc']
                   return dum
                 })
             }} />
@@ -427,7 +430,7 @@ function App() {
                   for (let verse of Object.entries(currentVersesMap)) {
                     if(verse[1]["checked"] && !verse[1]["done"]) {
                       if(!dum[date][verse[0]]) dum[date][verse[0]]=[]
-                      dum[date][verse[0]].push({"time": verse[1]["time"], "words_count": verse[1]["words_count"]})
+                      dum[date][verse[0]].push({"time": verse[1]["time"], "wc": verse[1]["wc"]})
                     }
                     if(!verse[1]["checked"] && verse[1]["done"]) {
                       dum[date][verse[0]].pop()
@@ -455,6 +458,9 @@ function App() {
                   let verse = ""
                   for (let verseObj of Object.entries(currentVersesMap)) {
                     let verseKeyParts = verseObj[0].split(/[_\.]/);
+                    if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
+                      verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                    }
                     if(verseKeyParts.length == 3) {
                       book=verseKeyParts[0] 
                       chap = verseKeyParts[1]
@@ -485,6 +491,9 @@ function App() {
                     }
                     if(!finalVerse && verse[1]["checked"]) {
                       let verseKeyParts = verse[0].split(/[_\.]/);
+                      if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
+                        verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                      }
                       if(verseKeyParts.length == 3 && dum["name"]==verseKeyParts[0] && dum["part"] == verseKeyParts[1] && dum["verse"] == verseKeyParts[2]) finalVerse = verse[0]
                       if(verseKeyParts.length == 4 && dum["name"]==verseKeyParts[0] && dum["part"] == verseKeyParts[1] && dum["sub_part"] == verseKeyParts[2] && dum["verse"] == verseKeyParts[3]) finalVerse = verse[0]
                     }
@@ -498,6 +507,9 @@ function App() {
                       dum["verse"] = ""
                     } else {
                       let verseKeyParts = finalVerse.split(/[_\.]/);
+                      if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
+                        verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                      }
                       if(verseKeyParts.length == 3) {
                         dum["name"]=verseKeyParts[0] 
                         dum["part"] = verseKeyParts[1]

@@ -108,7 +108,7 @@ function Stats(){
             if(userHistory[formattedDate]) {
                 for(let content of Object.entries(userHistory[formattedDate])) {
                     for (let entry of content[1]) {
-                        duration+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? (!entry.duration ? Math.round(entry.words_count / wordsPerMin) : entry.duration) : 0)
+                        duration+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? (!entry.duration ? Math.round(entry.wc / wordsPerMin) : entry.duration) : 0)
                         count+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? 1 : 0)                    
                     }
                 }
@@ -358,7 +358,7 @@ function Stats(){
                             if(userHistory[formattedDate]) {
                                 for(let content of Object.entries(userHistory[formattedDate])) {
                                     for (let entry of content[1]) {
-                                        duration+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? (!entry.duration ? Math.round(entry.words_count / wordsPerMin) : entry.duration) : 0)
+                                        duration+= ((currentMode == "all" || (currentMode == "lectures" ? entry.duration : !entry.duration)) ? (!entry.duration ? Math.round(entry.wc / wordsPerMin) : entry.duration) : 0)
                                     }
                                 }
                             }

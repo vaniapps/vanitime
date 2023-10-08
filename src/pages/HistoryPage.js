@@ -19,7 +19,7 @@ function History() {
         if(userHistory[key]){
             for (let entry of Object.entries(userHistory[key])) {
                 for (let i=0; i< entry[1].length; i++) {
-                    entryList.push({"name": entry[0], "time": entry[1][i]["time"], "isChecked": false, "index": i, "duration": entry[1][i]["duration"] ?? Math.round(entry[1][i]["words_count"] / wordsPerMin) })
+                    entryList.push({"name": entry[0], "time": entry[1][i]["time"], "isChecked": false, "index": i, "duration": entry[1][i]["duration"] ?? Math.round(entry[1][i]["wc"] / wordsPerMin) })
                 }
             }
         }

@@ -33,30 +33,30 @@ function Book() {
                     rwc2 = 0
                     if(Object.keys(dum[key1]['parts'][key2]['parts'])[0].startsWith("_")){
                         for (let key3 of Object.keys(dum[key1]['parts'][key2]['parts'])) {
-                            wc2+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]["words_count"]))
-                            if (dum[key1]['parts'][key2]['parts'][key3]["read"]) rwc2+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]["words_count"]))
+                            wc2+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]["wc"]))
+                            if (dum[key1]['parts'][key2]['parts'][key3]["read"]) rwc2+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]["wc"]))
                         }
                     }else{
                         for (let key3 of Object.keys(dum[key1]['parts'][key2]['parts'])) {
                             wc3=0
                             rwc3=0
                             for (let key4 of Object.keys(dum[key1]['parts'][key2]['parts'][key3]['parts'])) {
-                                wc3+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]['parts'][key4]["words_count"]))
-                                if(dum[key1]['parts'][key2]['parts'][key3]['parts'][key4]["read"]) rwc3+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]['parts'][key4]["words_count"]))
+                                wc3+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]['parts'][key4]["wc"]))
+                                if(dum[key1]['parts'][key2]['parts'][key3]['parts'][key4]["read"]) rwc3+=(Math.round(dum[key1]['parts'][key2]['parts'][key3]['parts'][key4]["wc"]))
                             }
-                            dum[key1]["parts"][key2]["parts"][key3]["words_count"] = wc3
-                            dum[key1]["parts"][key2]["parts"][key3]["read_words_count"] = rwc3
+                            dum[key1]["parts"][key2]["parts"][key3]["wc"] = wc3
+                            dum[key1]["parts"][key2]["parts"][key3]["read_wc"] = rwc3
                             wc2+=wc3
                             rwc2+=rwc3
                         }
                     }
-                    dum[key1]["parts"][key2]["words_count"] = wc2
-                    dum[key1]["parts"][key2]["read_words_count"] = rwc2
+                    dum[key1]["parts"][key2]["wc"] = wc2
+                    dum[key1]["parts"][key2]["read_wc"] = rwc2
                     wc1+=wc2
                     rwc1+=rwc2
                 }
-                dum[key1]["words_count"] = wc1
-                dum[key1]["read_words_count"] = rwc1
+                dum[key1]["wc"] = wc1
+                dum[key1]["read_wc"] = rwc1
             }
             return dum
     }
@@ -211,21 +211,23 @@ function Book() {
             </IonHeader>
             <IonContent>
                 {currentBook ? Object.entries(currentBook).map(([partKey, partValue])=>{
+                    console.log(currentBook)
                     return(
                         <IonItem onClick={()=>{
                             if(!markRead && !markUnread) {
-                                if(partKey.startsWith("_")) history.push("/purports/"+key+"."+partKey.replace("_", ""))
+                                if(partKey.split('_').length - 1 > 1) history.push("/purports/"+partKey.replace("_", ""))
+                                else if(partKey.startsWith("_")) history.push("/purports/"+key+"."+partKey.replace("_", ""))
                                 else if(!isNaN(keysList[keysList.length-1]) && !isNaN(partKey.replace("-", "")))
                                 history.push(`${url}.${partKey}`)
                                 else history.push(`${url}_${partKey}`)
                             }
                         }}>
                             <IonLabel>
-                                {partValue.name ?? partKey.replace("_", "")}
+                                {partValue.name ?? partKey.replace("_", "").replace(/_/g, " ")}
                             </IonLabel>
                             {partValue.read ? <IonIcon color="primary" style={{marginRight:"5px"}} icon={checkmarkOutline}></IonIcon> : ""}
-                            {!partKey.startsWith("_") ? <IonNote>{formatMinutes(Math.round(partValue.read_words_count/wordsPerMin))} | {formatMinutes(Math.round(partValue.words_count/wordsPerMin))} ({Math.floor((partValue.read_words_count/partValue.words_count)*100)}%)</IonNote> :
-                            <IonNote>{formatMinutes(Math.round(partValue.words_count/wordsPerMin))}</IonNote>}
+                            {!partKey.startsWith("_") ? <IonNote>{formatMinutes(Math.round(partValue.read_wc/wordsPerMin))} | {formatMinutes(Math.round(partValue.wc/wordsPerMin))} ({Math.floor((partValue.read_wc/partValue.wc)*100)}%)</IonNote> :
+                            <IonNote>{formatMinutes(Math.round(partValue.wc/wordsPerMin))}</IonNote>}
                             {markRead || markUnread ? (
                                 <IonCheckbox
                                 style={{marginLeft:"15px"}}

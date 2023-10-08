@@ -34,30 +34,30 @@ function Vanibase() {
                     rwc2 = 0
                     if(Object.keys(booksMap[key1]['parts'][key2]['parts'])[0].startsWith("_")){
                         for (let key3 of Object.keys(booksMap[key1]['parts'][key2]['parts'])) {
-                            wc2+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]["words_count"]))
-                            if (booksMap[key1]['parts'][key2]['parts'][key3]["read"]) rwc2+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]["words_count"]))
+                            wc2+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]["wc"]))
+                            if (booksMap[key1]['parts'][key2]['parts'][key3]["read"]) rwc2+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]["wc"]))
                         }
                     }else{
                         for (let key3 of Object.keys(booksMap[key1]['parts'][key2]['parts'])) {
                             wc3=0
                             rwc3=0
                             for (let key4 of Object.keys(booksMap[key1]['parts'][key2]['parts'][key3]['parts'])) {
-                                wc3+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]['parts'][key4]["words_count"]))
-                                if(booksMap[key1]['parts'][key2]['parts'][key3]['parts'][key4]["read"]) rwc3+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]['parts'][key4]["words_count"]))
+                                wc3+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]['parts'][key4]["wc"]))
+                                if(booksMap[key1]['parts'][key2]['parts'][key3]['parts'][key4]["read"]) rwc3+=(Math.round(booksMap[key1]['parts'][key2]['parts'][key3]['parts'][key4]["wc"]))
                             }
-                            dum[key1]["parts"][key2]["parts"][key3]["words_count"] = wc3
-                            dum[key1]["parts"][key2]["parts"][key3]["read_words_count"] = rwc3
+                            dum[key1]["parts"][key2]["parts"][key3]["wc"] = wc3
+                            dum[key1]["parts"][key2]["parts"][key3]["read_wc"] = rwc3
                             wc2+=wc3
                             rwc2+=rwc3
                         }
                     }
-                    dum[key1]["parts"][key2]["words_count"] = wc2
-                    dum[key1]["parts"][key2]["read_words_count"] = rwc2
+                    dum[key1]["parts"][key2]["wc"] = wc2
+                    dum[key1]["parts"][key2]["read_wc"] = rwc2
                     wc1+=wc2
                     rwc1+=rwc2
                 }
-                dum[key1]["words_count"] = wc1
-                dum[key1]["read_words_count"] = rwc1
+                dum[key1]["wc"] = wc1
+                dum[key1]["read_wc"] = rwc1
             }
             return dum
         })
@@ -97,6 +97,7 @@ function Vanibase() {
                 <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
                 <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
             {Object.entries(booksMap).map(([bookKey, bookValue]) => {
+                console.log(bookValue.wc, wordsPerMin)
                 return (
                 <IonCard onClick={()=>{
                     history.push(`/bookindex/${bookKey}`)
@@ -105,26 +106,14 @@ function Vanibase() {
                     
                     <IonCardTitle style={{"textAlign": "center"}}>{bookValue.name}</IonCardTitle>
                     <div style={{display:"flex", justifyContent:"space-between"}}>
-                    <IonLabel>{formatMinutes(Math.round(bookValue.read_words_count/wordsPerMin))} ({Math.floor((bookValue.read_words_count/bookValue.words_count)*100)}%)</IonLabel>
-                    <IonLabel>{formatMinutes(Math.round(bookValue.words_count/wordsPerMin))}</IonLabel>
+                    <IonLabel>{formatMinutes(Math.round(bookValue.read_wc/wordsPerMin))} ({Math.floor((bookValue.read_wc/bookValue.wc)*100)}%)</IonLabel>
+                    <IonLabel>{formatMinutes(Math.round(bookValue.wc/wordsPerMin))}</IonLabel>
                    
                     </div>
                     </IonCardContent>
                 </IonCard>
                 )
             })}
-
-            <IonCard onClick={()=>{
-                history.push(`/otherbooks`)
-            }}>
-                <IonCardContent style={{"textAlign": "center", paddingTop: "20px", paddingBottom:"5px"}}>
-                <IonCardTitle><IonLabel style={{"textAlign": "center"}}>Other Books</IonLabel></IonCardTitle>
-                <div style={{display:"flex", justifyContent:"space-between"}}>
-                    <IonLabel>{formatMinutes(0)} (0%)</IonLabel>
-                    <IonLabel>{formatMinutes(0)}</IonLabel>
-                    </div>
-                </IonCardContent>
-            </IonCard>
 
             <IonCard onClick={()=>{
                 history.push(`/lectureindex/year`)

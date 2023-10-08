@@ -2,6 +2,7 @@ import {hoursToMinutes} from "./durationToMinutes";
 
 function purportsList(booksData, bookName) {
   const purports = [];
+  console.log(bookName)
 
   if (bookName === "BG") {
     for (const chapterIndex in booksData["BG"]["parts"]) {
@@ -9,7 +10,7 @@ function purportsList(booksData, bookName) {
         purports.push([
           "BG_" + chapterIndex + "." + verse.slice(1),
           "Bhagavad Gita " + chapterIndex + "." + verse.slice(1),
-          booksData["BG"]["parts"][chapterIndex]["parts"][verse]["words_count"],
+          booksData["BG"]["parts"][chapterIndex]["parts"][verse]["wc"],
         ]);
       }
     }
@@ -20,7 +21,7 @@ function purportsList(booksData, bookName) {
           purports.push([
             "SB_" + cantoIndex + "." + chapterIndex + "." + verse.slice(1),
             "Srimad Bhagavatam " + cantoIndex + "." + chapterIndex + "." + verse.slice(1),
-            booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["parts"][verse]["words_count"],
+            booksData["SB"]["parts"][cantoIndex]["parts"][chapterIndex]["parts"][verse]["wc"],
           ]);
         }
       }
@@ -32,10 +33,19 @@ function purportsList(booksData, bookName) {
           purports.push([
             "CC_" + lila + "_" + chapterIndex + "." + verse.slice(1),
             "Caitanya Caritamrta " + lila + "." + chapterIndex + "." + verse.slice(1),
-            booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"][verse]["words_count"],
+            booksData["CC"]["parts"][lila]["parts"][chapterIndex]["parts"][verse]["wc"],
           ]);
         }
       }
+    }
+  } else if(booksData["OB"]["parts"][bookName]) {
+    console.log("wqsdaq")
+    for (const chapterName in booksData["OB"]["parts"][bookName]["parts"]) {
+      purports.push([
+        chapterName.slice(1),
+        chapterName.slice(1),
+        booksData["OB"]["parts"][bookName]["parts"][chapterName]["wc"],
+      ]);
     }
   }
 
@@ -43,7 +53,11 @@ function purportsList(booksData, bookName) {
 }
 
 function findNextPurports(booksMap, currentBook, vaniTime, wordsPerMin = 50) {
-  let startingPurport=currentBook["name"]+"_"+currentBook["part"]+ (currentBook["name"]=="CC" ? "_" : ".") + currentBook["sub_part"] + (currentBook["sub_part"] ? "." : "")+currentBook["verse"]
+  
+  let startingPurport = ""
+  if(currentBook["name"] == "OB") startingPurport = currentBook["verse"]
+  else startingPurport=currentBook["name"]+"_"+currentBook["part"]+ (currentBook["name"]=="CC" ? "_" : ".") + currentBook["sub_part"] + (currentBook["sub_part"] ? "." : "")+currentBook["verse"]
+  console.log(startingPurport)
   const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
   let totalWords = wordsPerMin * hoursToMinutes(vaniTime);
   let wordsSumSoFar = 0;
@@ -82,8 +96,10 @@ export function findNextPurport(booksMap, currentVerse) {
 }
 
 export function findPreviousPurport(booksMap, currentVerse) {
+  console.log(currentVerse)
   let startingPurport=currentVerse
   const purportList = purportsList(booksMap, startingPurport.split("_")[0]);
+  console.log(purportList)
   const startingIndex = purportList.findIndex(purport => purport[0] === startingPurport);
   if (startingIndex === -1) {
     console.error("Starting purport not found.");
