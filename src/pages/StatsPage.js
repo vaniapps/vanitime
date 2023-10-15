@@ -21,6 +21,7 @@ import {
  isPlatform,
  IonButtons,
  IonMenuButton,
+ IonSpinner,
 } from '@ionic/react'
 import { chevronDownOutline, settingsOutline } from 'ionicons/icons'
 import { useContext, useEffect, useState } from 'react'
@@ -53,6 +54,7 @@ function Stats() {
 
  const [goal, setGoal] = useContext(Goal)
  const [tempGoal, setTempGoal] = useState(JSON.parse(JSON.stringify(goal)))
+ const [calculated, setCalculated] = useState(false)
  const [currentGoal, setCurrentGoal] = useState({
   day: 0,
   week: 0,
@@ -67,6 +69,7 @@ function Stats() {
   return `${day}-${month}-${year}`
  }
  useEffect(() => {
+  setCalculated(false)
   // Find the oldest date
   const dates = Object.keys(userHistory)
   const oldestDate = new Date(
@@ -196,6 +199,8 @@ function Stats() {
    if (currentMode == 'books') dum = goal.books
    return dum
   })
+  setTimeout(()=>{setCalculated(true)},500)
+  
  }, [currentMode])
 
  useEffect(() => {
@@ -355,14 +360,31 @@ function Stats() {
       isPlatform('desktop') ? { display: 'flex', justifyContent: 'center' } : {}
      }
     >
+      {!calculated ? (
+    <div
+     style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      height: '100vh',
+      width: '100%',
+      zIndex: 10,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+     }}
+    >
+     <IonSpinner style={{ zIndex: 11 }} />
+    </div>
+   ) : null}
      <div
       style={
        isPlatform('desktop')
         ? {
            width: '400px',
-           visibility: dayList.length > 0 ? 'visible' : 'hidden',
+           visibility: calculated ? 'visible' : 'hidden'
           }
-        : {}
+        : {visibility: calculated ? 'visible' : 'hidden'}
       }
      >
       <IonCard>

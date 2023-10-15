@@ -180,7 +180,7 @@ function VaniBase(props) {
       isPlatform('desktop') ? { display: 'flex', justifyContent: 'center' } : {}
      }
     >
-     <div style={isPlatform('desktop') ? { width: '420px' } : {}}>
+     <div style={isPlatform('desktop') ? { width: '400px' } : {}}>
       {searchText ? (
        <Search
         searchResultsHook={{

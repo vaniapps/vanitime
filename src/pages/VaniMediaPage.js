@@ -227,7 +227,7 @@ function VaniMedia(props) {
      <div
       style={
        isPlatform('desktop')
-        ? { width: '420px', height: '100%' }
+        ? { width: '400px', height: '100%' }
         : { height: '100%' }
       }
      >

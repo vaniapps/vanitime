@@ -217,7 +217,7 @@ function VaniTimePage() {
       isPlatform('desktop') ? { display: 'flex', justifyContent: 'center' } : {}
      }
     >
-     <div style={isPlatform('desktop') ? { width: '420px' } : {}}>
+     <div style={isPlatform('desktop') ? { width: '400px' } : {}}>
       <div
        style={{
         marginTop: '10px',
