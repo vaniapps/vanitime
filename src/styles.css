@@ -1,163 +1,144 @@
 html.plt-mobile ion-app {
-  -webkit-user-select: auto;
-  -moz-user-select: auto;
-  -ms-user-select: auto;
-  user-select: auto;
+ -webkit-user-select: auto;
+ -moz-user-select: auto;
+ -ms-user-select: auto;
+ user-select: auto;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 body::-webkit-scrollbar {
-  display: none;
+ display: none;
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
 body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+ -ms-overflow-style: none; /* IE and Edge */
+ scrollbar-width: none; /* Firefox */
 }
 
-
-
-.noselect{
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  user-select: none !important;
+.noselect {
+ -webkit-user-select: none !important;
+ -moz-user-select: none !important;
+ -ms-user-select: none !important;
+ user-select: none !important;
 }
 
 .wrapper {
-  margin-left: 10px;
-  margin-right: 10px;
-  max-height: 200px;
-  overflow-y: auto;
+ margin-left: 10px;
+ margin-right: 10px;
+ max-height: 200px;
+ overflow-y: auto;
 }
-  
+
 .ReactModal__Overlay {
-  opacity: 0;
-  transition: opacity 200ms ease-in-out;
+ opacity: 0;
+ transition: opacity 200ms ease-in-out;
 }
 
-.ReactModal__Overlay--after-open{
-    opacity: 1;
+.ReactModal__Overlay--after-open {
+ opacity: 1;
 }
 
-.ReactModal__Overlay--before-close{
-    opacity: 0;
+.ReactModal__Overlay--before-close {
+ opacity: 0;
 }
 
 #container {
-  min-width: 200px;
-  height: 400px;
+ min-width: 200px;
+ height: 400px;
 }
 
 ion-card {
-  box-shadow: var(--ion-box-shadow);
-  --color: var(--ion-card-text-color);
+ box-shadow: var(--ion-box-shadow);
+ --color: var(--ion-card-text-color);
 }
 
 ion-datetime {
-  --background: var(--ion-background-color);
-  --background-rgb: var(--ion-background-rgb);
-  --wheel-highlight-background: #CCEEFF;
+ --background: var(--ion-background-color);
+ --background-rgb: var(--ion-background-rgb);
+ --wheel-highlight-background: #cceeff;
 }
 
 ion-datetime::part(wheel-item active) {
-  color: rgba(0, 0, 0);
+ color: rgba(0, 0, 0);
 }
 
 ion-item {
-  --background: rgba(0, 0, 0, 0); /* Fully transparent background */
+ --background: rgba(0, 0, 0, 0); /* Fully transparent background */
 }
 
 ion-checkbox::part(container) {
-  border-radius: 6px;
-  border: var(--ion-border);
+ border-radius: 6px;
+ border: var(--ion-border);
 }
 
 ion-toggle::part(track),
 ion-toggle.toggle-checked::part(track) {
-  
-  border: var(--ion-border);
-  
+ border: var(--ion-border);
 }
 
 ion-card-title {
-  white-space: nowrap;
-  overflow: hidden;    
-  text-overflow: ellipsis;
-  max-width: 100%;
-  font-size: var(--ion-card-title-size);
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ max-width: 100%;
+ font-size: var(--ion-card-title-size);
 }
 
 audio {
-  width: 100%;
-  display: block;
+ width: 100%;
+ display: block;
 }
 
 ion-range {
-  --bar-height: 3px;
-  --knob-size: 15px;
+ --bar-height: 3px;
+ --knob-size: 15px;
 }
 
 .container {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  padding: 80px;
+ align-items: center;
+ display: flex;
+ flex-direction: column;
+ padding: 80px;
 }
 
 ion-action-sheet.action-dark .action-sheet-group {
-  background: #181818;
+ background: #181818;
 }
 
-
 .container1 {
-  position: relative;
-  width: 80%;
-  margin: 0 auto;
-  padding: 20px;
+ position: relative;
+ width: 80%;
+ margin: 0 auto;
+ padding: 20px;
 }
 
 .custom-menu {
-  display: none;
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+ display: none;
+ position: absolute;
+ background-color: white;
+ border: 1px solid #ccc;
+ box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+ z-index: 1000;
 }
 
 .context-option {
-  padding: 8px;
-  cursor: pointer;
+ padding: 8px;
+ cursor: pointer;
 }
 
 .context-option:hover {
-  background-color: #f0f0f0;
+ background-color: #f0f0f0;
 }
 
 .notes {
-  user-select: none;
+ user-select: none;
 }
-
-/* .highlightotes {
-  border-bottom: 2px solid transparent;
-  border-image: linear-gradient(to right, #f06, #f93) 1;
-} */
 
 .video-list-container {
-  height: 100%;
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+ height: 100%;
+ overflow-y: scroll;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
 }
-
-
-
-
-
-
-
-
-
