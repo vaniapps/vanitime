@@ -118,7 +118,7 @@ function History() {
                 </IonHeader>
                 <IonContent>
                     
-                    <IonList>
+                    {entryList.length > 0 ? <IonList>
                   
                         {entryList.map(entry=>{
                             return (
@@ -149,7 +149,9 @@ function History() {
                             )
                         })}
                             
-                    </IonList>
+                    </IonList> : <div style={{height:"100%", display: 'flex', alignItems:"center", justifyContent:"center"}}>
+                        No history found for this day!
+                        </div>}
 
                 </IonContent>
         </IonPage>

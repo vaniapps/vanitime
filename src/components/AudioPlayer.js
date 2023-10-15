@@ -84,7 +84,7 @@ function AudioPlayer(props) {
     Your browser does not support the audio element.
    </audio>
    <div style={{fontSize:"20px", textAlign:"center", padding:"10px 0 0 0"}}>{props.audio.src}</div>
-   <div style={{fontSize:"20px", textAlign:"justify", padding:"0 20px 0 20px", height:"75%", display:'flex', alignItems:"center", overflowY:"scroll"}} >{props.audio.txt}</div>
+   <div style={{fontSize:"18px", textAlign:"justify", padding:"0 20px 0 20px", height:"75%", display:'flex', alignItems:"center", overflowY:"scroll"}} >{props.audio.text}</div>
    
    <div style={{ "width":"100%"}}>
         <IonRange value={currentTime} onIonChange={(e)=>{

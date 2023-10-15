@@ -51,6 +51,10 @@ function Text(){
   const [selectedHighlight, setSelectedHighlight] = useState({})
   const [editNotes, setEditNotes] = useState(false)
   const [fabButtonActivated, setFabButtonActivated] = useState(false)
+  const [searchWords, setSearchWords] = useState([])
+  useEffect(()=>{
+    setSearchWords(window.location.search)
+  },[])
   const customStyles = {
     content: {
       top: '50%',
@@ -77,7 +81,6 @@ function Text(){
   };
 
   const parseXmlToHtml = (xmlData, verse) => {
-      console.log(xmlData, verse)
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
      
@@ -97,6 +100,7 @@ function Text(){
       textContent = textContent.replace(/\bTEXT\s+\d+\b/, verse.replace("_", " "))
       textContent = textContent.replace(/<i.*?>/g, "").replace(/<\/i>/g, "");
       textContent = textContent.replace(/<p[^>]*>(.*?)<a[^>]*>(.*?)<\/a>(.*?)<\/p>/g, '')
+      textContent = textContent.replace(/\[\<\/span>edit/g, '').replace(/\]<\/span>/g, "")
     
       let parsedDocument = parser.parseFromString(textContent, 'text/html');
       let elements = parsedDocument.querySelectorAll('*');
@@ -127,7 +131,6 @@ function Text(){
       textContent = parsedDocument.documentElement.outerHTML;
 
       const htmlData = textContent.replace(/"/g, '');
-      console.log(htmlData)
       return htmlData;
   }
   
@@ -147,13 +150,11 @@ function Text(){
 
 
   useEffect(()=>{
-    
     const fetchData = async () => {
       try {
-        console.log("fetching....")
         const fetchPromises = Object.keys(versesMap).map(verse => {
            return axios.get("https://vanisource.org/w/api.php?action=parse&prop=text&format=xml&page="+verse)
-        } );
+        });
         const responses = await Promise.all(fetchPromises);
   
         const parsedHtmlContents = responses.map((response, i) => {
@@ -180,6 +181,9 @@ function Text(){
     const containerDiv = document.getElementsByClassName('content-container')[0];
     if(containerDiv){
     function onSelect(){
+      if(searchWords) {
+        setSearchWords("")
+      }
       const selection = window.getSelection();
       const selectedText = selection.toString();
       if(selectedText){
@@ -230,7 +234,6 @@ function Text(){
 
     containerDiv.addEventListener("click", (event) => {
       const clickedElement = event.target;
-      console.log(clickedElement.id)
       if(clickedElement.id.includes("@notes")){
         for (let bookmark of Object.entries(bookmarksMap)){
           for (let i=0; i<bookmark[1]['children'].length; i++) {
@@ -322,12 +325,23 @@ function Text(){
             element.innerHTML = modifiedHTML;
           }
         }
-        setHtmlContent(parsedDocument.documentElement.outerHTML);
+        let textContent = parsedDocument.documentElement.outerHTML
+        if(searchWords){
+          let wordsMap = {}
+          searchWords.slice(4).split("|").forEach((word)=>{
+            wordsMap[word] = true
+          })
+          Object.keys(wordsMap).forEach((word)=>{
+            let pattern = new RegExp(`\\b${word}\\b`, "g");
+            textContent = textContent.replace(pattern, "<span class='searchtext'>"+word+"</span>")
+          })
+        }
+        setHtmlContent(textContent);
       }
 
       function makehighlights(text, start_id, end_id, start_index, end_index, color, timestamp){
         let startColoring = false
-        if(!htmlContent.includes(start_id)) startColoring = true
+        // if(!htmlContent.includes(start_id)) startColoring = true
         const parser = new DOMParser();
         const parsedDocument = parser.parseFromString(tempHtmlContent, 'text/html');
         const elements = parsedDocument.querySelectorAll('*');
@@ -446,7 +460,7 @@ function Text(){
       }
       colorHtml()
     }
-  }, [contentLoaded, bookmarksMap])
+  }, [contentLoaded, bookmarksMap, searchWords])
 
   function setHighlightColor(color){
     setSettings(prev=>{
@@ -714,7 +728,6 @@ function Text(){
           for (let bookmark of Object.entries(dum)){
             for (let i=0; i<bookmark[1]['children'].length; i++) {
               if(bookmark[1]['children'][i].timestamp == selectedHighlight.timestamp) {
-                console.log(bookmark[1]['children'][i].timestamp,selectedHighlight.timestamp)
                 dum[bookmark[0]]['children'].splice(i,1)
                 break
               }
@@ -796,10 +809,9 @@ function Text(){
                   const minutes = String(now.getMinutes()).padStart(2, '0');
                   dum[verseKey]["time"] = `${hours}:${minutes}`
                   let verseKeyParts = verseKey.split(/[_\.]/);
-                  if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                    verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                  if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                    verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR": verseKeyParts[0], verseKeyParts.join("_")]
                   }
-                  console.log(verseKeyParts)
                   let verse = booksMap[verseKeyParts[0]]
                   for (let i=1; i<verseKeyParts.length-1; i++) {
                     verse = verse['parts'][verseKeyParts[i]]
@@ -858,7 +870,6 @@ function Text(){
                   }
                   return dum
                 })
-                console.log(tempBooksMap)
                 setBooksMap(prev=>{
                   let dum =  JSON.parse(JSON.stringify(tempBooksMap))
                   let book = ""
@@ -867,8 +878,8 @@ function Text(){
                   let verse = ""
                   for (let verseObj of Object.entries(versesMap)) {
                     let verseKeyParts = verseObj[0].split(/[_\.]/);
-                    if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                      verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                    if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                      verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                     }
                     if(verseKeyParts.length == 3) {
                       book=verseKeyParts[0] 
@@ -900,8 +911,8 @@ function Text(){
                     }
                     if(!finalVerse && verse[1]["checked"]) {
                       let verseKeyParts = verse[0].split(/[_\.]/);
-                      if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                        verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                      if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                        verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                       }
                       if(verseKeyParts.length == 3 && dum["name"]==verseKeyParts[0] && dum["part"] == verseKeyParts[1] && dum["verse"] == verseKeyParts[2]) finalVerse = verse[0]
                       if(verseKeyParts.length == 4 && dum["name"]==verseKeyParts[0] && dum["part"] == verseKeyParts[1] && dum["sub_part"] == verseKeyParts[2] && dum["verse"] == verseKeyParts[3]) finalVerse = verse[0]
@@ -916,8 +927,8 @@ function Text(){
                       dum["verse"] = ""
                     } else {
                       let verseKeyParts = finalVerse.split(/[_\.]/);
-                      if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                        verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                      if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                        verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                       }
                       if(verseKeyParts.length == 3) {
                         dum["name"]=verseKeyParts[0] 
@@ -963,9 +974,7 @@ function Text(){
             <IonCheckbox checked={verseValue.bookmarked} onIonChange={(e) => {
                 setVersesMap(prev=>{
                   let dum = {...prev}
-                  console.log(e.detail.checked)
                   dum[verseKey]["bookmarked"] = e.detail.checked
-                  console.log(dum)
                   return dum
                 })
             }} />
@@ -1174,7 +1183,6 @@ function Text(){
                       dum[bookmark_folder_name] = {"children": [], "isChecked": false}
                     }  
                     for (let verse of Object.entries(versesMap)) {
-                      console.log(verse)
                       if(verse[1]["bookmarked"]) dum[bookmark_folder_name]["children"].push({"name": verse[0], "type": "verse", "isChecked": false})
                     }
                     return dum 

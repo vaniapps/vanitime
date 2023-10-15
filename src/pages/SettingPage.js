@@ -3,12 +3,11 @@ IonIcon, IonCheckbox, IonItemDivider, IonRadioGroup, IonRadio, IonRange, IonTogg
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useHistory, useParams } from "react-router-dom";
 import { Goal, Setting, Settings, UserHistory, WordsPerMin } from '../context';
-import { bookmarkOutline, removeCircleOutline } from 'ionicons/icons';
+import { bookmarkOutline, removeCircleOutline, chevronBackOutline } from 'ionicons/icons';
 import {convertTo12HourFormat, formatMinutes} from "../scripts/durationToMinutes"
 import Modal from 'react-modal';
 import Login from '../components/Login';
 import Drive from '../components/Drive';
-import axios from 'axios';
 
 
 
@@ -28,7 +27,8 @@ function SettingPage() {
     const [tempGoal, setTempGoal] = useState(JSON.parse(JSON.stringify(goal)))
     const [toast, setToast] = useState("false")
     const [toastMessageMap, setToastMessageMap] = useState({
-        "input": "Please give valid inputs"
+        "input": "Please give valid inputs",
+        "goals_saved": "Goals are saved!"
     })
     const [alertsMap, setAlertsMap] = useState({
         "fetching": false,
@@ -46,8 +46,19 @@ function SettingPage() {
         {alertsMap["fetching"] ? <div style={{position:"absolute", top:0, left:0, height:"100vh", width:"100%", zIndex:10,  display:"flex", justifyContent:"center", alignItems:"center", backgroundColor:"black", opacity:"0.5"}}><IonSpinner style={{zIndex:11, color:"white"}} /></div> : null}
             <IonHeader>
             <IonToolbar>
+            <IonButtons slot="start">
+    <IonButton onClick={()=>{
+            if(history.length > 1){
+              history.goBack()
+            }else{
+              history.push("/")
+            }
+    }}>
+    <IonIcon icon={chevronBackOutline}></IonIcon>
+    </IonButton>
+    </IonButtons>
                 <div style={{textAlign:"center"}}>
-                <IonLabel>Setting</IonLabel>
+                <IonLabel>Settings</IonLabel>
                 </div>
             </IonToolbar>
                 </IonHeader>
@@ -121,6 +132,28 @@ function SettingPage() {
                    <div style={{marginRight:"10px", marginLeft:"13px"}}>200</div>
                    </div>
 
+                   <IonItemDivider color={"secondary"}>Home Page</IonItemDivider>
+                   <IonRadioGroup value={settings.home_page} onIonChange={(e)=>{
+                    setSettings(prev=>{
+                        let dum = {...prev}
+                        dum.home_page = e.detail.value
+                        return dum
+                    })
+                   }}>
+                   <IonItem>
+                        <IonLabel>VaniTime</IonLabel>
+                        <IonRadio slot="end" value="vanitime" />
+                    </IonItem>
+                    <IonItem>
+                        <IonLabel>VaniMedia</IonLabel>
+                        <IonRadio slot="end" value="vanimedia" />
+                    </IonItem>
+                    <IonItem>
+                        <IonLabel>VaniBase</IonLabel>
+                        <IonRadio slot="end" value="vanibase" />
+                    </IonItem>
+                   </IonRadioGroup>
+
                    <IonItemDivider color={"secondary"}>Display Read/Heard Alerts</IonItemDivider>
                    <IonRadioGroup value={settings.check_alerts} onIonChange={(e)=>{
                     setSettings(prev=>{
@@ -180,6 +213,7 @@ function SettingPage() {
                             } 
                             else {
                                 setGoal(tempGoal)
+                                setToast("goals_saved")
                             }
                         }} style={{textAlign:"center", margin: "10px"}}>
                         <IonButton>Save Goals</IonButton>

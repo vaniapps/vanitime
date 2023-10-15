@@ -55,6 +55,10 @@ function Audio(){
     const [selectedHighlight, setSelectedHighlight] = useState({})
     const [editNotes, setEditNotes] = useState(false)
     const [fabButtonActivated, setFabButtonActivated] = useState(false)
+    const [searchWords, setSearchWords] = useState([])
+    useEffect(()=>{
+      setSearchWords(window.location.search)
+    },[])
     const customStyles = {
       content: {
         top: '50%',
@@ -161,6 +165,9 @@ function Audio(){
       const containerDiv = document.getElementsByClassName('content-container')[0];
       if(containerDiv){
       function onSelect() {
+        if(searchWords) {
+          setSearchWords("")
+        }
         const selection = window.getSelection();
         const selectedText = selection.toString();
         if(selectedText){
@@ -295,12 +302,23 @@ function Audio(){
             element.innerHTML = modifiedHTML;
           }
         }
-        setHtmlContent(parsedDocument.documentElement.outerHTML);
+        let textContent = parsedDocument.documentElement.outerHTML
+        if(searchWords){
+          let wordsMap = {}
+          searchWords.slice(4).split("|").forEach((word)=>{
+            wordsMap[word] = true
+          })
+          Object.keys(wordsMap).forEach((word)=>{
+            let pattern = new RegExp(`\\b${word}\\b`, "g");
+            textContent = textContent.replace(pattern, "<span class='searchtext'>"+word+"</span>")
+          })
+        }
+        setHtmlContent(textContent);
       }
 
       function makehighlights(text, start_id, end_id, start_index, end_index, color, timestamp){
         let startColoring = false
-        if(!htmlContent.includes(start_id)) startColoring = true
+        // if(!htmlContent.includes(start_id)) startColoring = true
         const parser = new DOMParser();
         const parsedDocument = parser.parseFromString(tempHtmlContent, 'text/html');
         const elements = parsedDocument.querySelectorAll('*');
@@ -421,7 +439,7 @@ function Audio(){
       colorHtml()
     }
     console.log(contentLoaded)
-  }, [contentLoaded, bookmarksMap])
+  }, [contentLoaded, bookmarksMap, searchWords])
 
   function setHighlightColor(color){
     setSettings(prev=>{

@@ -12,6 +12,7 @@ export const CurrentBook = createContext()
 export const VaniTime = createContext()
 export const ContentMode = createContext()
 export const Bookmarks = createContext()
+export const MediaFavorites = createContext()
 export const LecturesTime = createContext()
 export const CheckAlerts = createContext()
 export const CurrentVersesMap = createContext()
@@ -37,9 +38,9 @@ export function ContextProvider({ children }) {
         "Read-Later": {"children": [], "isChecked": false},
         "Default-bookmarks": {"children": [], "isChecked": false},
         "Default-highlights": {"children": [], "isChecked": false},
-        "Default-notes": {"children": [], "isChecked": false},
-        "media": {}
+        "Default-notes": {"children": [], "isChecked": false}
     })
+    const [mediaFavoritesMap, setMediaFavoritesMap] = useLocal("media-favorites",{})
     const [lecturesTime, setLecturesTime] = useLocal("lectures-time", {"heard": 0, "total": 0})
     const [checkAlerts, setCheckAlerts] = useLocal("check-alerts", {"purports": false, "lecture": false})
     const [currentVersesMap, setCurrentVersesMap] = useLocal("current-verses-map", {})
@@ -53,7 +54,8 @@ export function ContextProvider({ children }) {
         "highlights_folder": "Default-highlights",
         "notes_folder": "Default-notes",
         "bookmarks_folder": "Default-bookmarks",
-        "bookmark_type": "Read-Later"
+        "bookmark_type": "Read-Later",
+        "home_page": "vanitime"
     })
     const [goal, setGoal] = useLocal("goal", {
         "books" : {
@@ -85,7 +87,9 @@ export function ContextProvider({ children }) {
         <CurrentLecture.Provider value={[currentLecture, setCurrentLecture]}>
         <Settings.Provider value={[settings, setSettings]}>
         <Goal.Provider value={[goal, setGoal]}>
+        <MediaFavorites.Provider value={[mediaFavoritesMap, setMediaFavoritesMap]}>
             {children}
+        </MediaFavorites.Provider>
         </Goal.Provider>
         </Settings.Provider>
         </CurrentLecture.Provider>

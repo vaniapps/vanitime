@@ -101,7 +101,7 @@ function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
   let counter = 0;
   const purportList = purportsList(booksMap);
   console.log(purportList)
-	if(purportList.length==0) return []
+	if(!purportList || purportList.length==0) return []
 	vaniTime = hoursToMinutes(vaniTime);
   let totalWords = wordsPerMin * vaniTime;
   while (true) {

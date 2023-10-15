@@ -1,8 +1,8 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonDatetime, IonButton,
 IonRadioGroup, IonRadio, IonLabel, IonItem, IonCheckbox, IonAlert, IonAccordion, 
 IonAccordionGroup, IonRouterOutlet, IonModal, IonToast, IonSegment, IonSegmentButton, IonIcon,
- IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote, isPlatform, IonButtons, IonInput } from '@ionic/react';
-import { useState, useRef } from 'react';
+ IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonNote, isPlatform, IonButtons, IonInput, IonMenuButton, IonMenu } from '@ionic/react';
+import { useState, useRef, useEffect } from 'react';
 import {  settingsOutline, menuOutline } from 'ionicons/icons';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import {Accordion, AccordionBody, AccordionHeader, AccordionItem} from "react-headless-accordion";
@@ -18,7 +18,6 @@ import { formatVaniTime } from "../scripts/durationToMinutes";
 import { useContext } from 'react';
 import { Books, ContentMode, CurrentBook, Lectures, Settings, VaniTime, WordsPerMin } from '../context';
 import { chevronDownSharp } from 'ionicons/icons';
-import { color } from 'highcharts';
 
   
 function VaniTimePage(){
@@ -47,11 +46,13 @@ function VaniTimePage(){
         "parts": false,
         "sub_parts": false,
         "audio": false,
-        "text": false
+        "text": false,
+        "accordion_body": false
     })
     const [toast, setToast] = useState("false")
     const [toastMessageMap, setToastMessageMap] = useState({
-        "select_book": "Please select a book"
+        "select_book": "Please select a book",
+        "content_not_found": "No content found, increase the selection"
     })
     const [tempCurrentBook, setTempCurrentBook] = useState({
         "name": "",
@@ -97,14 +98,24 @@ function VaniTimePage(){
       }
     function getContent() {
         if (contentMode == "random_audio") {
-            setCurrentContent(findRandomLecture(lecturesMap,vaniTime));
+            let cont = findRandomLecture(lecturesMap,vaniTime)
+            if(!cont || cont.length==0){
+                setToast("content_not_found")
+                return
+            } 
+            setCurrentContent(cont);
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["audio"] = true
                 return dum
             })
         } else if (contentMode == "random_text") {
-            setCurrentContent(findRandomPurports(booksMap,vaniTime,wordsPerMin));
+            let cont = findRandomPurports(booksMap,vaniTime,wordsPerMin)
+            if(!cont || cont.length==0){
+                setToast("content_not_found")
+                return
+            } 
+            setCurrentContent(cont);
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
@@ -113,7 +124,12 @@ function VaniTimePage(){
         } else if (contentMode == "book_text") {
             if(currentBook["verse"] === "") setToast("select_book")
             else{
-            setCurrentContent(findNextPurports(booksMap,currentBook,vaniTime,wordsPerMin));
+            let cont = findNextPurports(booksMap,currentBook,vaniTime,wordsPerMin)
+            if(!cont || cont.length==0){
+                setToast("content_not_found")
+                return
+            } 
+            setCurrentContent(cont);
             setAlertsMap(prev => {
                 let dum = {...prev}
                 dum["text"] = true
@@ -123,17 +139,36 @@ function VaniTimePage(){
         }
     }
 
-    console.log(alertsMap)
+
+
+    useEffect(()=>{
+        if(contentMode == "random_text") {
+            setTimeout(()=>{
+                setAlertsMap(prev => {
+                    let dum = {...prev}
+                    dum["accordion_body"] = true
+                    return dum
+                })
+            }, 1)
+        }else{
+            setAlertsMap(prev => {
+                let dum = {...prev}
+                dum["accordion_body"] = false
+                return dum
+            })
+        }
+    },[contentMode])
 
 
   return (
-     <IonPage>
+
+   
+    
+     <IonPage id="main-content">
       <IonHeader>
         <IonToolbar>
         <IonButtons slot='start'>
-                <IonButton>
-                    <IonIcon icon={menuOutline}></IonIcon>
-                </IonButton>
+        <IonMenuButton></IonMenuButton>
             </IonButtons>
             <IonSegment  onIonChange={(e)=>{
                 setContentMode(e.detail.value);
@@ -157,7 +192,7 @@ function VaniTimePage(){
       
       <IonContent >
                 <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
-                <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
+                <div style={isPlatform("desktop") ? {width:"420px"} : {}}>
        
         <div style={{marginTop:"10px", marginLeft:"15px", fontSize:"20px"}}>Scroll Vani Time: {formatVaniTime(vaniTime)}</div>
     
@@ -218,10 +253,10 @@ function VaniTimePage(){
                 
             </AccordionHeader>
            
-            <AccordionBody>
+             <AccordionBody>
             
         
-        {Object.entries(bookValue.parts).map(([partsKey, partsValue]) => {
+        {alertsMap["accordion_body"] ? Object.entries(bookValue.parts).map(([partsKey, partsValue]) => {
                 return(
                 <>{Object.entries(partsValue.parts)[0][1]["parts"] ?  <AccordionItem>
                      <AccordionHeader as={"div"}>
@@ -296,9 +331,15 @@ function VaniTimePage(){
                     </div>}</>
                 )
             })
-        }
+        : <div style={{"width": "100%", "display": "flex", "justifyContent": "space-between", "marginBottom": "20px"}}>
+        <IonLabel style={{"marginLeft": "40px", visibility: "hidden"
+}}>{"A Second Chance - The Story of a Near-Death Experience"}</IonLabel>
+        <IonCheckbox style={{"marginRight": "40px", visibility: "hidden"}} checked={false} onIonChange={(e) => {
+           
+        }} />
+        </div>}
             
-            </AccordionBody>
+            </AccordionBody> 
             </AccordionItem>
         )
     })
@@ -628,7 +669,7 @@ function VaniTimePage(){
       </IonContent>
     </IonPage>
 
-
+ 
 
   );
 };

@@ -18,12 +18,16 @@ import {
   IonCheckbox,
   IonButton,
   IonToolbar,
+  IonMenu,
+  IonHeader,
+  IonTitle,
 } from '@ionic/react';
 import { hourglassOutline, statsChartOutline, bookmarksOutline, settingsOutline, bookOutline, albumsOutline } from 'ionicons/icons';
 import { useEffect, useState, useContext, useRef } from 'react';
 import {findNextPurport} from "./scripts/findNextPurports"
 import Modal from 'react-modal';
 import './styles.css';
+import axios from 'axios';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -47,7 +51,7 @@ import Stats from './pages/StatsPage';
 import History from './pages/HistoryPage';
 import BookmarkFolders from './pages/BookmarkFoldersPage';
 import VaniTimePage from './pages/VaniTimePage';
-import Vanibase from './pages/VanibasePage';
+import VaniBase from './pages/VaniBasePage';
 import Text from './pages/TextPage';
 import Audio from './pages/AudioPage';
 import Book from './pages/BookPage';
@@ -55,10 +59,12 @@ import Lecture from './pages/LecturePage';
 import { Books, CheckAlerts, CurrentBook, CurrentLecture, CurrentVersesMap, IncompleteUserHistory, Lectures, Setting, Settings, UserHistory } from './context';
 import minutesToMinutes from './scripts/durationToMinutes';
 import SettingPage from './pages/SettingPage';
-import Shorts from './pages/ShortsPage';
+import VaniMedia from './pages/VaniMediaPage';
 
 
-
+import imageQuotesList from "./data/imageQuotesList.json";
+import imagesList from "./data/imagesList.json";
+import audioList from "./data/audioList.json";
 
 
 
@@ -77,7 +83,7 @@ function App() {
   const [userHistory, setUserHistory] = useContext(UserHistory)
   const [currentBook, setCurrentBook] = useContext(CurrentBook)
   const [incompleteUserHistory, setIncompleteUserHistory] = useContext(IncompleteUserHistory)
-  const [lectureMap, setLecturesMap] = useContext(Lectures)
+  const [lecturesMap, setLecturesMap] = useContext(Lectures)
   const [settings, setSettings] = useContext(Settings)
   const customStyles = {
     content: {
@@ -107,51 +113,49 @@ function App() {
   const containerRef = useRef(null);
   const scrollY = useRef(0);
 
+  const [videos, setVideos] = useState([])
+  const [imageQuotes, setImageQuotes] = useState([])
+  const [images, setImages] = useState([])
+  const [audios, setAudios] = useState([])
+  const [searchText, setSearchText] = useState("")
+  const [searchTextT, setSearchTextT] = useState("")
+  const [searchResults, setSearchResults] = useState({})
+  const [searchLoaded, setSearchLoaded] = useState(true)
+
   // useEffect(() => {
-  //   const container = containerRef.current;
-
-  //   const handleScroll = () => {
-  //     console.log("working")
-  //     // Get the current scroll position
-  //     const currentScrollY = window.scrollY;
-
-  //     // Calculate the difference in scroll position
-  //     const scrollDelta = currentScrollY - scrollY.current;
-
-  //     // Update the scroll position reference
-  //     scrollY.current = currentScrollY;
-
-  //     // Find the currently visible video
-  //     const videos = container.querySelectorAll('.video');
-  //     let visibleVideo = null;
-
-  //     videos.forEach((video) => {
-  //       const rect = video.getBoundingClientRect();
-  //       console.log(rect, window.innerHeight)
-  //       if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
-  //         visibleVideo = video;
-  //       }
-  //     });
-
-  //     // Scroll to the nearest video based on the scroll direction
-  //     if (visibleVideo) {
-  //       console.log(visibleVideo, scrollDelta)
-  //       if ( visibleVideo.nextElementSibling) {
-  //         visibleVideo.nextElementSibling.scrollIntoView({ behavior: 'smooth' });
-  //       } else if ( visibleVideo.previousElementSibling) {
-  //         visibleVideo.previousElementSibling.scrollIntoView({ behavior: 'smooth' });
-  //       }
+  //   console.log(navigator.onLine, location)
+  //   if(navigator.onLine) setIsOnline(true)
+  //   else{
+  //     if(location.pathname.includes("bookmarks") && location.pathname.includes("stats")) {
+  //       setIsOnline(true)
+  //     }else{
+  //       setIsOnline(false)
   //     }
-  //   };
+  //   }
+  // }, [location]);
 
-  //   // Attach the scroll event listener
-  //   container.addEventListener('scroll', handleScroll);
-
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     window.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, []);
+  useEffect(()=>{
+    axios.get("https://vanipedia.org/w/api.php?action=parse&prop=text&format=xml&page="+"VanimediaMayapur_YouTube_SHORTS_List")
+    .then(res=>{
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(res.data, 'text/xml');
+      let textContent = xmlDoc.querySelector('text').textContent;
+      const youtubeShortURLs = textContent.match(/https:\/\/www\.youtube\.com\/shorts\/[^\s]+/g);
+      let shortsList = []
+      for (let url of youtubeShortURLs) {
+        shortsList.push({
+          "url": url.replace('"',""),
+          "isPlaying": false
+        })
+      }
+      setVideos(shortsList.sort(() => Math.random() - 0.5))
+    }).catch((error)=>{
+      console.log(error)
+    })
+    setAudios(audioList.sort(() => Math.random() - 0.5))
+    setImages(imagesList.sort(() => Math.random() - 0.5))
+    setImageQuotes(imageQuotesList.sort(() => Math.random() - 0.5))
+  },[])
 
 
 
@@ -217,7 +221,7 @@ function App() {
     if(currentPath.includes("stats") || currentPath.includes("history")) setCurrentTab("stats")
     if(currentPath.includes("setting")) setCurrentTab("setting")
     if(currentPath.includes("bookmarks")) setCurrentTab("bookmarks")
-    if(currentPath.includes("vanishorts")) setCurrentTab("vanishorts")
+    if(currentPath.includes("vanimedia")) setCurrentTab("vanimedia")
     
 
   },[location])
@@ -236,72 +240,240 @@ function App() {
     })
   }
   }, [location])
+
+  function generateTitlesMap() {
+    let titlesMap = {}
+    for (let key1 of Object.keys(booksMap)) {
+        for (let key2 of Object.keys(booksMap[key1]['parts'])) {
+            if(Object.keys(booksMap[key1]['parts'][key2]['parts'])[0].startsWith("_")){
+                for (let key3 of Object.keys(booksMap[key1]['parts'][key2]['parts'])) {
+                    let title = key1 + (isNaN(key1) ? "_" : ".") + key2 + (isNaN(key2) ? "_" : ".") + key3.replace("_", "")
+                    if(key1=="OB") titlesMap[key3.replace("_", "")] = "8. " + booksMap[key1]['parts'][key2]["name"]
+                    else titlesMap[title] = "2. " + booksMap[key1]["name"] 
+                }
+            }else{
+                for (let key3 of Object.keys(booksMap[key1]['parts'][key2]['parts'])) {
+                    for (let key4 of Object.keys(booksMap[key1]['parts'][key2]['parts'][key3]['parts'])) {
+                        let title = key1 + (isNaN(key1) ? "_" : ".") + key2 + (isNaN(key2) ? "_" : ".") + key3 + (isNaN(key3) ? "_" : ".") + key4.replace("_", "")
+                        if(key1 == "SB" && parseInt(key2) < 10) titlesMap[title] = "3. "
+                        if(key1 == "SB" && parseInt(key2) >= 10) titlesMap[title] = "4. "
+                        if(key2 == "Adi") titlesMap[title] = "5. "
+                        if(key2 == "Madhya") titlesMap[title] = "6. "
+                        if(key2 == "Antya") titlesMap[title] = "7. "
+                        titlesMap[title] = titlesMap[title] + booksMap[key1]["name"] + " | " + booksMap[key1]['parts'][key2]["name"]
+                    }
+                }
+            }
+        }
+    }
+
+    for (let key1 of Object.keys(lecturesMap)) {
+        for (let key2 of Object.keys(lecturesMap[key1]['parts'])) {
+            titlesMap[key2] = "1. " + "Lectures"
+        }
+    }
+    
+    return titlesMap
+}
+
+function customSort(arr) {
+    return arr.sort((a, b) => {
+        const aParts = a["name"].split(/[\._]/);
+        const bParts = b["name"].split(/[\._]/);
+
+        for (let i = 0; i < Math.min(aParts.length, bParts.length); i++) {
+        if (!isNaN(aParts[i]) && !isNaN(bParts[i])) {
+            const numA = parseInt(aParts[i]);
+            const numB = parseInt(bParts[i]);
+            if (numA < numB) {
+            return -1;
+            } else if (numA > numB) {
+            return 1;
+            }
+        } else if (aParts[i] < bParts[i]) {
+            return -1;
+        } else if (aParts[i] > bParts[i]) {
+            return 1;
+        }
+        }
+
+        return aParts.length - bParts.length;
+    });
+    }
+
+
+
+useEffect(() => {
+    async function fetchData() {
+      try {
+        let continueParam = '';
+        let results = {};
+        let searchResult = {}
+
+        while (true) {
+         
+          const response = await axios.get(
+            `https://vanisource.org/w/api.php?action=query&list=search&srwhat=text&format=xml&srlimit=max&srsearch=${searchText.replace(/\s+/g, ' ')}${continueParam}&srprop=redirecttitle`
+          );
+
+            const xmlDoc = new DOMParser().parseFromString(response.data, 'application/xml');
+            
+            const searchElements = xmlDoc.querySelectorAll('p');
+           
+            searchElements.forEach((searchElement) => {
+                const title = searchElement.getAttribute('title').replace(/ /g, "_");
+                const snippet = searchElement.getAttribute('snippet');
+                results[title] = snippet;
+            });
+
+            const continueElement = xmlDoc.querySelector('continue');
+            if (continueElement) {
+                continueParam = `&sroffset=${continueElement.getAttribute('sroffset')}`;
+            } else {
+                break;
+            }
+        }
+        let titlesMap = generateTitlesMap()
+        for(const title in results){
+            if(title in titlesMap){
+                if(titlesMap[title] in searchResult){
+                    searchResult[titlesMap[title]].push({
+                        "name":title,
+                        "snippet": "<div>" + results[title] + "</div>"
+                    })
+                } else {
+                    searchResult[titlesMap[title]] = []
+                    searchResult[titlesMap[title]].push({
+                        "name":title,
+                        "snippet": "<div>" + results[title] + "</div>"
+                    })
+                }
+            }else {
+                console.log(title)
+            }
+        }
+
+        let sortedSearchResult = {}
+
+        Object.keys(searchResult)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach(key => {
+            let title = key.slice(3) + ` (${searchResult[key].length})`
+            sortedSearchResult[title] = customSort(searchResult[key])
+        });
+
+        setSearchResults(sortedSearchResult);
+        setSearchLoaded(true)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+    setSearchLoaded(false)
+    fetchData();
+  }, [searchText]);
+
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    // Add an event listener to listen for online/offline events
+    const handleOnlineStatusChange = () => {
+      setTimeout(()=> { window.location.reload()},1000)
+      setIsOnline(navigator.onLine);
+    };
+
+    window.addEventListener('online', handleOnlineStatusChange);
+    window.addEventListener('offline', handleOnlineStatusChange);
+
+    // Remove the event listeners when the component unmounts
+    return () => {
+      window.removeEventListener('online', handleOnlineStatusChange);
+      window.removeEventListener('offline', handleOnlineStatusChange);
+    };
+  }, []);
+
+  let noInternetPageHtml = (<div style={{height:"100%", width:"90%", margin:"10px", position:"fixed", display:"flex", alignItems:"center", justifyContent:"center"}}>
+  No Internet connection! But you can still access your highlights, notes and stats.
+</div>)
+
+
+
   
   return (
     <IonApp>
+
+    <IonMenu contentId="main-content">
+        <IonHeader>
+        <IonToolbar>
+            <IonTitle>VaniTime App</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+        <img src="https://vanimedia.org/w/images/0/08/CT16-001.JPG" />
+          <IonItem onClick={()=>{
+            window.location="https://vanipedia.org/wiki/Main_Page"
+          }}>
+            <IonLabel>About</IonLabel>
+          </IonItem>
+        </IonContent>
+      </IonMenu>
    
       <IonPage>
-        <IonContent>
+         <IonContent>
         <IonRouterOutlet>
         
           <Route path="/vanitime">
-            <VaniTimePage />
+          {isOnline ? 
+            <VaniTimePage /> : noInternetPageHtml}
           </Route>
           <Route path="/vanibase">
-            <Vanibase />
-          </Route>
+          {isOnline ? 
+            <VaniBase searchTextHook={{searchText, setSearchText}} searchTextTHook={{searchTextT, setSearchTextT}} searchResultsHook = {{searchResults, setSearchResults}} searchLoadedHook={{searchLoaded, setSearchLoaded}} /> 
+            : noInternetPageHtml}
+          </Route> 
           <Route path="/stats">
             <Stats />
           </Route>
           <Route path={"/history/:key"}>
-            <History />
+          {isOnline ? 
+            <History /> : noInternetPageHtml}
           </Route>
           <Route path={"/bookmarks"}>
            <BookmarkFolders />
           </Route>
           <Route path={"/setting"}>
-          <SettingPage />
+           {isOnline ? 
+          <SettingPage /> : noInternetPageHtml}
           </Route>
           <Route path={"/lecture/:key"}>
-            <Audio />
+           {isOnline ? 
+            <Audio /> : noInternetPageHtml}
           </Route>
           <Route path={"/purports/:key"}>
-          <Text />
+          {isOnline ? 
+          <Text /> : noInternetPageHtml}
           </Route>
           <Route path={"/lectureindex/:key"}>
-            <Lecture />
+           {isOnline ? 
+            <Lecture /> : noInternetPageHtml}
           </Route>
           <Route path={"/bookindex/:key"}>
-          <Book />
+           {isOnline ? 
+          <Book /> : noInternetPageHtml}
           </Route>
-          <Route path={"/vanishorts"}>
-          <Shorts />
-          </Route>
+          <Route path={"/vanimedia"}>
+           {isOnline ? 
+          <VaniMedia videos={videos} audios={audios} images={images} imageQuotes={imageQuotes} />
+          : noInternetPageHtml}
+          </Route> 
 
-          <Route path={"/otherbooks"}>
-            <h1 style={{marginLeft:"10px"}}>Coming soon...</h1>
-            <div class="container">
-    <p id="selectable-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-  </div>
-          </Route>
           <Route exact path="/">
-            <Redirect to="/vanitime" />
+            <Redirect to={`/${settings.home_page}`} />
           </Route>
         </IonRouterOutlet>
         </IonContent>
         {!`${location.pathname}`.includes("/lecture/") && !`${location.pathname}`.includes("/purports/") ? <IonFooter>
           <IonToolbar>
         <IonSegment   value={currentTab} >
-        {/* <IonSegmentButton style={{ minWidth: 0 }} value="setting"  onClick={()=>history.push("/setting")}>
-            <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
-            <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
-            <IonIcon icon={settingsOutline}/>
-            </div>
-            <div style={{flexBasis:"100%" , fontSize:"10px"}}>
-            <IonLabel>Setting</IonLabel>
-            </div>
-            </div>
-          </IonSegmentButton> */}
           <IonSegmentButton style={{ minWidth: 0 }} value="stats"  onClick={()=>history.push("/stats")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
@@ -332,13 +504,13 @@ function App() {
             </div>
             </div>
           </IonSegmentButton>
-          <IonSegmentButton style={{ minWidth: 0 }} value="vanishorts"  onClick={()=>history.push("/vanishorts")}>
+          <IonSegmentButton style={{ minWidth: 0 }} value="vanimedia"  onClick={()=>history.push("/vanimedia")}>
             <div style={{display:"flex", flexWrap: "wrap", alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"flex-end", justifyContent:"center", flexBasis:"100%", fontSize:"30px", marginTop:"5px"}}>
             <IonIcon icon={albumsOutline} />
             </div>
             <div style={{flexBasis:"100%" , fontSize:"10px"}}>
-            <IonLabel>VaniShorts</IonLabel>
+            <IonLabel>VaniMedia</IonLabel>
             </div>
             </div>
           </IonSegmentButton>
@@ -388,8 +560,8 @@ function App() {
                   const minutes = String(now.getMinutes()).padStart(2, '0');
                   dum[verseKey]["time"] = `${hours}:${minutes}`
                   let verseKeyParts = verseKey.split(/[_\.]/);
-                  if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                    verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                  if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                    verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                   }
                   let verse = booksMap[verseKeyParts[0]]
                   for (let i=1; i<verseKeyParts.length-1; i++) {
@@ -458,8 +630,8 @@ function App() {
                   let verse = ""
                   for (let verseObj of Object.entries(currentVersesMap)) {
                     let verseKeyParts = verseObj[0].split(/[_\.]/);
-                    if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                      verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                    if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                      verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                     }
                     if(verseKeyParts.length == 3) {
                       book=verseKeyParts[0] 
@@ -491,8 +663,8 @@ function App() {
                     }
                     if(!finalVerse && verse[1]["checked"]) {
                       let verseKeyParts = verse[0].split(/[_\.]/);
-                      if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                        verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                      if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                        verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                       }
                       if(verseKeyParts.length == 3 && dum["name"]==verseKeyParts[0] && dum["part"] == verseKeyParts[1] && dum["verse"] == verseKeyParts[2]) finalVerse = verse[0]
                       if(verseKeyParts.length == 4 && dum["name"]==verseKeyParts[0] && dum["part"] == verseKeyParts[1] && dum["sub_part"] == verseKeyParts[2] && dum["verse"] == verseKeyParts[3]) finalVerse = verse[0]
@@ -507,8 +679,8 @@ function App() {
                       dum["verse"] = ""
                     } else {
                       let verseKeyParts = finalVerse.split(/[_\.]/);
-                      if(verseKeyParts[0] != "BG" || verseKeyParts[0] != "SB" || verseKeyParts[0]!= "CC") {
-                        verseKeyParts = ["OB", verseKeyParts[0], verseKeyParts.join("_")]
+                      if(verseKeyParts[0] != "BG" && verseKeyParts[0] != "SB" && verseKeyParts[0]!= "CC") {
+                        verseKeyParts = ["OB", verseKeyParts[0].startsWith("SSR") ? "SSR":verseKeyParts[0], verseKeyParts.join("_")]
                       }
                       if(verseKeyParts.length == 3) {
                         dum["name"]=verseKeyParts[0] 
@@ -578,7 +750,7 @@ function App() {
                     if(!dum[date]) dum[date]={}
                     if(!dum[date][currentLecture]) dum[date][currentLecture]=[]
                     let duration = 0;
-                    for (let category of Object.entries(lectureMap)) {
+                    for (let category of Object.entries(lecturesMap)) {
                         for (let lecture of Object.entries(category[1]["parts"])) {
                             if(lecture[0] == currentLecture) {
                                 duration = minutesToMinutes(lecture[1]["duration"])
@@ -605,7 +777,7 @@ function App() {
             }}>Listend</IonButton>
       </div>
       <div style={{margin:"5px 5px 0 5px", fontSize:"12px"}}>*You can turn off the alerts in settings</div>
-    </Modal>
+    </Modal> 
         </IonPage>
   </IonApp>
   );

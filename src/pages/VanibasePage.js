@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { Books, Lectures, LecturesTime, Settings, VaniTime, WordsPerMin } from "../context";
 import { IonPage, IonHeader, IonToolbar, IonLabel, IonContent, IonCard, IonCardHeader, IonCardContent,
- IonRouterOutlet, isPlatform, IonCardTitle, IonSearchbar} from "@ionic/react";
+ IonRouterOutlet, isPlatform, IonCardTitle, IonSearchbar, IonButtons, IonButton, IonIcon, IonMenuButton} from "@ionic/react";
 import { useHistory, Switch, Route, useLocation, useRouteMatch, useParams } from 'react-router-dom';
-import Book from "./BookPage";
-import Lecture from "./LecturePage";
+import {  settingsOutline, menuOutline, searchOutline, chevronBackOutline } from 'ionicons/icons';
 import minutesToMinutes, {formatMinutes} from '../scripts/durationToMinutes';
+import Search from "./SearchPage";
 
 
-function Vanibase() {
+function VaniBase(props) {
     const [booksMap, setBooksMap] = useContext(Books)
     let history = useHistory();
     let { path, url } = useRouteMatch();
@@ -16,6 +16,10 @@ function Vanibase() {
     const [lecturesTime, setLecturesTime] = useContext(LecturesTime)
     const [lecturesMap, setLecturesMap] = useContext(Lectures)
     const [settings, setSettings] = useContext(Settings)
+    const {searchText, setSearchText} = props.searchTextHook
+    const {searchTextT, setSearchTextT} = props.searchTextTHook
+    const {searchResults, setSearchResults} = props.searchResultsHook
+    const {searchLoaded, setSearchLoaded} = props.searchLoadedHook
     useEffect(()=>{
      
         let wc1 = 0
@@ -85,18 +89,57 @@ function Vanibase() {
         setLecturesMap(dum)
       
     },[])
+
+    useEffect(()=>{
+        if(searchText !="")
+        history.push("/vanibase/search/"+searchText)
+    },[searchText])
     return (
-       <IonPage>
+       <IonPage id="main-content">
         <IonHeader>
            
             <IonToolbar >
-            <IonSearchbar color={settings.theme == "light" ? "light" : "dark"} placeholder="Search (coming soon...)" style={{"paddingBottom":"0px"}}></IonSearchbar>
+                <div style={{"display":"flex"}}>
+                {searchText ? <IonButtons slot="start">
+                <IonButton onClick={()=>{
+                    setSearchText("")
+                    setSearchTextT("")
+                    window.scrollTo(0,0)
+                }}>
+                    <IonIcon icon={chevronBackOutline}></IonIcon>
+                </IonButton>
+            </IonButtons> : <IonButtons slot='start'>
+        <IonMenuButton></IonMenuButton>
+            </IonButtons>
+            }
+            <IonSearchbar value={searchTextT} onKeyUp={(e)=>{
+                if (e.key === 'Enter') {
+                    setSearchText(searchTextT)
+                    window.scrollTo(0,0)
+                }
+            }} onIonInput={(e)=>{
+                console.log("imput", e.detail.value)
+                if (e.key === 'Enter') {
+                    setSearchText(searchTextT)
+                    window.scrollTo(0,0)
+                }
+                setSearchTextT(e.detail.value)
+        }} color={settings.theme == "light" ? "light" : "dark"} placeholder="Search " style={{"paddingBottom":"0px"}}></IonSearchbar>
+            <IonButtons slot="end">
+                <IonButton onClick={()=>{
+                    setSearchText(searchTextT)
+                    window.scrollTo(0,0)
+                }}>
+                    <IonIcon icon={searchOutline}></IonIcon>
+                </IonButton>
+            </IonButtons>
+            </div>
             </IonToolbar>
         </IonHeader>
-        <IonContent>
+        <IonContent scrollEvents={true}>
                 <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
-                <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
-            {Object.entries(booksMap).map(([bookKey, bookValue]) => {
+                <div style={isPlatform("desktop") ? {width:"420px"} : {}}>
+          {searchText ? <Search searchResultsHook = {{searchResults, setSearchResults}} searchLoadedHook={{searchLoaded, setSearchLoaded}} searchTextHook ={{searchText, setSearchText}} /> : <>{Object.entries(booksMap).map(([bookKey, bookValue]) => {
                 console.log(bookValue.wc, wordsPerMin)
                 return (
                 <IonCard onClick={()=>{
@@ -142,8 +185,7 @@ function Vanibase() {
                 <IonCardTitle><IonLabel style={{"textAlign": "center"}}>Lectures by Place</IonLabel></IonCardTitle>
                
                 </IonCardContent>
-            </IonCard>
-           
+            </IonCard></>}
             </div>
     </div>
         </IonContent>
@@ -152,4 +194,4 @@ function Vanibase() {
     )
 }
 
-export default Vanibase;
+export default VaniBase;

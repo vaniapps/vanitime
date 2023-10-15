@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react'
 import Login from './Login'
 import { IonButton, IonToast } from '@ionic/react'
 import axios from 'axios'
-import { Bookmarks, Books, Lectures, Settings, UserHistory } from '../context'
+import { Bookmarks, Books, Lectures, MediaFavorites, Settings, UserHistory } from '../context'
 import Modal from 'react-modal';
 
 const CLIENT_ID = "16422091894-2aisb9q5f0qp4mc4u4v9di97hks1u0l8.apps.googleusercontent.com"
@@ -54,6 +54,7 @@ function Drive(props) {
 
     const [useHistory, setUserHistory] = useContext(UserHistory)
     const [bookmarksMap, setBookmarksMap] = useContext(Bookmarks)
+    const [mediaFavoritesMap, setMediaFavoritesMap] = useContext(MediaFavorites)
     const [booksMap, setBooksMap] = useContext(Books)
     const [lecturesMap, setLecturesMap] = useContext(Lectures)
     const [lastModified, setLastModified] = useState("")
@@ -63,7 +64,8 @@ function Drive(props) {
     const [toastMessageMap, setToastMessageMap] = useState({
         "no_save_file_found": "No saved data found, Please save first!",
         "saved": "Successfully saved the data!",
-        "loaded": "Successfully loaded the data!"
+        "loaded": "Successfully loaded the data!",
+        "error_login": "Some thing went wrong! Please try Login again"
     })
 
     async function saveData() {
@@ -76,7 +78,8 @@ function Drive(props) {
             "lectures": lecturesMap,
             "books": booksMap,
             "stats": useHistory,
-            "bookmarks": bookmarksMap
+            "bookmarks": bookmarksMap,
+            "media": mediaFavoritesMap
         })], {type: 'application/json'});
         var metadata = {
             'name': "vanitimeappdata",
@@ -84,16 +87,19 @@ function Drive(props) {
             'parents': ['appDataFolder'],
         };
 
+        try{
+
         var accessToken = gapi.auth.getToken().access_token; // Here gapi is used for retrieving the access token.
         var formData = new FormData();
         formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
         formData.append('file', file);
         console.log(accessToken, formData)
-
+        if(listResponse.result && listResponse.result.files){
         for (let i=0; i<listResponse.result.files.length; i++){
             if(listResponse.result.files[i].name == "vanitimeappdata") {
                 await gapi.client.drive.files.delete({fileId: listResponse.result.files[i].id})
             }
+        }
         }
         
         let uploadResponse = await axios({
@@ -111,9 +117,19 @@ function Drive(props) {
             dum["fetching"] = false
             return dum
         })
+        } catch (error) {
+            console.log(error)
+            setToast("error_login")
+            props.setAlertsMap(prev => {
+                let dum = {...prev}
+                dum["fetching"] = false
+                return dum
+            })
+        }
     }
 
     async function loadData() {
+        try{
         for (let i=0; i<listResponse.result.files.length; i++){
             let fileContent = {}
             if(listResponse.result.files[i].name == "vanitimeappdata") {
@@ -126,6 +142,7 @@ function Drive(props) {
                 console.log(fileContent.result)
                 setUserHistory(fileContent.result.stats)
                 setBookmarksMap(fileContent.result.bookmarks)
+                setMediaFavoritesMap(fileContent.result.media)
                 setLecturesMap(fileContent.result.lectures)
                 setBooksMap(fileContent.result.books)
                 props.setAlertsMap(prev => {
@@ -135,6 +152,15 @@ function Drive(props) {
                 })
                 break;
             }
+        }
+        } catch(error) {
+            console.log(error)
+            setToast("error_login")
+            props.setAlertsMap(prev => {
+                let dum = {...prev}
+                dum["fetching"] = false
+                return dum
+            })
         }
     }
 
@@ -151,7 +177,9 @@ function Drive(props) {
                             dum["fetching"] = true
                             return dum
                         })
+                       
                         gapi.client.load('drive', 'v3', async ()=>{
+                            try{
                             const listResponse = await gapi.client.drive.files.list({
                                 spaces: 'appDataFolder',
                                 fields: 'files(id, name, modifiedTime)'
@@ -175,7 +203,17 @@ function Drive(props) {
                                 }
                             }
                             saveData(listResponse)
+                        } catch(error) {
+                            console.log(error)
+                            setToast("error_login")
+                            props.setAlertsMap(prev => {
+                                let dum = {...prev}
+                                dum["fetching"] = false
+                                return dum
+                            })  
+                        }
                         })
+                    
                     }}>Save Data</IonButton>
                     <IonButton onClick={()=>{
                          props.setAlertsMap(prev => {
@@ -184,6 +222,7 @@ function Drive(props) {
                             return dum
                         })
                          gapi.client.load('drive', 'v3', async ()=>{
+                            try{
                             const listResponse = await gapi.client.drive.files.list({
                                 spaces: 'appDataFolder',
                                 fields: 'files(id, name, modifiedTime)'
@@ -207,9 +246,19 @@ function Drive(props) {
                                 }
                             }
                             setToast("no_save_file_found")
+                        } catch(error) {
+                            console.log(error)
+                            setToast("error_login")
+                            props.setAlertsMap(prev => {
+                                let dum = {...prev}
+                                dum["fetching"] = false
+                                return dum
+                            })  
+                        }
                         })
                     }}>Load Data</IonButton>
                     </div>
+                    <p>*Google needs to approve this app for users to login in this app. So It will take few days for this to function.</p>
                     <Modal
                         isOpen={props.alertsMap["save"] || props.alertsMap["load"]}
                         onRequestClose={()=>{

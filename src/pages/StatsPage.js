@@ -1,8 +1,8 @@
 import { IonPage, IonHeader, IonToolbar, IonSegment, IonSegmentButton, IonLabel, IonContent,
 IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton, IonIcon,
  IonPopover, IonList, IonItem, IonDatetime, IonRouterOutlet, IonRange, IonModal, IonInput,
-IonToast, isPlatform } from '@ionic/react';
-import { chevronBackCircle, chevronDownOutline } from 'ionicons/icons';
+IonToast, isPlatform, IonButtons, IonMenuButton } from '@ionic/react';
+import { chevronBackCircle, chevronDownOutline, menuOutline, settingsOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useHistory, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom';
 import { Goal, Settings, UserHistory, WordsPerMin } from '../context';
@@ -26,12 +26,8 @@ function Stats(){
     const [currentMode, setCurrentMode] = useLocal("stats-mode","all")
     const [wordsPerMin, setWordsPerMin] = useContext(WordsPerMin)
     const [settings, setSettings] = useContext(Settings)
-    const modal = useRef(null);
     let primaryColor = settings.theme == "light" ? "#1e90ff" : "#3498db"
     let textColor = settings.theme == "light" ? "#000000" : "#ffffff"
-    function modalDismiss() {
-        modal.current?.dismiss();
-    }
     const [toast, setToast] = useState("false")
     const [toastMessageMap, setToastMessageMap] = useState({
         "input": "Please give valid inputs"
@@ -210,6 +206,9 @@ function Stats(){
             if(value <= 0) {
                 return { backgroundColor: "#ffffff", textColor: "#000000" };
             }
+            if(maxValue<=0) {
+                return { backgroundColor: "#CCEEFF", textColor: "#000000" };
+            }
             if(value>=maxValue) {
                 return { backgroundColor: primaryColor, textColor: "#ffffff" };
             }
@@ -221,6 +220,9 @@ function Stats(){
         if(settings.theme == "dark"){
             if(value <= 0) {
                 return { backgroundColor: "#121212", textColor: "#ffffff" };
+            }
+            if(maxValue<=0) {
+                return { backgroundColor: "#CCEEFF", textColor: "#000000" };
             }
             if(value>=maxValue) {
                 return { backgroundColor: primaryColor, textColor: "#ffffff" };
@@ -312,9 +314,13 @@ function Stats(){
 
     
     return(
-        <IonPage>
+        <IonPage id="main-content">
             <IonHeader>
                 <IonToolbar>
+                <IonButtons slot='start'>
+        <IonMenuButton></IonMenuButton>
+            </IonButtons>
+
                     <IonSegment onIonChange={(e)=>{
                         setCurrentMode(e.detail.value)
                     }} value={currentMode}>
@@ -328,11 +334,16 @@ function Stats(){
                         <IonLabel>Books</IonLabel>
                     </IonSegmentButton>
                     </IonSegment>
+                    <IonButtons slot='end'>
+                <IonButton onClick={()=>history.push("/setting")}>
+                    <IonIcon icon={settingsOutline}></IonIcon>
+                </IonButton>
+            </IonButtons>
                 </IonToolbar>
                 </IonHeader>
                 <IonContent>
                 <div style={isPlatform("desktop") ? {display:"flex", justifyContent:"center"} : {}}>
-                <div style={isPlatform("desktop") ? {minWidth:"420px"} : {}}>
+                <div style={isPlatform("desktop") ? {width:"400px", visibility:(dayList.length > 0 ? 'visible' : "hidden" )} : {}}>
                 <IonCard>
                     <IonCardContent style={{"textAlign": "center"}}>
                     <div style={{display:"flex", justifyContent:"space-between"}}>
@@ -365,7 +376,7 @@ function Stats(){
 
                             if(formattedDate == formatDate(new Date())) {
                                 let colorObj = valueToColor(duration, currentGoal["day"])
-                                colorObj["textColor"] = "red"
+                                colorObj["textColor"] = "#FA8072"
                                 return colorObj
                             }
                             
@@ -404,7 +415,7 @@ function Stats(){
                                 alignItems:"center"
                                 
                             }}>
-                                <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
+                                <div style={{height:"30px", fontSize:"11px", opacity:"1",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
                                 left:dayList.length ? dayList[dayList.length-1]['duration']/currentGoal["day"] < 1 ? ((dayList[dayList.length-1]['duration']/currentGoal["day"])*100-4.5)+"%" : "95.5%" : "-4.5%"
                                 }}>{dayList.length && currentGoal["day"] >0 ? Math.round((dayList[dayList.length-1]['duration']/currentGoal["day"])*100) : 0}%</div>
                             </div>
@@ -429,7 +440,7 @@ function Stats(){
                                 justifyContent:"end",
                                 alignItems:"center"
                             }}>
-                                <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
+                                <div style={{height:"30px", fontSize:"11px",opacity:"1",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
                                 left:weekList.length ? weekList[weekList.length-1]['duration']/currentGoal["week"] < 1 ? ((weekList[weekList.length-1]['duration']/currentGoal["week"])*100-4.5)+"%" : "95.5%" : "-4.5%"
                                 }}>{weekList.length && currentGoal["week"] >0 ? Math.round((weekList[weekList.length-1]['duration']/currentGoal["week"])*100) : 0}%</div>
                             </div>
@@ -453,7 +464,7 @@ function Stats(){
                                 justifyContent:"end",
                                 alignItems:"center"
                             }}>
-                                <div style={{height:"30px", fontSize:"11px",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
+                                <div style={{height:"30px", fontSize:"11px",opacity:"1",  backgroundColor:"#CCEEFF", color:"black", width:"30px", position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", 
                                 left:monthList.length ? monthList[monthList.length-1]['duration']/currentGoal["month"] < 1 ? ((monthList[monthList.length-1]['duration']/currentGoal["month"])*100-4.5)+"%" : "95.5%" : "-4.5%"
                                 }}>{monthList.length && currentGoal["month"] >0 ? Math.round((monthList[monthList.length-1]['duration']/currentGoal["month"])*100) : 0}%</div>
                             </div>

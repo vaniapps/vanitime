@@ -2,7 +2,7 @@ import {hoursToMinutes} from "./durationToMinutes";
 
 function purportsList(booksData, bookName) {
   const purports = [];
-  console.log(bookName)
+  if(bookName.startsWith("SSR")) bookName = "SSR"
 
   if (bookName === "BG") {
     for (const chapterIndex in booksData["BG"]["parts"]) {
