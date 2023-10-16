@@ -69,8 +69,7 @@ function AudioPlayer(props) {
    .join(':')
  }
  function calculateFontSize(length) {
-  let fsize = 32 - length / 16
-  console.log(length)
+  let fsize = 30 - length / 15
   return fsize / 10 + 'vh'
  }
  const [toast, setToast] = useState('false')

@@ -150,7 +150,6 @@ function VaniBase(props) {
         }
        }}
        onIonInput={(e) => {
-        console.log('imput', e.detail.value)
         if (e.key === 'Enter') {
          setSearchText(searchTextT)
          window.scrollTo(0, 0)
@@ -196,7 +195,6 @@ function VaniBase(props) {
       ) : (
        <>
         {Object.entries(booksMap).map(([bookKey, bookValue]) => {
-         console.log(bookValue.wc, wordsPerMin)
          return (
           <IonCard
            onClick={() => {

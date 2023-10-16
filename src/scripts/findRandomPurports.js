@@ -94,7 +94,6 @@ function purportsList(booksData) {
   }
   books.push(purports)
  }
- console.log(books.length, Math.floor(Math.random() * books.length))
  return books[Math.floor(Math.random() * books.length)]
 }
 
@@ -125,7 +124,6 @@ function binarySearch(arr, target) {
 function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
  let counter = 0
  const purportList = purportsList(booksMap)
- console.log(purportList)
  if (!purportList || purportList.length == 0) return []
  vaniTime = hoursToMinutes(vaniTime)
  let totalWords = wordsPerMin * vaniTime
@@ -133,8 +131,6 @@ function findRandomPurports(booksMap, vaniTime, wordsPerMin = 50) {
   let start = Math.floor(Math.random() * purportList.length)
   let purports = []
   if (counter == 20) {
-   console.log('linit execed')
-   console.log(purportList)
    purportList.sort((a, b) => a[2] - b[2])
    purports.push(binarySearch(purportList, totalWords))
    return purports

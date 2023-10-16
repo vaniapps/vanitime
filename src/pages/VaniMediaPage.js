@@ -13,6 +13,8 @@ import {
  isPlatform,
  IonButtons,
  IonMenuButton,
+ IonFab,
+ IonFabButton,
 } from '@ionic/react'
 
 import VideoPlayer from '../components/VideoPlayer'
@@ -34,6 +36,7 @@ function VaniMedia(props) {
  const [currentMode, setCurrentMode] = useLocal('media-mode', 'shorts')
  const [isFavourites, setIsFavourites] = useState(false)
  const [mediaFavoritesMap, setMediaFavoritesMap] = useContext(MediaFavorites)
+ const [currentIndex, setCurrentIndex] = useState(0)
 
  function filterFavourites(list) {
   const map = {}
@@ -41,7 +44,6 @@ function VaniMedia(props) {
   for (let i = 0; i < list.length; i++) {
    map[list[i].url] = list[i]
   }
-  console.log(map)
   for (let key of Object.keys(mediaFavoritesMap)) {
    if (map[key]) {
     favouriteList.push(map[key])
@@ -60,16 +62,17 @@ function VaniMedia(props) {
  }, [isFavourites])
 
  useEffect(() => {
-  generateItems([], setVideos, props.videos)
-  generateItems([], setAudios, props.audios)
-  generateItems([], setImages, props.images)
-  generateItems([], setImageQuotes, props.imageQuotes)
+  if(videos.length==0) generateItems(videos, setVideos, props.videos)
+  if(audios.length==0) generateItems(audios, setAudios, props.audios)
+  if(images.length==0) generateItems(images, setImages, props.images)
+  if(imageQuotes.length==0) generateItems(imageQuotes, setImageQuotes, props.imageQuotes)
  }, [props])
 
  const stopPlayingOnScroll = (container, setItems) => {
   const scrollTop = container.scrollTop
   const elementHeight = container.clientHeight
   const index = Math.round(scrollTop / elementHeight)
+  setCurrentIndex(index)
   setItems((prev) => {
    let dum = [...prev]
    for (let i = 0; i < prev.length; i++) {
@@ -78,23 +81,6 @@ function VaniMedia(props) {
    return dum
   })
  }
-
- useEffect(() => {
-  setAudios((prev) => {
-   let dum = [...prev]
-   for (let i = 0; i < dum.length; i++) {
-    dum[i].isPlaying = false
-   }
-   return dum
-  })
-  setVideos((prev) => {
-   let dum = [...prev]
-   for (let i = 0; i < dum.length; i++) {
-    dum[i].isPlaying = false
-   }
-   return dum
-  })
- }, [currentMode])
 
  const generateItems = (items, setItems, list) => {
   if (isFavourites) return
@@ -140,13 +126,19 @@ function VaniMedia(props) {
 
  useEffect(() => {
   scrollListener('images', 'image', images, setImages, props.images)
- }, [images, currentMode])
+ }, [images, currentMode, isFavourites])
  useEffect(() => {
   scrollListener('videos', 'video', videos, setVideos, props.videos)
- }, [videos, currentMode])
+ }, [videos, currentMode, isFavourites])
+ useEffect(() => {
+  scrollListener('videosfavs', 'video', videosFavs, setVideosFavs, props.videos)
+ }, [videosFavs, currentMode, isFavourites])
  useEffect(() => {
   scrollListener('audios', 'audio', audios, setAudios, props.audios)
- }, [audios, currentMode])
+ }, [audios, currentMode, isFavourites])
+ useEffect(() => {
+  scrollListener('audiosfavs', 'audio', audiosFavs, setAudiosFavs, props.audios)
+ }, [audios, currentMode, isFavourites])
  useEffect(() => {
   scrollListener(
    'imagequotes',
@@ -155,7 +147,12 @@ function VaniMedia(props) {
    setImageQuotes,
    props.imageQuotes
   )
- }, [imageQuotes, currentMode])
+ }, [imageQuotes, currentMode, isFavourites])
+
+ useEffect(()=>{
+  setCurrentIndex(0)
+ },[currentMode, isFavourites])
+
 
  let noFavsPageHtml = (
   <div
@@ -189,16 +186,16 @@ function VaniMedia(props) {
       value={currentMode}
      >
       <IonSegmentButton value="shorts">
-       <IonLabel style={{ fontSize: '1.5vh' }}>Shorts</IonLabel>
+       <IonLabel style={{ fontSize: '1.4vh' }}>Shorts</IonLabel>
       </IonSegmentButton>
       <IonSegmentButton value="quotes">
-       <IonLabel style={{ fontSize: '1.5vh' }}>Quotes</IonLabel>
+       <IonLabel style={{ fontSize: '1.4vh' }}>Quotes</IonLabel>
       </IonSegmentButton>
       <IonSegmentButton value="audios">
-       <IonLabel style={{ fontSize: '1.5vh' }}>Audio</IonLabel>
+       <IonLabel style={{ fontSize: '1.4vh' }}>Audio</IonLabel>
       </IonSegmentButton>
       <IonSegmentButton value="darshans">
-       <IonLabel style={{ fontSize: '1.5vh' }}>Darshan</IonLabel>
+       <IonLabel style={{ fontSize: '1.4vh' }}>Darshan</IonLabel>
       </IonSegmentButton>
      </IonSegment>
      <IonButtons slot="end">
@@ -255,6 +252,7 @@ function VaniMedia(props) {
        ) : null}
        {currentMode == 'shorts' && isFavourites ? (
         <div
+        className="videosfavs"
          style={{
           height: '100%',
           overflowY: 'scroll',
@@ -265,7 +263,7 @@ function VaniMedia(props) {
           {videosFavs.length > 0 ? (
            <>
             {videosFavs.map((video, i) => {
-             return <VideoPlayer video={video} i={i} setVideos={setVideos} />
+             return <VideoPlayer className="video" video={video} i={i} setVideos={setVideosFavs} />
             })}
            </>
           ) : (
@@ -333,6 +331,7 @@ function VaniMedia(props) {
        ) : null}
        {currentMode == 'audios' && isFavourites ? (
         <div
+        className="audiosfavs"
          style={{
           height: '100%',
           overflowY: 'scroll',
@@ -345,10 +344,11 @@ function VaniMedia(props) {
             {audiosFavs.map((audio, i) => {
              return (
               <AudioPlayer
+              className="audio"
                audio={audio}
                i={i}
-               audios={audios}
-               setAudios={setAudios}
+               audios={audiosFavs}
+               setAudios={setAudiosFavs}
               />
              )
             })}
@@ -394,6 +394,81 @@ function VaniMedia(props) {
          </>
         </div>
        ) : null}
+
+       {isPlatform("ios") && currentMode=="shorts" && !isFavourites && currentIndex <5 ?  <IonFab
+    style={{
+     position: 'absolute',
+     bottom: '10%',
+     right: '2%',
+     zIndex: 100,
+    }}
+   >
+    <IonFabButton
+     onClick={() => {
+      if (mediaFavoritesMap[videos[currentIndex].url]) {
+       setMediaFavoritesMap((prev) => {
+        let dum = {
+         ...prev,
+        }
+        delete dum[videos[currentIndex].url]
+        return dum
+       })
+      } else {
+       setMediaFavoritesMap((prev) => {
+        let dum = {
+         ...prev,
+        }
+        dum[videos[currentIndex].url] = 'audio'
+        return dum
+       })
+      }
+     }}
+     style={{
+      opacity: '0.6',
+      zIndex: 100,
+     }}
+    >
+     <IonIcon icon={videos[currentIndex] && mediaFavoritesMap[videos[currentIndex].url] ? heart : heartOutline} />
+    </IonFabButton>
+   </IonFab> : null}
+
+   { isPlatform("ios") && currentMode=="shorts" && isFavourites && currentIndex <5  ?  <IonFab
+    style={{
+     position: 'absolute',
+     bottom: '10%',
+     right: '2%',
+     zIndex: 100,
+    }}
+   >
+    <IonFabButton
+     onClick={() => {
+      if (mediaFavoritesMap[videosFavs[currentIndex].url]) {
+       setMediaFavoritesMap((prev) => {
+        let dum = {
+         ...prev,
+        }
+        delete dum[videosFavs[currentIndex].url]
+        return dum
+       })
+      } else {
+       setMediaFavoritesMap((prev) => {
+        let dum = {
+         ...prev,
+        }
+        dum[videosFavs[currentIndex].url] = 'audio'
+        return dum
+       })
+      }
+     }}
+     style={{
+      opacity: '0.6',
+      zIndex: 100,
+     }}
+    >
+     <IonIcon icon={videosFavs[currentIndex] && mediaFavoritesMap[videosFavs[currentIndex].url] ? heart : heartOutline} />
+    </IonFabButton>
+   </IonFab> : null}
+   
       </div>
      </div>
     </div>

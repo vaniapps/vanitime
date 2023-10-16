@@ -130,7 +130,6 @@ function Lecture() {
    const sortedKeys = Object.keys(dumBook).sort()
    const sortedObject = {}
    for (const key of sortedKeys) {
-    console.log(key)
     sortedObject['_' + key] = dumBook[key]
    }
    dumBook = { ...sortedObject }
@@ -229,7 +228,6 @@ function Lecture() {
                for (let category of Object.entries(dum)) {
                 for (let lecture of Object.entries(category[1]['parts'])) {
                  if (lecture[0] == part2) {
-                  console.log(part2)
                   dum[category[0]]['parts'][part2].read = markRead
                    ? true
                    : false

@@ -54,7 +54,6 @@ function purportsList(booksData, bookName) {
    }
   }
  } else if (booksData['OB']['parts'][bookName]) {
-  console.log('wqsdaq')
   for (const chapterName in booksData['OB']['parts'][bookName]['parts']) {
    purports.push([
     chapterName.slice(1),
@@ -79,7 +78,6 @@ function findNextPurports(booksMap, currentBook, vaniTime, wordsPerMin = 50) {
    currentBook['sub_part'] +
    (currentBook['sub_part'] ? '.' : '') +
    currentBook['verse']
- console.log(startingPurport)
  const purportList = purportsList(booksMap, startingPurport.split('_')[0])
  let totalWords = wordsPerMin * hoursToMinutes(vaniTime)
  let wordsSumSoFar = 0
@@ -122,10 +120,8 @@ export function findNextPurport(booksMap, currentVerse) {
 }
 
 export function findPreviousPurport(booksMap, currentVerse) {
- console.log(currentVerse)
  let startingPurport = currentVerse
  const purportList = purportsList(booksMap, startingPurport.split('_')[0])
- console.log(purportList)
  const startingIndex = purportList.findIndex(
   (purport) => purport[0] === startingPurport
  )

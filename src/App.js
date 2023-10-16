@@ -245,7 +245,6 @@ function App() {
  }, [settings])
 
  useEffect(() => {
-  console.log(location)
   let currentPath = window.location.pathname
   if (currentPath.includes('vanitime')) setCurrentTab('vanitime')
   if (currentPath.includes('vanibase') || currentPath.includes('index'))
@@ -409,8 +408,6 @@ function App() {
         snippet: '<div>' + results[title] + '</div>',
        })
       }
-     } else {
-      console.log(title)
      }
     }
 

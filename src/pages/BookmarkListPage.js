@@ -42,7 +42,6 @@ function BookmarkList() {
  let history = useHistory()
  const [settings, setSettings] = useContext(Settings)
  const [highlightColor, setHighlightColor] = useState('all')
- console.log(bookmarksMap[key].children.length)
 
  return (
   <IonPage>
@@ -132,11 +131,9 @@ function BookmarkList() {
       <IonButtons
        style={{ marginRight: '8px' }}
        onClick={() => {
-        console.log(bookmarksMap)
         setReo(false)
         setChangedIndexes([])
         let dum = JSON.parse(JSON.stringify(bookmarksMap))
-        console.log(bookmarksMap, dum[key])
         for (let index of changedIndexes) {
          let curr = dum[key]['children'][index.from]
          dum[key]['children'].splice(index.from, 1)
@@ -214,7 +211,6 @@ function BookmarkList() {
     <IonReorderGroup
      disabled={!reo}
      onIonItemReorder={(e) => {
-      console.log(e.detail.from, e.detail.to)
 
       e.detail.complete()
 
@@ -223,7 +219,6 @@ function BookmarkList() {
        dum.push({ from: e.detail.from, to: e.detail.to })
        return dum
       })
-      console.log(bookmarksMap)
      }}
     >
      {bookmarksMap[key]

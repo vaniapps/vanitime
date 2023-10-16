@@ -55,11 +55,9 @@ function Search(props) {
         </IonItem>
         <div className="ion-padding" slot="content">
          {values.map((val) => {
-          console.log(val)
           return (
            <IonItem
             onClick={() => {
-             console.log(key)
              if (key.startsWith('Lectures'))
               history.push(
                '/lecture/' +

@@ -470,14 +470,11 @@ function Audio() {
      if (element.childElementCount > 0) continue
      if (element.getAttribute('id') == start_id && color != 'notes') {
       if (start_id == end_id) {
-       console.log(highlights[elementId])
        if (highlights[elementId]) {
-        console.log([start_index, end_index])
         highlights[elementId].push([start_index, end_index, color, timestamp])
        } else {
         highlights[elementId] = [[start_index, end_index, color, timestamp]]
        }
-       console.log(highlights[elementId])
        break
       } else {
        if (highlights[elementId]) {
@@ -665,11 +662,8 @@ function Audio() {
     highlights[highlight[0]] = resultArray
    }
 
-   console.log(highlights)
-
    colorHtml()
   }
-  console.log(contentLoaded)
  }, [contentLoaded, bookmarksMap, searchWords])
 
  function setHighlightColor(color) {
@@ -1076,10 +1070,6 @@ function Audio() {
             if (
              bookmark[1]['children'][i].timestamp == selectedHighlight.timestamp
             ) {
-             console.log(
-              bookmark[1]['children'][i].timestamp,
-              selectedHighlight.timestamp
-             )
              dum[bookmark[0]]['children'].splice(i, 1)
              break
             }
@@ -1471,7 +1461,6 @@ function Audio() {
       <IonButton
        onClick={() => {
         if (!bookmarkInput['radio'] && !bookmarkInput['text']) {
-         console.log(toast)
          setToast('bookmark_input')
          return
         }

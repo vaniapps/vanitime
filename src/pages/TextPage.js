@@ -513,14 +513,11 @@ function Text() {
      if (element.childElementCount > 0) continue
      if (element.getAttribute('id') == start_id && color != 'notes') {
       if (start_id == end_id) {
-       console.log(highlights[elementId])
        if (highlights[elementId]) {
-        console.log([start_index, end_index])
         highlights[elementId].push([start_index, end_index, color, timestamp])
        } else {
         highlights[elementId] = [[start_index, end_index, color, timestamp]]
        }
-       console.log(highlights[elementId])
        break
       } else {
        if (highlights[elementId]) {

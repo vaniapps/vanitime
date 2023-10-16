@@ -93,7 +93,6 @@ function Book() {
  function refreshList() {
   let dumBook = JSON.parse(JSON.stringify(booksMap[keysList[0]]['parts']))
   for (let i = 1; i < keysList.length; i++) {
-   console.log(keysList[i], dumBook)
    if (i == keysList.length - 1 && dumBook['_' + keysList[i]]) {
     history.push('/purports/' + key)
    } else dumBook = dumBook[keysList[i]]['parts']
@@ -191,7 +190,6 @@ function Book() {
          let dum = { ...prev }
          let dumBook = dum[keysList[0]]['parts']
          for (let i = 1; i < keysList.length; i++) {
-          console.log(keysList[i], dumBook)
           if (i == keysList.length - 1 && dumBook['_' + keysList[i]]) {
            history.push('/purports/' + key)
           } else dumBook = dumBook[keysList[i]]['parts']
@@ -238,7 +236,6 @@ function Book() {
    <IonContent>
     {currentBook
      ? Object.entries(currentBook).map(([partKey, partValue]) => {
-        console.log(currentBook)
         return (
          <IonItem
           onClick={() => {

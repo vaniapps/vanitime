@@ -105,7 +105,6 @@ function Drive(props) {
     })
    )
    formData.append('file', file)
-   console.log(accessToken, formData)
    if (listResponse.result && listResponse.result.files) {
     for (let i = 0; i < listResponse.result.files.length; i++) {
      if (listResponse.result.files[i].name == 'vanitimeappdata') {
@@ -156,7 +155,6 @@ function Drive(props) {
       alt: 'media',
       fileId: listResponse.result.files[i].id,
      })
-     console.log(fileContent.result)
      setUserHistory(fileContent.result.stats)
      setBookmarksMap(fileContent.result.bookmarks)
      setMediaFavoritesMap(fileContent.result.media)

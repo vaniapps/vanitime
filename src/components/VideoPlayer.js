@@ -1,6 +1,6 @@
 import ReactPlayer from 'react-player'
 import { useState, useContext } from 'react'
-import { IonSpinner, IonFab, IonFabButton, IonIcon } from '@ionic/react'
+import { IonSpinner, IonFab, IonFabButton, IonIcon, isPlatform } from '@ionic/react'
 import { MediaFavorites } from '../context'
 import { heartOutline, heart } from 'ionicons/icons'
 
@@ -38,6 +38,22 @@ function VideoPlayer(props) {
      <IonSpinner style={{ zIndex: 11 }} />
     </div>
    ) : null}
+   <div
+   style={{
+    position:"absolute",
+    height:"80%",
+    width:"100%",
+    top:"10%",
+    left:0
+   }}
+   onClick={()=>{
+    setVideos((prev)=>{
+        let dum = [...prev]
+        dum[i]["isPlaying"] = !dum[i]["isPlaying"]
+        return dum
+    })
+   }}
+   ></div>
    <ReactPlayer
     url={video.url}
     playing={video.isPlaying}
@@ -55,11 +71,8 @@ function VideoPlayer(props) {
     loop
     width="100%"
     height="100%"
-    style={{
-     zIndex: 5,
-    }}
    />
-   <IonFab
+   {i >=5 || !isPlatform("ios") ? <IonFab
     style={{
      position: 'absolute',
      bottom: '10%',
@@ -79,6 +92,7 @@ function VideoPlayer(props) {
        })
       } else {
        setMediaFavoritesMap((prev) => {
+        
         let dum = {
          ...prev,
         }
@@ -94,7 +108,7 @@ function VideoPlayer(props) {
     >
      <IonIcon icon={mediaFavoritesMap[video.url] ? heart : heartOutline} />
     </IonFabButton>
-   </IonFab>
+   </IonFab> : null}
   </div>
  )
 }

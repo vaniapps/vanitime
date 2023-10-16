@@ -360,7 +360,7 @@ function Stats() {
       isPlatform('desktop') ? { display: 'flex', justifyContent: 'center' } : {}
      }
     >
-      {!calculated ? (
+      {/* {!calculated ? (
     <div
      style={{
       position: 'fixed',
@@ -376,15 +376,14 @@ function Stats() {
     >
      <IonSpinner style={{ zIndex: 11 }} />
     </div>
-   ) : null}
+   ) : null} */}
      <div
       style={
        isPlatform('desktop')
         ? {
-           width: '400px',
-           visibility: calculated ? 'visible' : 'hidden'
+           width: '400px'
           }
-        : {visibility: calculated ? 'visible' : 'hidden'}
+        : {}
       }
      >
       <IonCard>
@@ -807,7 +806,6 @@ function Stats() {
           </IonList>
           <div
            onClick={() => {
-            console.log(tempGoal)
             if (
              tempGoal['lectures']['day'] < 0 ||
              tempGoal['books']['day'] < 0
